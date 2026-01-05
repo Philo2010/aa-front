@@ -5,4 +5,5 @@
 <main>
 <h1>Abyss Angel</h1>
 <LinkButton to="/about">About</LinkButton>
+<LinkButton to="/login">Login</LinkButton>
 </main>
