@@ -6,10 +6,8 @@
   let username = "";
   let password = "";
 
-  // This function will be called by FormWithLoading when the form is submitted
-  async function handleLogin(event: CustomEvent<{ setMessage: (msg: string) => void }>) {
-    const { setMessage } = event.detail;
-
+  // Function passed to the child; must return Promise<string>
+  async function handleLogin(): Promise<string> {
     try {
       const res = await sendApiRefPost(
         loginRespondsSchema,
@@ -20,25 +18,23 @@
 
       switch (res.type) {
         case "success":
-          setMessage("Login successful!");
-          break;
+          return "Login successful!";
         case "validation_error":
-          setMessage(res.error.issues.map(i => i.message).join(", "));
-          break;
+          return res.error.issues.map(i => i.message).join(", ");
         case "network_error":
-          setMessage("Network error: " + res.error.message);
-          break;
+          return "Network error: " + res.error.message;
         case "api_error":
-          setMessage("Server error: " + res.error);
-          break;
+          return "Server error: " + res.error;
       }
     } catch {
-      setMessage("Unknown error occurred");
+      return "Unknown error occurred";
     }
   }
 </script>
 
-<FormWithLoading on:submit={handleLogin} submitLabel="Login">
+<main>
+<FormWithLoading dispatch={handleLogin} submitLabel="Login">
   <input bind:value={username} placeholder="Username" />
   <input type="password" bind:value={password} placeholder="Password" />
 </FormWithLoading>
+</main>

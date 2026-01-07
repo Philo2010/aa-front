@@ -4,3 +4,7 @@ import { z } from "zod";
 export const loginRespondsSchema = z.string();
 
 export const loginRespondsErrorSchema = z.string();
+
+export const insertPitRespondSchema = z.number();
+
+export const insertPitRespondErrorSchema = z.string();

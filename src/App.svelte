@@ -9,12 +9,14 @@
   import About from './routes/About.svelte';
   import Login from './routes/Login.svelte';
   import Insert from './routes/pitExample/Insert.svelte'
+  import Test from './routes/Test.svelte';
 
   const routes = {
     '/': Home,
     '/about': About,
     '/login': Login,
-    '/insert': Insert
+    '/insert': Insert,
+    '/test': Test,
 };
 </script>
 

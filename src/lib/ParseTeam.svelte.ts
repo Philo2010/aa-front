@@ -4,13 +4,16 @@ export type TeamData = {
     is_ab_team: boolean
 }
 
-function parse_team(team_string: string): TeamData | string {
+export function parse_team(team_string: string): TeamData | string { 
     let team_number: number;
+    if (team_string.length == 0) {
+        return "Please return a vaild team!";
+    }
     
     if (team_string.endsWith('B') || team_string.endsWith('b')) {
         //is a b team
         let string_team = team_string.slice(0, -1);
-        team_number = parseInt(string_team);
+        team_number = Number(string_team);
         if (isNaN(team_number)) {
             return "Please input a vaild team!";
         }
@@ -20,7 +23,7 @@ function parse_team(team_string: string): TeamData | string {
         }
         return data;
     } else {
-        team_number = parseInt(team_string);
+        team_number = Number(team_string);
         if (isNaN(team_number)) {
             return "Please input a vaild team!";
         }
