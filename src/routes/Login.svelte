@@ -8,6 +8,7 @@
 
   // Function passed to the child; must return Promise<string>
   async function handleLogin(): Promise<string> {
+     console.log("running dispatch");
     try {
       const res = await sendApiRefPost(
         loginRespondsSchema,

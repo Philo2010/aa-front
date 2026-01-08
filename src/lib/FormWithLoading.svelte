@@ -1,16 +1,14 @@
 <script lang="ts">
-  // The parent passes a function that returns a Promise<string>
-  export let dispatch: () => Promise<string>;
 
-  let loading = false;
-  export let message: string | null = null;
-  export let submitLabel: string = "Submit";
+  let loading = $state(false);
+  let { children, message = null, submitLabel = "Submit", stop = $bindable(), dispatch} = $props();
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
     if (loading) return;
 
     loading = true;
+    console.log("about to run dispatch!");
     try {
       message = await dispatch();
     } catch (err) {
@@ -22,11 +20,17 @@
   }
 </script>
 
-<form on:submit={handleSubmit}>
+<form onsubmit={handleSubmit}>
   <fieldset disabled={loading}>
-    <slot />
-    <button type="submit" disabled={loading}>
-      {loading ? "Sending…" : submitLabel}
+    {@render children()}
+    <button type="submit" disabled={loading || stop}>
+      {#if loading}
+        Sending…
+      {:else if stop}
+        N/A
+      {:else}
+       {submitLabel}
+       {/if}
     </button>
   </fieldset>
 </form>

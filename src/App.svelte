@@ -1,6 +1,4 @@
-<script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from '/vite.svg'
+<script lang="ts">
   import Counter from './lib/Counter.svelte'
 
   import Router from 'svelte-spa-router';
@@ -22,7 +20,7 @@
 
 <nav>
   <a href="#/">Home</a>
-  <a href="#/about">About</a>
+  <a href="#/test">About</a>
 </nav>
 
 <Router {routes} />
