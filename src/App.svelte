@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Counter from './lib/Counter.svelte'
 
   import Router from 'svelte-spa-router';
 
@@ -8,6 +7,10 @@
   import Login from './routes/Login.svelte';
   import Insert from './routes/pitExample/Insert.svelte'
   import Test from './routes/Test.svelte';
+  import type { CreateClientConfig } from './lib/';
+
+  //init config for heyapi
+  export
 
   const routes = {
     '/': Home,

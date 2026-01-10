@@ -1,7 +1,7 @@
 {
-	  "compilerOptions": {
-		      "verbatimModuleSyntax": true,
-			  "target":"es6"
-		}
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext"
+  }
 }
-
