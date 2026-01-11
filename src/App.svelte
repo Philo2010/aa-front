@@ -1,29 +1,37 @@
-<script lang="ts">
-
+<script>
   import Router from 'svelte-spa-router';
 
   import Home from './routes/Home.svelte';
   import About from './routes/About.svelte';
   import Login from './routes/Login.svelte';
-  import Insert from './routes/pitExample/Insert.svelte'
   import Test from './routes/Test.svelte';
-  import type { CreateClientConfig } from './lib/';
 
-  //init config for heyapi
-  export
+  //paths for admin
+  import IndexAdmin from './routes/admin/IndexAdmin.svelte';
+  import LeaderBoard from './routes/admin/LeaderBoard.svelte';
+  import PasswordReset from './routes/admin/PasswordReset.svelte';
+  import SendWarning from './routes/admin/SendWarning.svelte';
+  import SetEvent from './routes/admin/SetEvent.svelte';
+  import SubScout from './routes/admin/SubScout.svelte';
+    import Queue from './routes/admin/Queue.svelte';
+    import QueuePlayoff from './routes/admin/QueuePlayoff.svelte';
+
 
   const routes = {
     '/': Home,
     '/about': About,
     '/login': Login,
-    '/insert': Insert,
     '/test': Test,
-};
+    //admin
+    '/admin': IndexAdmin,
+    '/admin/leaderboard': LeaderBoard,
+    '/admin/passwordreset': PasswordReset,
+    '/admin/sendwarning': SendWarning,
+    '/admin/setevent': SetEvent,
+    '/admin/subscout': SubScout,
+    '/admin/queue': Queue,
+    '/admin/queueplayoff': QueuePlayoff
+  };
 </script>
-
-<nav>
-  <a href="#/">Home</a>
-  <a href="#/test">About</a>
-</nav>
 
 <Router {routes} />

@@ -212,6 +212,100 @@ export type SearchParamData = {
     is_mvp?: boolean | null;
 };
 
+export type LoginRes = {
+    Success: string;
+} | {
+    Error: string;
+};
+
+export type LoginForm = {
+    username: string;
+    password: string;
+};
+
+export type ApiResultForArrayOfGameForArrayOfScoutingTeamForScouterWithoutIdAndMvpIds = {
+    status: 'Success';
+    message: Array<GameForArrayOfScoutingTeamForScouterWithoutIdAndMvpIds>;
+} | {
+    status: 'Error';
+    message: string;
+};
+
+export type GameForArrayOfScoutingTeamForScouterWithoutIdAndMvpIds = {
+    id: number;
+    event_code: string;
+    match_id: number;
+    set: number;
+    tournament_level: TournamentLevels;
+    teams: Array<ScoutingTeamForScouterWithoutId>;
+    mvp: MvpIds;
+};
+
+export type ScoutingTeamForScouterWithoutId = {
+    id: number;
+    station: Stations;
+    team: TeamData;
+    scouters: Array<ScouterWithoutId>;
+};
+
+export type TeamData = {
+    is_ab_team: boolean;
+    team: number;
+};
+
+export type ScouterWithoutId = {
+    id: number;
+    station: Stations;
+    done: boolean;
+};
+
+export type MvpIds = {
+    blue?: number | null;
+    red?: number | null;
+};
+
+export type MvpInsert = {
+    mvp_id: number;
+    mvp_team: TeamData;
+    comment: string;
+    total_score: number;
+    penalty_score: number;
+};
+
+export type QueueInput = {
+    event: string;
+};
+
+export type EditSnow = {
+    snowgrave_scout_id: number;
+    game: GamesEditSpecific;
+};
+
+export type GamesEditSpecific = {
+    ExampleGame: Edit2;
+};
+
+export type Edit2 = {
+    hehe?: number | null;
+    beep?: number | null;
+    hoohoo?: string | null;
+};
+
+export type InsertSnow = {
+    snowgrave_scout_id: number;
+    game: GamesInsertsSpecific;
+};
+
+export type GamesInsertsSpecific = {
+    ExampleGame: Insert2;
+};
+
+export type Insert2 = {
+    hehe: number;
+    beep: number;
+    hoohoo: string;
+};
+
 export type EditPitData = {
     body: PitEditSpecific;
     path: {
@@ -347,3 +441,94 @@ export type SearchResponses = {
 };
 
 export type SearchResponse = SearchResponses[keyof SearchResponses];
+
+export type LoginData = {
+    body: LoginForm;
+    path?: never;
+    query?: never;
+    url: '/api/login';
+};
+
+export type LoginResponses = {
+    200: LoginRes;
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
+
+export type GetYearsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/get_years';
+};
+
+export type GetYearsResponses = {
+    200: ApiResultForArrayOfGameForArrayOfScoutingTeamForScouterWithoutIdAndMvpIds;
+};
+
+export type GetYearsResponse = GetYearsResponses[keyof GetYearsResponses];
+
+export type MvpInsertData = {
+    body: MvpInsert;
+    path?: never;
+    query?: never;
+    url: '/api/mvp/insert';
+};
+
+export type MvpInsertResponses = {
+    200: ApiResultForString;
+};
+
+export type MvpInsertResponse = MvpInsertResponses[keyof MvpInsertResponses];
+
+export type QueueData = {
+    body: QueueInput;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/queue_match';
+};
+
+export type QueueResponses = {
+    200: ApiResultForString;
+};
+
+export type QueueResponse = QueueResponses[keyof QueueResponses];
+
+export type QueuePlayoffData = {
+    body: QueueInput;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/queue_match_playoff';
+};
+
+export type QueuePlayoffResponses = {
+    200: ApiResultForString;
+};
+
+export type QueuePlayoffResponse = QueuePlayoffResponses[keyof QueuePlayoffResponses];
+
+export type ScoutEditData = {
+    body: EditSnow;
+    path?: never;
+    query?: never;
+    url: '/api/scout/edit';
+};
+
+export type ScoutEditResponses = {
+    200: ApiResultForString;
+};
+
+export type ScoutEditResponse = ScoutEditResponses[keyof ScoutEditResponses];
+
+export type ScoutInsertData = {
+    body: InsertSnow;
+    path?: never;
+    query?: never;
+    url: '/api/scout/insert';
+};
+
+export type ScoutInsertResponses = {
+    200: ApiResultForString;
+};
+
+export type ScoutInsertResponse = ScoutInsertResponses[keyof ScoutInsertResponses];

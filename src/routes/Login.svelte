@@ -1,34 +1,39 @@
 <script lang="ts">
   import FormWithLoading from '../lib/FormWithLoading.svelte';
-  import { loginRespondsSchema, loginRespondsErrorSchema } from '../lib/schema.zod';
+  import { client } from '../lib/schema/client.gen.js';
   import { sendApiRefPost } from '../lib/ApiRequest.svelte';
-
+  import { login } from '../lib/schema/sdk.gen'; // adjust path
+  import type { LoginResponses } from '../lib/schema/types.gen';
   let username = "";
   let password = "";
 
   // Function passed to the child; must return Promise<string>
-  async function handleLogin(): Promise<string> {
+  async function handleLogin(): Promise<{message: string, worked: boolean}> {
      console.log("running dispatch");
-    try {
-      const res = await sendApiRefPost(
-        loginRespondsSchema,
-        loginRespondsErrorSchema,
-        { username, password },
-        "/api/login"
-      );
-
-      switch (res.type) {
-        case "success":
-          return "Login successful!";
-        case "validation_error":
-          return res.error.issues.map(i => i.message).join(", ");
-        case "network_error":
-          return "Network error: " + res.error.message;
-        case "api_error":
-          return "Server error: " + res.error;
+     const res = await login({
+      body: {
+        username: username,
+        password: password
       }
-    } catch {
-      return "Unknown error occurred";
+    });
+    if (res.error) {
+      //there is an error now (sad)
+      return {
+        message: String(res.response.status),
+        worked: false
+      };
+    } else {
+      if ('Error' in res.data) {
+        return {
+          message: "Error returned by server: " + res.data.Error,
+          worked: false, 
+        };
+      } else {
+        return {
+          message: res.data.Success, 
+          worked: true
+        };
+      }
     }
   }
 </script>

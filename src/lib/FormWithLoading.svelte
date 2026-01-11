@@ -1,18 +1,34 @@
 <script lang="ts">
+    import type { Snippet } from "svelte";
+
 
   let loading = $state(false);
-  let { children, message = null, submitLabel = "Submit", stop = $bindable(), dispatch} = $props();
+  let message = $state(null);
+  let is_error = $state(true);
+  let { 
+    children, 
+    submitLabel = "Submit", 
+    stop = $bindable(), 
+    dispatch 
+  }: {
+    children: Snippet;
+    submitLabel?: string;
+    stop?: boolean;
+    dispatch: () => Promise<{ message: string; worked: boolean }>;
+  } = $props();
 
   async function handleSubmit(event: Event) {
     event.preventDefault();
     if (loading) return;
 
     loading = true;
-    console.log("about to run dispatch!");
     try {
-      message = await dispatch();
+      let message_data = await dispatch();
+      message = message_data.message;
+      is_error = !message_data.worked;
     } catch (err) {
       message = "Unknown error occurred";
+      is_error = true;
       console.error(err);
     } finally {
       loading = false;
@@ -36,7 +52,8 @@
 </form>
 
 {#if message}
-  <p class="form-message">{message}</p>
+  <p class="form-message"
+    style:color={is_error ? "red" : "green"}>{message}</p>
 {/if}
 
 <style>
@@ -52,7 +69,6 @@
   }
 
   .form-message {
-    color: red;
     font-size: 0.9rem;
     margin-top: 0.5rem;
   }
