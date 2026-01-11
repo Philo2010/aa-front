@@ -306,6 +306,14 @@ export type Insert2 = {
     hoohoo: string;
 };
 
+export type ApiResultForArrayOfString = {
+    status: 'Success';
+    message: Array<string>;
+} | {
+    status: 'Error';
+    message: string;
+};
+
 export type EditPitData = {
     body: PitEditSpecific;
     path: {
@@ -532,3 +540,16 @@ export type ScoutInsertResponses = {
 };
 
 export type ScoutInsertResponse = ScoutInsertResponses[keyof ScoutInsertResponses];
+
+export type GetAllUsersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/misc/get_all_users';
+};
+
+export type GetAllUsersResponses = {
+    200: ApiResultForArrayOfString;
+};
+
+export type GetAllUsersResponse = GetAllUsersResponses[keyof GetAllUsersResponses];

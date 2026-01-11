@@ -37,10 +37,3 @@
     }
   }
 </script>
-
-<main>
-<FormWithLoading dispatch={handleLogin} submitLabel="Login">
-  <input bind:value={username} placeholder="Username" />
-  <input type="password" bind:value={password} placeholder="Password" />
-</FormWithLoading>
-</main>

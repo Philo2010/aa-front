@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AveragesData, AveragesResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetData, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses } from './types.gen';
+import type { AveragesData, AveragesResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -142,3 +142,5 @@ export const scoutInsert = <ThrowOnError extends boolean = false>(options: Optio
         ...options.headers
     }
 });
+
+export const getAllUsers = <ThrowOnError extends boolean = false>(options?: Options<GetAllUsersData, ThrowOnError>) => (options?.client ?? client).get<GetAllUsersResponses, unknown, ThrowOnError>({ url: '/api/misc/get_all_users', ...options });

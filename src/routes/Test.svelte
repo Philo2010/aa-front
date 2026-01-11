@@ -1,21 +1,29 @@
 <script lang="ts">
-    import NiceErrorTextBox from "../lib/NiceErrorTextBox.svelte";
-    let input = $state();
-    let error = $state(null);
-
-    $effect(() => {
-        if (typeof input != "string") {
-            return;
-        }
-        if (input.includes("a")) {
-            error = "can't have a!";
-        } else {
-            error = null;
-        }
-    }) 
+  import WarningModal from '../lib/GetWarningBox.svelte';
+  
 </script>
 
-<main>
-    <p>{input}</p>
-    <NiceErrorTextBox bind:input={input} error={error} />
-</main>
+<div>
+  <h1>My App</h1>
+  
+</div>
+
+<style>
+  div {
+    padding: 2rem;
+  }
+  
+  button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background: #cc0000;
+  }
+</style>

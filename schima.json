@@ -455,6 +455,23 @@
           }
         }
       }
+    },
+    "/api/misc/get_all_users": {
+      "get": {
+        "operationId": "get_all_users",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_Array_of_String"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1652,6 +1669,49 @@
             "type": "string"
           }
         }
+      },
+      "ApiResult_for_Array_of_String": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success"
+                ]
+              },
+              "message": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Error"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        ]
       }
     }
   }

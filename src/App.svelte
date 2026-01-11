@@ -5,6 +5,7 @@
   import About from './routes/About.svelte';
   import Login from './routes/Login.svelte';
   import Test from './routes/Test.svelte';
+  import GetWarningBox from './lib/GetWarningBox.svelte';
 
   //paths for admin
   import IndexAdmin from './routes/admin/IndexAdmin.svelte';
@@ -35,3 +36,4 @@
 </script>
 
 <Router {routes} />
+<GetWarningBox />
