@@ -1,9 +1,6 @@
 <script lang="ts">
   import FormWithLoading from '../lib/FormWithLoading.svelte';
-  import { client } from '../lib/schema/client.gen.js';
-  import { sendApiRefPost } from '../lib/ApiRequest.svelte';
-  import { login } from '../lib/schema/sdk.gen'; // adjust path
-  import type { LoginResponses } from '../lib/schema/types.gen';
+  import { login } from '../lib/schema/sdk.gen';
   let username = "";
   let password = "";
 
@@ -37,3 +34,10 @@
     }
   }
 </script>
+
+<main>
+<FormWithLoading dispatch={handleLogin} submitLabel="Login">
+  <input bind:value={username} placeholder="Username" />
+  <input type="password" bind:value={password} placeholder="Password" />
+</FormWithLoading>
+</main>

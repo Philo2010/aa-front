@@ -1,28 +1,17 @@
 <script lang="ts">
-    import { tr } from 'zod/locales';
     import FormWithLoading from '../../lib/FormWithLoading.svelte';
+    import UserSelector from '../../lib/UserSelector.svelte';
     import { sendScoutwarn } from '../../lib/schema/sdk.gen';
-    import { getAllUsers } from '../../lib/schema/sdk.gen';
-
-    let users = $state<null | string[]>(null);
+    import { checkadmin } from "../../lib/checkadminship";
+    
     let used_to_send = $state<string>("");
-    let message = $state<string>();
-    let stop = $derived((used_to_send == ""));
-
-    $effect(() => {
-        (async () => {
-            let res = await getAllUsers();
-            if (res.error) {
-                users = null;
-            } else {
-                if (res.data.status == 'Error') {
-                    users = null
-                } else {
-                    users = res.data.message;
-                }
-            }
-        })();
-    })
+    let message = $state<string>("");
+    let stop = $derived(used_to_send == "");
+    
+    if (!checkadmin()) {
+        window.location.replace("/#/notallowed");
+    }
+    
     async function send(): Promise<{ message: string; worked: boolean }> {
         let res = await sendScoutwarn({
             body: {
@@ -30,7 +19,7 @@
                 message: message,
             }
         });
-
+        
         if (res.error) {
             return {
                 message: String(res.response.status),
@@ -50,23 +39,13 @@
             }
         }
     } 
-    
 </script>
 
 <h1>Send Warning</h1>
 <FormWithLoading dispatch={send} submitLabel="Send" {stop}>
     <h2>Person to send to</h2>
-    {#if users != null}
-        <select bind:value={used_to_send}>
-            {#each users as user}
-                <option value={user}>
-                    {user}
-                </option>
-            {/each}
-        </select>
-    {:else}
-        <input bind:value={used_to_send}>
-    {/if}
+    <UserSelector bind:value={used_to_send} />
+    
     <h2>Message</h2>
     <textarea bind:value={message}></textarea>
     <br> 

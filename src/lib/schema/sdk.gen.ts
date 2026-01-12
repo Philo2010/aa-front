@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AveragesData, AveragesResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses } from './types.gen';
+import type { AveragesData, AveragesResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -144,3 +144,34 @@ export const scoutInsert = <ThrowOnError extends boolean = false>(options: Optio
 });
 
 export const getAllUsers = <ThrowOnError extends boolean = false>(options?: Options<GetAllUsersData, ThrowOnError>) => (options?.client ?? client).get<GetAllUsersResponses, unknown, ThrowOnError>({ url: '/api/misc/get_all_users', ...options });
+
+export const resetPassword = <ThrowOnError extends boolean = false>(options: Options<ResetPasswordData, ThrowOnError>) => (options.client ?? client).post<ResetPasswordResponses, unknown, ThrowOnError>({
+    url: '/api/misc/reset_password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const setEvent = <ThrowOnError extends boolean = false>(options: Options<SetEventData, ThrowOnError>) => (options.client ?? client).post<SetEventResponses, unknown, ThrowOnError>({
+    url: '/api/set_event',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getEvent = <ThrowOnError extends boolean = false>(options?: Options<GetEventData, ThrowOnError>) => (options?.client ?? client).get<GetEventResponses, unknown, ThrowOnError>({ url: '/api/get_event', ...options });
+
+export const subScout = <ThrowOnError extends boolean = false>(options: Options<SubScoutData, ThrowOnError>) => (options.client ?? client).post<SubScoutResponses, unknown, ThrowOnError>({
+    url: '/api/sub_scout',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getLeaderboard = <ThrowOnError extends boolean = false>(options?: Options<GetLeaderboardData, ThrowOnError>) => (options?.client ?? client).get<GetLeaderboardResponses, unknown, ThrowOnError>({ url: '/api/snowgrave/leaderboard', ...options });

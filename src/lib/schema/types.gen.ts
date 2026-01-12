@@ -314,6 +314,33 @@ export type ApiResultForArrayOfString = {
     message: string;
 };
 
+export type ResetPasswordForm = {
+    user: string;
+    new_password: string;
+};
+
+export type SetEvent = {
+    event: string;
+};
+
+export type SubScoutForm = {
+    og: string;
+    replacement: string;
+};
+
+export type ApiResultForArrayOfSnowScouterDataLeaderBoard = {
+    status: 'Success';
+    message: Array<SnowScouterDataLeaderBoard>;
+} | {
+    status: 'Error';
+    message: string;
+};
+
+export type SnowScouterDataLeaderBoard = {
+    username: string;
+    amount_of_warning: number;
+};
+
 export type EditPitData = {
     body: PitEditSpecific;
     path: {
@@ -553,3 +580,68 @@ export type GetAllUsersResponses = {
 };
 
 export type GetAllUsersResponse = GetAllUsersResponses[keyof GetAllUsersResponses];
+
+export type ResetPasswordData = {
+    body: ResetPasswordForm;
+    path?: never;
+    query?: never;
+    url: '/api/misc/reset_password';
+};
+
+export type ResetPasswordResponses = {
+    200: ApiResultForString;
+};
+
+export type ResetPasswordResponse = ResetPasswordResponses[keyof ResetPasswordResponses];
+
+export type SetEventData = {
+    body: SetEvent;
+    path?: never;
+    query?: never;
+    url: '/api/set_event';
+};
+
+export type SetEventResponses = {
+    200: ApiResultForString;
+};
+
+export type SetEventResponse = SetEventResponses[keyof SetEventResponses];
+
+export type GetEventData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/get_event';
+};
+
+export type GetEventResponses = {
+    200: ApiResultForString;
+};
+
+export type GetEventResponse = GetEventResponses[keyof GetEventResponses];
+
+export type SubScoutData = {
+    body: SubScoutForm;
+    path?: never;
+    query?: never;
+    url: '/api/sub_scout';
+};
+
+export type SubScoutResponses = {
+    200: ApiResultForString;
+};
+
+export type SubScoutResponse = SubScoutResponses[keyof SubScoutResponses];
+
+export type GetLeaderboardData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/leaderboard';
+};
+
+export type GetLeaderboardResponses = {
+    200: ApiResultForArrayOfSnowScouterDataLeaderBoard;
+};
+
+export type GetLeaderboardResponse = GetLeaderboardResponses[keyof GetLeaderboardResponses];

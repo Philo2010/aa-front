@@ -6,6 +6,7 @@
   import Login from './routes/Login.svelte';
   import Test from './routes/Test.svelte';
   import GetWarningBox from './lib/GetWarningBox.svelte';
+  import NotAllowed from './routes/NotAllowed.svelte';
 
   //paths for admin
   import IndexAdmin from './routes/admin/IndexAdmin.svelte';
@@ -31,7 +32,8 @@
     '/admin/setevent': SetEvent,
     '/admin/subscout': SubScout,
     '/admin/queue': Queue,
-    '/admin/queueplayoff': QueuePlayoff
+    '/admin/queueplayoff': QueuePlayoff,
+    '/notallowed': NotAllowed
   };
 </script>
 

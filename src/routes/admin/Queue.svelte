@@ -2,6 +2,10 @@
     import FormWithLoading from "../../lib/FormWithLoading.svelte";
     import { queue } from "../../lib/schema/sdk.gen";
     let event_code = $state("");
+    import { checkadmin } from "../../lib/checkadminship";
+    if (!checkadmin()) {
+        window.location.replace("/#/notallowed");
+    }
 
     async function handleLogin(): Promise<{message: string, worked: boolean}> {
         let res = await queue({

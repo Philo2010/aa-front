@@ -1,6 +1,10 @@
 <script>
     import LinkButton from "../../lib/LinkButton.svelte";
     import LeaderBoard from "./LeaderBoard.svelte";
+    import { checkadmin } from "../../lib/checkadminship";
+    if (!checkadmin()) {
+        window.location.replace("/#/notallowed");
+    }
 
 </script>
 <main>

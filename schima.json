@@ -472,6 +472,121 @@
           }
         }
       }
+    },
+    "/api/misc/reset_password": {
+      "post": {
+        "operationId": "reset_password",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordForm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/set_event": {
+      "post": {
+        "operationId": "set_event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/get_event": {
+      "get": {
+        "operationId": "get_event",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sub_scout": {
+      "post": {
+        "operationId": "sub_scout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubScoutForm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/snowgrave/leaderboard": {
+      "get": {
+        "operationId": "get_leaderboard",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_Array_of_SnowScouterDataLeaderBoard"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1712,6 +1827,106 @@
             }
           }
         ]
+      },
+      "ResetPasswordForm": {
+        "type": "object",
+        "required": [
+          "new_password",
+          "user"
+        ],
+        "properties": {
+          "user": {
+            "type": "string"
+          },
+          "new_password": {
+            "type": "string"
+          }
+        }
+      },
+      "SetEvent": {
+        "type": "object",
+        "required": [
+          "event"
+        ],
+        "properties": {
+          "event": {
+            "type": "string"
+          }
+        }
+      },
+      "SubScoutForm": {
+        "type": "object",
+        "required": [
+          "og",
+          "replacement"
+        ],
+        "properties": {
+          "og": {
+            "type": "string"
+          },
+          "replacement": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResult_for_Array_of_SnowScouterDataLeaderBoard": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success"
+                ]
+              },
+              "message": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SnowScouterDataLeaderBoard"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Error"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "SnowScouterDataLeaderBoard": {
+        "type": "object",
+        "required": [
+          "amount_of_warning",
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "amount_of_warning": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       }
     }
   }
