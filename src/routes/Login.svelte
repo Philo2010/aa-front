@@ -1,8 +1,8 @@
 <script lang="ts">
   import FormWithLoading from '../lib/FormWithLoading.svelte';
   import { login } from '../lib/schema/sdk.gen';
-  let username = "";
-  let password = "";
+  let username = $state("");
+  let password = $state("");
 
   // Function passed to the child; must return Promise<string>
   async function handleLogin(): Promise<{message: string, worked: boolean}> {
