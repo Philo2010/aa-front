@@ -2,9 +2,14 @@
     import { resetPassword } from "../../lib/schema/sdk.gen";
     import FormWithLoading from "../../lib/FormWithLoading.svelte";
     import UserSelector from "../../lib/UserSelector.svelte";
+    import { checkadmin } from "../../lib/checkadminship";
     let user = $state<string>("");
     let password = $state<string>("");
     let stop = $derived((user === ""));
+    if (!checkadmin()) {
+        window.location.replace("/#/notallowed");
+    }
+
 
     async function handlepass(): Promise<{message: string, worked: boolean}> {
         let res = await resetPassword({

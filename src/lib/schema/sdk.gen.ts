@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AveragesData, AveragesResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
+import type { AveragesData, AveragesResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -53,6 +53,8 @@ export const forgiveScoutwarn = <ThrowOnError extends boolean = false>(options: 
         ...options.headers
     }
 });
+
+export const getForScout = <ThrowOnError extends boolean = false>(options?: Options<GetForScoutData, ThrowOnError>) => (options?.client ?? client).post<GetForScoutResponses, unknown, ThrowOnError>({ url: '/api/pit/get_scouter', ...options });
 
 export const getScoutwarn = <ThrowOnError extends boolean = false>(options?: Options<GetScoutwarnData, ThrowOnError>) => (options?.client ?? client).get<GetScoutwarnResponses, unknown, ThrowOnError>({ url: '/api/scoutwarn/getall', ...options });
 

@@ -15,8 +15,9 @@
   import SendWarning from './routes/admin/SendWarning.svelte';
   import SetEvent from './routes/admin/SetEvent.svelte';
   import SubScout from './routes/admin/SubScout.svelte';
-    import Queue from './routes/admin/Queue.svelte';
-    import QueuePlayoff from './routes/admin/QueuePlayoff.svelte';
+  import PitSelect from './routes/pit/PitSelect.svelte';
+  import Queue from './routes/admin/Queue.svelte';
+  import QueuePlayoff from './routes/admin/QueuePlayoff.svelte';
 
 
   const routes = {
@@ -33,7 +34,8 @@
     '/admin/subscout': SubScout,
     '/admin/queue': Queue,
     '/admin/queueplayoff': QueuePlayoff,
-    '/notallowed': NotAllowed
+    '/notallowed': NotAllowed,
+    '/pit/select': PitSelect
   };
 </script>
 

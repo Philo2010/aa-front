@@ -77,6 +77,22 @@ export type Forgive = {
     id: number;
 };
 
+export type ApiResultForArrayOfPitScouterInstance = {
+    status: 'Success';
+    message: Array<PitScouterInstance>;
+} | {
+    status: 'Error';
+    message: string;
+};
+
+export type PitScouterInstance = {
+    id: number;
+    event: string;
+    team: number;
+    is_ab_team: boolean;
+    is_sum: boolean;
+};
+
 export type ApiResultForArrayOfReturnWarningSend = {
     status: 'Success';
     message: Array<ReturnWarningSend>;
@@ -394,6 +410,19 @@ export type ForgiveScoutwarnResponses = {
 };
 
 export type ForgiveScoutwarnResponse = ForgiveScoutwarnResponses[keyof ForgiveScoutwarnResponses];
+
+export type GetForScoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/pit/get_scouter';
+};
+
+export type GetForScoutResponses = {
+    200: ApiResultForArrayOfPitScouterInstance;
+};
+
+export type GetForScoutResponse = GetForScoutResponses[keyof GetForScoutResponses];
 
 export type GetScoutwarnData = {
     body?: never;
