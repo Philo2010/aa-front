@@ -604,6 +604,77 @@
           }
         }
       }
+    },
+    "/api/pit/get_all": {
+      "get": {
+        "operationId": "pit_get_all",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_Array_of_PitEvent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pit/assign": {
+      "post": {
+        "operationId": "assign_pit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignScoutFormButCool"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/snowgrave/insert_scout": {
+      "post": {
+        "operationId": "insert_scout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScouterInsertFront"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1034,12 +1105,16 @@
       "Message": {
         "type": "object",
         "required": [
+          "is_anon",
           "message",
           "resv"
         ],
         "properties": {
           "resv": {
             "type": "string"
+          },
+          "is_anon": {
+            "type": "boolean"
           },
           "message": {
             "type": "string"
@@ -2014,6 +2089,193 @@
           "amount_of_warning": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ApiResult_for_Array_of_PitEvent": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success"
+                ]
+              },
+              "message": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PitEvent"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Error"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "PitEvent": {
+        "type": "object",
+        "required": [
+          "event_code",
+          "id",
+          "is_ab_team",
+          "is_done",
+          "team"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "team": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "is_ab_team": {
+            "type": "boolean"
+          },
+          "is_done": {
+            "type": "boolean"
+          },
+          "event_code": {
+            "type": "string"
+          }
+        }
+      },
+      "AssignScoutFormButCool": {
+        "type": "object",
+        "required": [
+          "asignment",
+          "scouts"
+        ],
+        "properties": {
+          "scouts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "asignment": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PitAssigment"
+            }
+          }
+        }
+      },
+      "PitAssigment": {
+        "type": "object",
+        "required": [
+          "index",
+          "upcomingid"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "format": "uint",
+            "minimum": 0.0
+          },
+          "upcomingid": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ScouterInsertFront": {
+        "type": "object",
+        "required": [
+          "matches",
+          "player_indexs"
+        ],
+        "properties": {
+          "player_indexs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MatchData"
+            }
+          }
+        }
+      },
+      "MatchData": {
+        "type": "object",
+        "required": [
+          "game_scouters",
+          "mvp",
+          "upcoming_match_id"
+        ],
+        "properties": {
+          "upcoming_match_id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "game_scouters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameTeamDataScouter"
+            }
+          },
+          "mvp": {
+            "$ref": "#/components/schemas/GameTeamDataMvpFront"
+          }
+        }
+      },
+      "GameTeamDataScouter": {
+        "type": "object",
+        "required": [
+          "id",
+          "station"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "uint",
+            "minimum": 0.0
+          },
+          "station": {
+            "$ref": "#/components/schemas/Stations"
+          }
+        }
+      },
+      "GameTeamDataMvpFront": {
+        "type": "object",
+        "required": [
+          "blue",
+          "red"
+        ],
+        "properties": {
+          "red": {
+            "type": "string"
+          },
+          "blue": {
+            "type": "string"
           }
         }
       }

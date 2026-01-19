@@ -33,3 +33,13 @@ export function parse_team(team_string: string): TeamData | string {
         }
     }
 }
+
+
+export function format_team(team: number, is_ab_team: boolean): string {
+    let addon: string = "";
+    if (is_ab_team) {
+        addon += 'B';
+    }
+
+    return String(team) + addon;
+}

@@ -18,6 +18,10 @@
   import PitSelect from './routes/pit/PitSelect.svelte';
   import Queue from './routes/admin/Queue.svelte';
   import QueuePlayoff from './routes/admin/QueuePlayoff.svelte';
+  import PitAssign from './routes/pit/PitAssign.svelte';
+  import PitInsert from './routes/pit/PitInsert.svelte';
+  import PitGet from './routes/pit/PitGet.svelte';
+  import PitEdit from './routes/pit/PitEdit.svelte';
 
 
   const routes = {
@@ -25,7 +29,6 @@
     '/about': About,
     '/login': Login,
     '/test': Test,
-    //admin
     '/admin': IndexAdmin,
     '/admin/leaderboard': LeaderBoard,
     '/admin/passwordreset': PasswordReset,
@@ -35,7 +38,11 @@
     '/admin/queue': Queue,
     '/admin/queueplayoff': QueuePlayoff,
     '/notallowed': NotAllowed,
-    '/pit/select': PitSelect
+    '/pit/select': PitSelect,
+    '/pit/assign': PitAssign,
+    '/pit/get': PitGet,
+    '/pit/insert': PitInsert,
+    '/pit/edit': PitEdit
   };
 </script>
 

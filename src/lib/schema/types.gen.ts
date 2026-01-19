@@ -111,6 +111,7 @@ export type ReturnWarningSend = {
 
 export type Message = {
     resv: string;
+    is_anon: boolean;
     message: string;
 };
 
@@ -355,6 +356,53 @@ export type ApiResultForArrayOfSnowScouterDataLeaderBoard = {
 export type SnowScouterDataLeaderBoard = {
     username: string;
     amount_of_warning: number;
+};
+
+export type ApiResultForArrayOfPitEvent = {
+    status: 'Success';
+    message: Array<PitEvent>;
+} | {
+    status: 'Error';
+    message: string;
+};
+
+export type PitEvent = {
+    id: number;
+    team: number;
+    is_ab_team: boolean;
+    is_done: boolean;
+    event_code: string;
+};
+
+export type AssignScoutFormButCool = {
+    scouts: Array<string>;
+    asignment: Array<PitAssigment>;
+};
+
+export type PitAssigment = {
+    index: number;
+    upcomingid: number;
+};
+
+export type ScouterInsertFront = {
+    player_indexs: Array<string>;
+    matches: Array<MatchData>;
+};
+
+export type MatchData = {
+    upcoming_match_id: number;
+    game_scouters: Array<GameTeamDataScouter>;
+    mvp: GameTeamDataMvpFront;
+};
+
+export type GameTeamDataScouter = {
+    id: number;
+    station: Stations;
+};
+
+export type GameTeamDataMvpFront = {
+    red: string;
+    blue: string;
 };
 
 export type EditPitData = {
@@ -674,3 +722,42 @@ export type GetLeaderboardResponses = {
 };
 
 export type GetLeaderboardResponse = GetLeaderboardResponses[keyof GetLeaderboardResponses];
+
+export type PitGetAllData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/pit/get_all';
+};
+
+export type PitGetAllResponses = {
+    200: ApiResultForArrayOfPitEvent;
+};
+
+export type PitGetAllResponse = PitGetAllResponses[keyof PitGetAllResponses];
+
+export type AssignPitData = {
+    body: AssignScoutFormButCool;
+    path?: never;
+    query?: never;
+    url: '/api/pit/assign';
+};
+
+export type AssignPitResponses = {
+    200: ApiResultForString;
+};
+
+export type AssignPitResponse = AssignPitResponses[keyof AssignPitResponses];
+
+export type InsertScoutData = {
+    body: ScouterInsertFront;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/insert_scout';
+};
+
+export type InsertScoutResponses = {
+    200: ApiResultForString;
+};
+
+export type InsertScoutResponse = InsertScoutResponses[keyof InsertScoutResponses];

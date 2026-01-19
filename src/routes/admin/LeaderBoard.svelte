@@ -1,6 +1,8 @@
 <script lang="ts">
-    import { da } from 'zod/locales';
-import { getLeaderboard } from '../../lib/schema/sdk.gen';
+    if (!checkadmin()) {
+        window.location.replace("/#/notallowed");
+    }
+    import { getLeaderboard } from '../../lib/schema/sdk.gen';
     import type { SnowScouterDataLeaderBoard } from '../../lib/schema/types.gen';
     let data = $state<SnowScouterDataLeaderBoard[]>();
     let loading = $state(true);
