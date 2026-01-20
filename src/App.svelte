@@ -22,7 +22,9 @@
   import PitInsert from './routes/pit/PitInsert.svelte';
   import PitGet from './routes/pit/PitGet.svelte';
   import PitEdit from './routes/pit/PitEdit.svelte';
-
+  import ScoutAssign from './routes/scout/ScoutAssign.svelte';
+  import CreateUser from './routes/admin/CreateUser.svelte';
+    import ScoutSelect from './routes/scout/ScoutSelect.svelte';
 
   const routes = {
     '/': Home,
@@ -32,7 +34,9 @@
     '/admin': IndexAdmin,
     '/admin/leaderboard': LeaderBoard,
     '/admin/passwordreset': PasswordReset,
+    '/scout/assign': ScoutAssign,
     '/admin/sendwarning': SendWarning,
+    '/admin/create_user': CreateUser,
     '/admin/setevent': SetEvent,
     '/admin/subscout': SubScout,
     '/admin/queue': Queue,
@@ -40,6 +44,7 @@
     '/notallowed': NotAllowed,
     '/pit/select': PitSelect,
     '/pit/assign': PitAssign,
+    '/scout/select': ScoutSelect,
     '/pit/get': PitGet,
     '/pit/insert': PitInsert,
     '/pit/edit': PitEdit

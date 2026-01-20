@@ -336,6 +336,30 @@ export type ResetPasswordForm = {
     new_password: string;
 };
 
+export type ApiResultForArrayOfGame = {
+    status: 'Success';
+    message: Array<Game>;
+} | {
+    status: 'Error';
+    message: string;
+};
+
+export type Game = {
+    id: number;
+    event_code: string;
+    match_id: number;
+    set: number;
+    tournament_level: TournamentLevels;
+    team: Array<Team>;
+};
+
+export type Team = {
+    id: number;
+    station: Stations;
+    team: number;
+    is_ab_team: boolean;
+};
+
 export type SetEvent = {
     event: string;
 };
@@ -390,19 +414,24 @@ export type ScouterInsertFront = {
 };
 
 export type MatchData = {
-    upcoming_match_id: number;
+    upcoming_team_id: number;
     game_scouters: Array<GameTeamDataScouter>;
     mvp: GameTeamDataMvpFront;
 };
 
 export type GameTeamDataScouter = {
-    id: number;
-    station: Stations;
+    index: number;
 };
 
 export type GameTeamDataMvpFront = {
     red: string;
     blue: string;
+};
+
+export type CreateUserForm = {
+    username: string;
+    password: string;
+    is_admin: string;
 };
 
 export type EditPitData = {
@@ -671,6 +700,19 @@ export type ResetPasswordResponses = {
 
 export type ResetPasswordResponse = ResetPasswordResponses[keyof ResetPasswordResponses];
 
+export type GetAllSnowgraveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/all';
+};
+
+export type GetAllSnowgraveResponses = {
+    200: ApiResultForArrayOfGame;
+};
+
+export type GetAllSnowgraveResponse = GetAllSnowgraveResponses[keyof GetAllSnowgraveResponses];
+
 export type SetEventData = {
     body: SetEvent;
     path?: never;
@@ -761,3 +803,16 @@ export type InsertScoutResponses = {
 };
 
 export type InsertScoutResponse = InsertScoutResponses[keyof InsertScoutResponses];
+
+export type CreateUserFrontData = {
+    body: CreateUserForm;
+    path?: never;
+    query?: never;
+    url: '/api/create_user';
+};
+
+export type CreateUserFrontResponses = {
+    200: ApiResultForString;
+};
+
+export type CreateUserFrontResponse = CreateUserFrontResponses[keyof CreateUserFrontResponses];

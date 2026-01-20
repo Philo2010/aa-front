@@ -15,4 +15,5 @@
     <LinkButton to="/admin/subscout">Sub Scout</LinkButton>
     <LinkButton to="/admin/queue">Queue</LinkButton>
     <LinkButton to="/admin/queueplayoff">Queue Playoff</LinkButton>
+    <LinkButton to="/admin/create_user">Create User</LinkButton>
 </main>

@@ -1,29 +1,22 @@
 <script lang="ts">
-    import { getAllUsers } from '../lib/schema/sdk.gen';
-    
+    import { fetchUsers, getUsers, subscribe } from '../lib/store/users.svelte';
+
     interface Props {
         value: string;
         onchange?: (value: string) => void;
     }
-    
+
     let { value = $bindable(""), onchange }: Props = $props();
-    let users = $state<null | string[]>(null);
     
+    let users = $state(getUsers());
+
     $effect(() => {
-        (async () => {
-            let res = await getAllUsers();
-            if (res.error) {
-                users = null;
-            } else {
-                if (res.data.status == 'Error') {
-                    users = null;
-                } else {
-                    users = res.data.message;
-                }
-            }
-        })();
+        fetchUsers();
+        return subscribe(() => {
+            users = getUsers();
+        });
     });
-    
+
     function handleChange(e: Event) {
         const target = e.target as HTMLInputElement | HTMLSelectElement;
         value = target.value;

@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
+import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, CreateUserFrontData, CreateUserFrontResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllSnowgraveData, GetAllSnowgraveResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -156,6 +156,8 @@ export const resetPassword = <ThrowOnError extends boolean = false>(options: Opt
     }
 });
 
+export const getAllSnowgrave = <ThrowOnError extends boolean = false>(options?: Options<GetAllSnowgraveData, ThrowOnError>) => (options?.client ?? client).get<GetAllSnowgraveResponses, unknown, ThrowOnError>({ url: '/api/snowgrave/all', ...options });
+
 export const setEvent = <ThrowOnError extends boolean = false>(options: Options<SetEventData, ThrowOnError>) => (options.client ?? client).post<SetEventResponses, unknown, ThrowOnError>({
     url: '/api/set_event',
     ...options,
@@ -191,6 +193,15 @@ export const assignPit = <ThrowOnError extends boolean = false>(options: Options
 
 export const insertScout = <ThrowOnError extends boolean = false>(options: Options<InsertScoutData, ThrowOnError>) => (options.client ?? client).post<InsertScoutResponses, unknown, ThrowOnError>({
     url: '/api/snowgrave/insert_scout',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const createUserFront = <ThrowOnError extends boolean = false>(options: Options<CreateUserFrontData, ThrowOnError>) => (options.client ?? client).post<CreateUserFrontResponses, unknown, ThrowOnError>({
+    url: '/api/create_user',
     ...options,
     headers: {
         'Content-Type': 'application/json',
