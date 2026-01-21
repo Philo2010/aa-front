@@ -1818,6 +1818,7 @@
         "required": [
           "done",
           "id",
+          "is_redo",
           "station"
         ],
         "properties": {
@@ -1829,6 +1830,9 @@
             "$ref": "#/components/schemas/Stations"
           },
           "done": {
+            "type": "boolean"
+          },
+          "is_redo": {
             "type": "boolean"
           }
         }
@@ -2101,7 +2105,7 @@
           "id",
           "match_id",
           "set",
-          "team",
+          "teams",
           "tournament_level"
         ],
         "properties": {
@@ -2123,11 +2127,19 @@
           "tournament_level": {
             "$ref": "#/components/schemas/TournamentLevels"
           },
-          "team": {
+          "teams": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Team"
             }
+          },
+          "mvp_blue": {
+            "type": "string",
+            "nullable": true
+          },
+          "mvp_red": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -2136,6 +2148,7 @@
         "required": [
           "id",
           "is_ab_team",
+          "scouters",
           "station",
           "team"
         ],
@@ -2153,6 +2166,12 @@
           },
           "is_ab_team": {
             "type": "boolean"
+          },
+          "scouters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

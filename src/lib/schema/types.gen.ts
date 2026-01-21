@@ -274,6 +274,7 @@ export type ScouterWithoutId = {
     id: number;
     station: Stations;
     done: boolean;
+    is_redo: boolean;
 };
 
 export type MvpIds = {
@@ -350,7 +351,9 @@ export type Game = {
     match_id: number;
     set: number;
     tournament_level: TournamentLevels;
-    team: Array<Team>;
+    teams: Array<Team>;
+    mvp_blue?: string | null;
+    mvp_red?: string | null;
 };
 
 export type Team = {
@@ -358,6 +361,7 @@ export type Team = {
     station: Stations;
     team: number;
     is_ab_team: boolean;
+    scouters: Array<string>;
 };
 
 export type SetEvent = {

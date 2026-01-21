@@ -27,7 +27,7 @@
     // Check each game
     for (const game of all_games) {
         // Check each team has at least one scouter
-        for (const team of game.team) {
+        for (const team of game.teams) {
             const teamScouters = scouters.get(team.id);
             
             // Team must have at least one scouter
@@ -103,7 +103,7 @@
     }
 
     for (const game of all_games) {
-        for (const team of game.team) {
+        for (const team of game.teams) {
             const teamScouters = scouters.get(team.id) ?? [];
             const player_team_index: GameTeamDataScouter[] = [];
 
@@ -136,49 +136,84 @@
     };
     }
 
+    function resetAllAssignments() {
+        if (typeof all_games === 'string') return;
+        
+        const newScouters = new Map<number, string[]>();
+        const newRedMvps = new Map<number, string>();
+        const newBlueMvps = new Map<number, string>();
+        
+        all_games.forEach(game => {
+            game.teams.forEach(team => {
+                newScouters.set(team.id, []);
+            });
+            newRedMvps.set(game.id, "");
+            newBlueMvps.set(game.id, "");
+        });
+        
+        scouters = newScouters;
+        redMvps = newRedMvps;
+        blueMvps = newBlueMvps;
+        
+        // Also reset master assignments
+        masterScouters = ["", "", "", "", "", ""];
+        masterRedMvp = "";
+        masterBlueMvp = "";
+    }
+
     
     $effect(() => {
-        (async () => {
-            let res = await getAllSnowgrave();
-            if (res.error) {
-                all_games = "Failed with code: " + String(res.response.status);
+    (async () => {
+        let res = await getAllSnowgrave();
+        if (res.error) {
+            all_games = "Failed with code: " + String(res.response.status);
+        } else {
+            if (res.data.status === 'Error') {
+                all_games = "Error from server: " + res.data.message;
             } else {
-                if (res.data.status === 'Error') {
-                    all_games = "Error from server: " + res.data.message;
-                } else {
-                    all_games = res.data.message;
-                    all_games.sort((a, b) => {
-                        if (a.tournament_level === b.tournament_level) {
-                            return a.match_id - b.match_id;
+                all_games = res.data.message;
+                all_games.sort((a, b) => {
+                    if (a.tournament_level === b.tournament_level) {
+                        return a.match_id - b.match_id;
+                    } else {
+                        if (a.tournament_level === 'QualificationMatch') {
+                            return 1;
+                        } else if (b.tournament_level === 'QualificationMatch') {
+                            return -1;
                         } else {
-                            if (a.tournament_level === 'QualificationMatch') {
-                                return 1;
-                            } else if (b.tournament_level === 'QualificationMatch') {
-                                return -1;
-                            } else {
-                                return a.tournament_level.localeCompare(b.tournament_level);
-                            }
+                            return a.tournament_level.localeCompare(b.tournament_level);
                         }
+                    }
+                });
+                
+                // Initialize scouters, red mvps, and blue mvps for each game
+                const newScouters = new Map<number, string[]>();
+                const newRedMvps = new Map<number, string>();
+                const newBlueMvps = new Map<number, string>();
+                
+                all_games.forEach(game => {
+                    // Auto-fill scouters from existing data
+                    game.teams.forEach(team => {
+                        newScouters.set(
+                            team.id, 
+                            team.scouters && team.scouters.length > 0 
+                                ? [...team.scouters] 
+                                : []
+                        );
                     });
                     
-                    // Initialize scouters, red mvps, and blue mvps for each game
-                    const newScouters = new Map<number, string[]>();
-                    const newRedMvps = new Map<number, string>();
-                    const newBlueMvps = new Map<number, string>();
-                    all_games.forEach(game => {
-                        game.team.forEach(team => {
-                            newScouters.set(team.id, []);
-                        });
-                        newRedMvps.set(game.id, "");
-                        newBlueMvps.set(game.id, "");
-                    });
-                    scouters = newScouters;
-                    redMvps = newRedMvps;
-                    blueMvps = newBlueMvps;
-                }
+                    // Auto-fill MVPs from existing data
+                    newRedMvps.set(game.id, game.mvp_red || "");
+                    newBlueMvps.set(game.id, game.mvp_blue || "");
+                });
+                
+                scouters = newScouters;
+                redMvps = newRedMvps;
+                blueMvps = newBlueMvps;
             }
-        })();
-    });
+        }
+    })();
+});
     
     function updateScouter(teamId: number, index: number, value: string) {
         const teamScouters = scouters.get(teamId);
@@ -222,7 +257,7 @@
         
         all_games.forEach(game => {
             // Apply master scouters to each team based on their index in the game
-            game.team.forEach((team, teamIndex) => {
+            game.teams.forEach((team, teamIndex) => {
                 if (teamIndex < 6 && masterScouters[teamIndex]) {
                     const teamScouters = newScouters.get(team.id) || [];
                     teamScouters.push(masterScouters[teamIndex]);
@@ -302,9 +337,14 @@
         </div>
     </div>
     
-    <button type="button" onclick={applyMasterToAllGames} style="margin-top: 10px;">
-        Apply to All Games
-    </button>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button type="button" onclick={applyMasterToAllGames}>
+            Apply to All Games
+        </button>
+        <button type="button" onclick={resetAllAssignments} style="background-color: #dc3545;">
+            Reset All Assignments
+        </button>
+    </div>
 </div>
 
 {#if typeof(all_games) === 'string'} 
@@ -317,7 +357,7 @@
             <p>Set: {game.set}</p>
             <p>Level: {game.tournament_level}</p>
             <p>Event {game.event_code}</p>
-            {#each game.team as team, teamIndex}
+            {#each game.teams as team, teamIndex}
                 <div>
                     <strong>Team {teamIndex + 1}:</strong> {format_team(team.team, team.is_ab_team)} - {team.station}
                     {#each scouters.get(team.id) ?? [] as scouter, i}

@@ -1,4 +1,5 @@
 <script lang='ts'>
+    import { format_team } from "../../lib/ParseTeam.svelte";
     import { getYears } from "../../lib/schema/sdk.gen";
     import type { GameForArrayOfScoutingTeamForScouterWithoutIdAndMvpIds } from "../../lib/schema/types.gen";
     let games = $state<string | GameForArrayOfScoutingTeamForScouterWithoutIdAndMvpIds[]>("Loading");
@@ -28,9 +29,10 @@
         <p>Set: {game.set}</p>
         <p>Tournament Level: {game.tournament_level}</p>
         <p>Event Code: {game.event_code}</p>
+
         <h4>Your assigned to scout:</h4>
         {#each game.teams as team }
-            
+            <p>Team: {format_team(team.team.team, team.team.is_ab_team)}</p>
         {/each}
 
     </div>
