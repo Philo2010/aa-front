@@ -26,6 +26,7 @@
 	import ScoutAssign from './routes/scout/ScoutAssign.svelte';
 	import CreateUser from './routes/admin/CreateUser.svelte';
 	import ScoutSelect from './routes/scout/ScoutSelect.svelte';
+	import ScoutPage from './routes/scout/ScoutPage.svelte';
 
 	const routes = {
 		'/': Home,
@@ -46,6 +47,7 @@
 		'/pit/select': PitSelect,
 		'/pit/assign': PitAssign,
 		'/scout/select': ScoutSelect,
+		'/scout/page': ScoutPage,
 		'/pit/get': PitGet,
 		'/pit/insert': PitInsert,
 		'/pit/edit': PitEdit

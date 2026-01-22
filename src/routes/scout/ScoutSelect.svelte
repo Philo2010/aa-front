@@ -15,6 +15,14 @@
             games = "Error from server: " + res.data.message;
         } else {
             games = res.data.message;
+            games.sort((a,b) => {
+                if (a.tournament_level === 'QualificationMatch' && b.tournament_level != 'QualificationMatch') {
+                    return -1;
+                } else if (a.tournament_level != 'QualificationMatch' && b.tournament_level === 'QualificationMatch') {
+                    return 1;
+                }
+                return a.match_id - b.match_id;
+            })
         }
     })()});
 </script>
@@ -26,7 +34,7 @@
     mvp: MvpIds;
 };-->
 {#each games as game}
-    <div>
+    <div class="game-box">
         <p>Match: {game.match_id}</p>
         <p>Set: {game.set}</p>
         <p>Tournament Level: {game.tournament_level}</p>
@@ -34,9 +42,21 @@
 
         <h4>Your assigned to scout:</h4>
         {#each game.teams as team }
-            <p>Team: {format_team(team.team.team, team.team.is_ab_team)}</p>
+            <p>Team: {format_team(team.team.team, team.team.is_ab_team)} ID: {team.scouters[0].id}</p> <!--Always be the first index so dont question it bro-->
         {/each}
 
     </div>
 {/each}
 {/if}
+
+
+<style>
+    .game-box {
+        background-color: #3cb371;
+        padding: 10px;
+        padding-left: 30px;
+        padding-right: 30px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+</style>
