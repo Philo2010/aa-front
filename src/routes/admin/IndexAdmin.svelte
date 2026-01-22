@@ -1,3 +1,5 @@
+<h1>NOT UPDATED, IF YOU SEE THIS PLEASE DO NOT REMOVE</h1>
+
 <script>
     import LinkButton from "../../lib/LinkButton.svelte";
     import LeaderBoard from "./LeaderBoard.svelte";

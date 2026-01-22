@@ -1,3 +1,5 @@
+<h1>NOT UPDATED, IF YOU SEE THIS PLEASE DO NOT REMOVE</h1>
+
 <script lang="ts">
     import { boolean } from "zod";
     import { checkadmin } from "../../lib/checkadminship";
