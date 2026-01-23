@@ -1,6 +1,7 @@
 <h1>NOT UPDATED, IF YOU SEE THIS PLEASE DO NOT REMOVE</h1>
 
 <script lang='ts'>
+    import LinkButton from "$lib/LinkButton.svelte";
     import { format_team } from "../../lib/ParseTeam.svelte";
     import { getYears } from "../../lib/schema/sdk.gen";
     import type { GameForArrayOfScoutingTeamForScouterWithoutIdAndMvpIds } from "../../lib/schema/types.gen";
@@ -42,7 +43,7 @@
 
         <h4>Your assigned to scout:</h4>
         {#each game.teams as team }
-            <p>Team: {format_team(team.team.team, team.team.is_ab_team)} ID: {team.scouters[0].id}</p> <!--Always be the first index so dont question it bro-->
+            <LinkButton to="/scout/page?id={team.scouters[0].id}&team={format_team(team.team.team, team.team.is_ab_team)}">Team: {format_team(team.team.team, team.team.is_ab_team)}</LinkButton>
         {/each}
 
     </div>
