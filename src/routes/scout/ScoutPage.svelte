@@ -1,10 +1,18 @@
+<!--TODO MAKE THIS PRETTY SEQUOURA! (ps please use comments when denoting the state of a page)-->
+
+
 <script lang="ts">
+    import FormWithLoading from "$lib/FormWithLoading.svelte";
     import type { Insert2 } from "$lib/schema/types.gen";
     import { onMount } from "svelte";
 
     let team = $state<string>("");
     let snowgrave_insert_id: number;
-    let scout_form: Insert2 = $state();
+    let scout_form: Insert2 = $state<Insert2>({
+        hehe: 0,
+        beep: 0,
+        hoohoo: ""
+    });
     enum States {
         Auto = 0,
         Teleop = 1,
@@ -13,7 +21,7 @@
 
 
     
-    let form_state = $state(States.Auto);
+    let form_state = $state<States>(States.Auto);
 
     onMount(() => {
         // For hash-based routing like #/pit/insert?id=2&team=5829
@@ -31,7 +39,18 @@
             window.location.replace("/#/notallowed");
         }
     });
+
+    async function dispatch(): Promise<{ message: string; worked: boolean }> {
+    
+
+      return  {
+        message: "TBD",
+        worked: false
+      }
+    }
 </script>
+
+<FormWithLoading dispatch={dispatch} hide_sub={form_state != 2}>
 
 {#if form_state === States.Auto }
 <!--Auto-->
@@ -46,6 +65,9 @@
 <h1>Endgame</h1>
 <input bind:value={scout_form.hoohoo} placeholder="HooHoo">
 {/if}
+<br>
+</FormWithLoading>
+<br>
 <button class="tactical-btn" onclick={() => {form_state--}} disabled={form_state === 0}>Back page</button>
 <button class="tactical-btn" onclick={() => {form_state++}} disabled={form_state > 1}>Next page</button>
 

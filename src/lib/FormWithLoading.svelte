@@ -9,11 +9,13 @@
     children, 
     submitLabel = "Submit", 
     stop = $bindable(), 
+    hide_sub = false,
     dispatch 
   }: {
     children: Snippet;
     submitLabel?: string;
     stop?: boolean;
+    hide_sub?: boolean,
     dispatch: () => Promise<{ message: string; worked: boolean }>;
   } = $props();
 
@@ -39,15 +41,17 @@
 <form onsubmit={handleSubmit}>
   <fieldset disabled={loading}>
     {@render children()}
-    <button type="submit" disabled={loading || stop}>
-      {#if loading}
-        Sending…
-      {:else if stop}
-        N/A
-      {:else}
-       {submitLabel}
-       {/if}
-    </button>
+    {#if !hide_sub }
+      <button type="submit" disabled={loading || stop}>
+        {#if loading}
+          Sending…
+        {:else if stop}
+          N/A
+        {:else}
+        {submitLabel}
+        {/if}
+      </button>
+    {/if}
   </fieldset>
 </form>
 
