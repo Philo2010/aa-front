@@ -1,6 +1,7 @@
 <h1>NOT UPDATED, IF YOU SEE THIS PLEASE DO NOT REMOVE</h1>
 
 <script lang='ts'>
+    //TODO: Make ui for pit scout!
     import LinkButton from "$lib/LinkButton.svelte";
     import { format_team } from "../../lib/ParseTeam.svelte";
     import { getYears } from "../../lib/schema/sdk.gen";
@@ -16,8 +17,10 @@
             games = "Error from server: " + res.data.message;
         } else {
             games = res.data.message;
+            console.log(games);
             games.sort((a,b) => {
                 if (a.tournament_level === 'QualificationMatch' && b.tournament_level != 'QualificationMatch') {
+                    console.log("qual");
                     return -1;
                 } else if (a.tournament_level != 'QualificationMatch' && b.tournament_level === 'QualificationMatch') {
                     return 1;
