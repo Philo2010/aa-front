@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, CreateUserFrontData, CreateUserFrontResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllSnowgraveData, GetAllSnowgraveResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
+import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, CreateUserFrontData, CreateUserFrontResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllSnowgraveData, GetAllSnowgraveResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetTeamsFromGameData, GetTeamsFromGameResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -208,3 +208,5 @@ export const createUserFront = <ThrowOnError extends boolean = false>(options: O
         ...options.headers
     }
 });
+
+export const getTeamsFromGame = <ThrowOnError extends boolean = false>(options: Options<GetTeamsFromGameData, ThrowOnError>) => (options.client ?? client).get<GetTeamsFromGameResponses, unknown, ThrowOnError>({ url: '/api/pit/get_teams_from_game/{id_upcoming_game}', ...options });

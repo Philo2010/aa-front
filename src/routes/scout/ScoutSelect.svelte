@@ -20,7 +20,6 @@
             console.log(games);
             games.sort((a,b) => {
                 if (a.tournament_level === 'QualificationMatch' && b.tournament_level != 'QualificationMatch') {
-                    console.log("qual");
                     return -1;
                 } else if (a.tournament_level != 'QualificationMatch' && b.tournament_level === 'QualificationMatch') {
                     return 1;
@@ -29,20 +28,25 @@
             })
         }
     })()});
+    // For hash-based routing like #/scout/mvp?id=2&is_blue=true&game_id=6767
 </script>
 {#if typeof games === 'string'} 
 {games}
 {:else}
-<!--    id: number;
-    teams: Array<ScoutingTeamForScouterWithoutId>;
-    mvp: MvpIds;
-};-->
 {#each games as game}
     <div class="game-box">
         <p>Match: {game.match_id}</p>
         <p>Set: {game.set}</p>
         <p>Tournament Level: {game.tournament_level}</p>
         <p>Event Code: {game.event_code}</p>
+
+        {#if typeof(game.mvp.blue) === 'number'}
+            <LinkButton to="/scout/mvp?id={game.mvp.blue}&is_blue=true&game_id={game.id}">Blue MVP</LinkButton>
+        {/if}
+
+        {#if typeof(game.mvp.red) === 'number'}
+            <LinkButton to="/scout/mvp?id={game.mvp.red}&is_blue=false&game_id={game.id}">Red MVP</LinkButton>
+        {/if}
 
         <h4>Your assigned to scout:</h4>
         {#each game.teams as team }

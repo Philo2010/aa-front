@@ -438,6 +438,19 @@ export type CreateUserForm = {
     is_admin: string;
 };
 
+export type ApiResultForArrayOfTeamWithAlliance = {
+    status: 'Success';
+    message: Array<TeamWithAlliance>;
+} | {
+    status: 'Error';
+    message: string;
+};
+
+export type TeamWithAlliance = {
+    is_blue: boolean;
+    team: TeamData;
+};
+
 export type EditPitData = {
     body: PitEditSpecific;
     path: {
@@ -820,3 +833,18 @@ export type CreateUserFrontResponses = {
 };
 
 export type CreateUserFrontResponse = CreateUserFrontResponses[keyof CreateUserFrontResponses];
+
+export type GetTeamsFromGameData = {
+    body?: never;
+    path: {
+        id_upcoming_game: number;
+    };
+    query?: never;
+    url: '/api/pit/get_teams_from_game/{id_upcoming_game}';
+};
+
+export type GetTeamsFromGameResponses = {
+    200: ApiResultForArrayOfTeamWithAlliance;
+};
+
+export type GetTeamsFromGameResponse = GetTeamsFromGameResponses[keyof GetTeamsFromGameResponses];

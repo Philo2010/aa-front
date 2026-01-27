@@ -719,6 +719,34 @@
           }
         }
       }
+    },
+    "/api/pit/get_teams_from_game/{id_upcoming_game}": {
+      "get": {
+        "operationId": "get_teams_from_game",
+        "parameters": [
+          {
+            "name": "id_upcoming_game",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_Array_of_TeamWithAlliance"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2459,6 +2487,64 @@
           },
           "is_admin": {
             "type": "string"
+          }
+        }
+      },
+      "ApiResult_for_Array_of_TeamWithAlliance": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Success"
+                ]
+              },
+              "message": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TeamWithAlliance"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "message",
+              "status"
+            ],
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "Error"
+                ]
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "TeamWithAlliance": {
+        "type": "object",
+        "required": [
+          "is_blue",
+          "team"
+        ],
+        "properties": {
+          "is_blue": {
+            "type": "boolean"
+          },
+          "team": {
+            "$ref": "#/components/schemas/TeamData"
           }
         }
       }
