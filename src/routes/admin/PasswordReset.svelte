@@ -1,4 +1,4 @@
-<h1>NOT UPDATED, IF YOU SEE THIS PLEASE DO NOT REMOVE</h1>
+
 
 <script lang="ts">
     import { resetPassword } from "../../lib/schema/sdk.gen";

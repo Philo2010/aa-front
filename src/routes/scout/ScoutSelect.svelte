@@ -1,4 +1,4 @@
-<h1>NOT UPDATED, IF YOU SEE THIS PLEASE DO NOT REMOVE</h1>
+
 
 <script lang='ts'>
     //TODO: Make ui for pit scout!
@@ -50,7 +50,11 @@
 
         <h4>Your assigned to scout:</h4>
         {#each game.teams as team }
-            <LinkButton to="/scout/page?id={team.scouters[0].id}&team={format_team(team.team.team, team.team.is_ab_team)}">Team: {format_team(team.team.team, team.team.is_ab_team)}</LinkButton>
+            {#if team.scouters[0].is_redo }
+                <LinkButton to="/scout/page?id={team.scouters[0].id}&team={format_team(team.team.team, team.team.is_ab_team)}&edit=true">Redo Team: {format_team(team.team.team, team.team.is_ab_team)}</LinkButton>
+            {:else}
+                <LinkButton to="/scout/page?id={team.scouters[0].id}&team={format_team(team.team.team, team.team.is_ab_team)}">Team: {format_team(team.team.team, team.team.is_ab_team)}</LinkButton>
+            {/if}
         {/each}
 
     </div>
@@ -61,6 +65,15 @@
 <style>
     .game-box {
         background-color: #3cb371;
+        padding: 10px;
+        padding-left: 30px;
+        padding-right: 30px;
+        border-radius: 10px;
+        margin: 10px;
+    }
+
+    .game-box-bad {
+        background-color: #840d0d;
         padding: 10px;
         padding-left: 30px;
         padding-right: 30px;

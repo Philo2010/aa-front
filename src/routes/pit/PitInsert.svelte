@@ -1,18 +1,18 @@
-<h1>NOT UPDATED, IF YOU SEE THIS PLEASE DO NOT REMOVE</h1>
+
 
 <script lang="ts">
     import FormWithLoading from "../../lib/FormWithLoading.svelte";
-    import { insert } from "../../lib/schema/sdk.gen";
+    import { editPit, insert } from "../../lib/schema/sdk.gen";
     import { onMount } from 'svelte';
 
     let url = new URL(window.location.href);
     let width = $state<number>(0);
     let height = $state<number>(0);
     let team = $state<string>("");
-
+    let edit = $state<boolean>(false);
     let insert_id: number;
     onMount(() => {
-        // For hash-based routing like #/pit/insert?id=2&team=5829
+        // For hash-based routing like #/pit/insert?id=2&team=5829&edit=true
         const hash = window.location.hash;
         const searchPart = hash.split('?')[1];
         const params = new URLSearchParams(searchPart);

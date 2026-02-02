@@ -28,6 +28,7 @@
 	import ScoutSelect from './routes/scout/ScoutSelect.svelte';
 	import ScoutPage from './routes/scout/ScoutPage.svelte';
 	import ScoutMvp from './routes/scout/ScoutMvp.svelte';
+	import Search from './routes/view/Search.svelte';
 
 	const routes = {
 		'/': Home,
@@ -49,6 +50,7 @@
 		'/pit/assign': PitAssign,
 		'/scout/mvp': ScoutMvp,
 		'/scout/select': ScoutSelect,
+		'/view/search': Search,
 		'/scout/page': ScoutPage,
 		'/pit/get': PitGet,
 		'/pit/insert': PitInsert,

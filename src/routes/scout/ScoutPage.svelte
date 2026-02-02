@@ -4,12 +4,13 @@
 <script lang="ts">
     import FormWithLoading from "$lib/FormWithLoading.svelte";
     import type { Insert2 } from "$lib/schema/types.gen";
-    import { scoutInsert } from "$lib/schema/sdk.gen";
+    import { scoutEdit, scoutInsert } from "$lib/schema/sdk.gen";
     import { onMount } from "svelte";
     
     let team = $state<string>("");
     let stop = $state<boolean>(true);
     let snowgrave_insert_id: number;
+    let edit = $state<boolean>(false);
     let scout_form: Insert2 = $state<Insert2>({
         hehe: 0,
         beep: 0,
@@ -39,6 +40,12 @@
         const hash = window.location.hash;
         const searchPart = hash.split('?')[1];
         const params = new URLSearchParams(searchPart);
+
+        if (params.has("edit")) {
+            if (params.get("edit") === "true") {
+                edit = true;
+            }
+        }
         
         if (params.has("id") || params.has("team")) {
             snowgrave_insert_id = Number(params.get("id"));
@@ -50,6 +57,8 @@
             window.location.replace("/#/notallowed");
         }
     });
+
+    $inspect(edit);
 
     async function dispatch(): Promise<{ message: string; worked: boolean }> {
       let res = await scoutInsert({
@@ -84,9 +93,44 @@
         }
       }
     }
+
+    async function handleEdit(): Promise<{message: string, worked: boolean}> {
+        let res = await scoutEdit({
+            body: {
+                snowgrave_scout_id: snowgrave_insert_id,
+                game: {
+                    ExampleGame: {
+                        hehe: scout_form.hehe,
+                        beep: scout_form.beep,
+                        hoohoo: scout_form.hoohoo
+                    }
+                }
+            },
+
+        });
+
+        if (res.error) {
+            return {
+                message: String(res.response.status),
+                worked: false
+            };
+        } else {
+            if (res.data.status = 'Error') {
+                return {
+                    message: String(res.data.message),
+                    worked: false
+                };
+            } else {
+                return {
+                    message: String(res.data.message),
+                    worked: true
+                };
+            }
+        }
+    }
 </script>
 
-<FormWithLoading dispatch={dispatch} hide_sub={form_state != 2} stop={stop}>
+<FormWithLoading dispatch={edit ? handleEdit : dispatch} hide_sub={form_state != 2} stop={stop}>
 
 {#if form_state === States.Auto }
 <!--Auto-->
