@@ -54,8 +54,8 @@
 		'/scout/page': ScoutPage,
 		'/pit/get': PitGet,
 		'/pit/insert': PitInsert,
-		'/pit/edit': PitEdit
+		'/pit/edit': PitEdit,
 	};
 </script>
 
-<Router routes={routes} /><GetWarningBox />
+<Router {routes} /><GetWarningBox />

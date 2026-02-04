@@ -1,0 +1,2 @@
+[install.scopes]
+muonw = { url = "https://node.pkgreg.com/" }

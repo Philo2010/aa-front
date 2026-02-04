@@ -167,7 +167,12 @@ export type Graph = {
 
 export type GraphForm = {
     event?: string | null;
-    teams: Array<number>;
+    teams: Array<TeamData>;
+};
+
+export type TeamData = {
+    is_ab_team: boolean;
+    team: number;
 };
 
 export type ApiResultForArrayOfGamesFull = {
@@ -263,11 +268,6 @@ export type ScoutingTeamForScouterWithoutId = {
     station: Stations;
     team: TeamData;
     scouters: Array<ScouterWithoutId>;
-};
-
-export type TeamData = {
-    is_ab_team: boolean;
-    team: number;
 };
 
 export type ScouterWithoutId = {

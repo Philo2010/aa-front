@@ -12,12 +12,16 @@
   "devDependencies": {
     "@hey-api/openapi-ts": "0.90.2",
     "@lucide/svelte": "latest",
+    "@muonw/powertable": "^2.3.5",
     "@sveltejs/adapter-auto": "^7.0.0",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@tailwindcss/vite": "^4.1.18",
     "@tsconfig/svelte": "^5.0.6",
     "@types/js-cookie": "^3.0.6",
     "clsx": "^2.1.1",
+    "prettier": "^3.8.1",
+    "prettier-plugin-svelte": "^3.4.1",
+    "sass": "^1.97.3",
     "svelte": "^5.48.0",
     "svelte-preprocess": "^6.0.3",
     "svelte-spa-router": "^4.0.1",
@@ -30,6 +34,7 @@
     "vite": "^7.3.1"
   },
   "dependencies": {
+    "@muonw/mascara": "^0.4.2",
     "js-cookie": "^3.0.5",
     "zod": "^4.3.6"
   }
