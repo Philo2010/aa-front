@@ -29,6 +29,7 @@
 	import ScoutPage from './routes/scout/ScoutPage.svelte';
 	import ScoutMvp from './routes/scout/ScoutMvp.svelte';
 	import Search from './routes/view/Search.svelte';
+	import Graph from './routes/view/Graph.svelte';
 
 	const routes = {
 		'/': Home,
@@ -55,6 +56,7 @@
 		'/pit/get': PitGet,
 		'/pit/insert': PitInsert,
 		'/pit/edit': PitEdit,
+		'/view/graph': Graph,
 	};
 </script>
 

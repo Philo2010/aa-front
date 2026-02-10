@@ -5,11 +5,13 @@
 	import type { Insert2 } from '$lib/schema/types.gen';
 	import { scoutEdit, scoutInsert } from '$lib/schema/sdk.gen';
 	import { onMount } from 'svelte';
+	import StarRating from '$lib/StarRating.svelte';
 
 	let team = $state<string>('');
 	let stop = $state<boolean>(true);
 	let snowgrave_insert_id: number;
 	let edit = $state<boolean>(false);
+	let defence = $state<number>(0);
 	let scout_form: Insert2 = $state<Insert2>({
 		hehe: 0,
 		beep: 0,
@@ -61,6 +63,7 @@
 		let res = await scoutInsert({
 			body: {
 				snowgrave_scout_id: snowgrave_insert_id,
+				defence: defence,
 				game: {
 					ExampleGame: {
 						hehe: scout_form.hehe,
@@ -95,6 +98,7 @@
 		let res = await scoutEdit({
 			body: {
 				snowgrave_scout_id: snowgrave_insert_id,
+				defence: defence,
 				game: {
 					ExampleGame: {
 						hehe: scout_form.hehe,
@@ -146,6 +150,9 @@
 		<h1>Endgame</h1>
 		<h2>Hoohoo</h2>
 		<input bind:value={scout_form.hoohoo} placeholder="HooHoo" />
+
+		<h2>Defence</h2>
+		<StarRating bind:value={defence}></StarRating>
 	{/if}
 	<br />
 </FormWithLoading>

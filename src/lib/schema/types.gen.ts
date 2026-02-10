@@ -138,41 +138,35 @@ export type Avg = {
     beep_avg: number;
 };
 
-export type ApiResultForArrayOfArrayOfGamesGraph = {
+export type ApiResultForArrayOfGraphTeam = {
     status: 'Success';
-    message: Array<Array<GamesGraph>>;
+    message: Array<GraphTeam>;
 } | {
     status: 'Error';
     message: string;
 };
 
-export type GamesGraph = {
-    header: HeaderGraph;
-    game: GamesGraphSpecific;
+export type GraphTeam = {
+    data: Array<GamesGraph>;
+    team: TeamData;
 };
 
-export type HeaderGraph = {
+export type GamesGraph = {
     time: string;
     total_score: number;
-};
-
-export type GamesGraphSpecific = {
-    ExampleGame: Graph;
-};
-
-export type Graph = {
-    hehe: number;
-    beep: number;
-};
-
-export type GraphForm = {
-    event?: string | null;
-    teams: Array<TeamData>;
+    auto_score: number;
+    teleop_score: number;
+    defence: number;
 };
 
 export type TeamData = {
     is_ab_team: boolean;
     team: number;
+};
+
+export type GraphForm = {
+    event?: string | null;
+    teams: Array<TeamData>;
 };
 
 export type ApiResultForArrayOfGamesFull = {
@@ -196,6 +190,8 @@ export type HeaderFull = {
     match_id: number;
     set: number;
     total_score: number;
+    auto_score: number;
+    teleop_score: number;
     event_code: string;
     tournament_level: TournamentLevels;
     station: Stations;
@@ -204,6 +200,7 @@ export type HeaderFull = {
     is_marked: boolean;
     is_mvp: boolean;
     snowgrave_scout_id: number;
+    defence: number;
 };
 
 export type TournamentLevels = 'QualificationMatch' | 'Quarterfinal' | 'Semifinal' | 'Final';
@@ -296,6 +293,7 @@ export type QueueInput = {
 
 export type EditSnow = {
     snowgrave_scout_id: number;
+    defence?: number | null;
     game: GamesEditSpecific;
 };
 
@@ -312,6 +310,7 @@ export type Edit2 = {
 export type InsertSnow = {
     snowgrave_scout_id: number;
     game: GamesInsertsSpecific;
+    defence: number;
 };
 
 export type GamesInsertsSpecific = {
@@ -582,7 +581,7 @@ export type GraphData = {
 };
 
 export type GraphResponses = {
-    200: ApiResultForArrayOfArrayOfGamesGraph;
+    200: ApiResultForArrayOfGraphTeam;
 };
 
 export type GraphResponse = GraphResponses[keyof GraphResponses];
