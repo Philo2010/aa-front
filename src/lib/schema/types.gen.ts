@@ -115,17 +115,22 @@ export type Message = {
     message: string;
 };
 
-export type ApiResultForArrayOfGamesAvg = {
+export type ApiResultForArrayOfTeamAvg = {
     status: 'Success';
-    message: Array<GamesAvg>;
+    message: Array<TeamAvg>;
 } | {
     status: 'Error';
     message: string;
 };
 
-export type GamesAvg = {
+export type TeamAvg = {
     team: number;
+    is_ab_team: boolean;
     total_score: number;
+    auto_score: number;
+    teleop_score: number;
+    defence_score: number;
+    mvp_percent: number;
     game: GamesAvgSpecific;
 };
 
@@ -553,7 +558,7 @@ export type AveragesData = {
 };
 
 export type AveragesResponses = {
-    200: ApiResultForArrayOfGamesAvg;
+    200: ApiResultForArrayOfTeamAvg;
 };
 
 export type AveragesResponse = AveragesResponses[keyof AveragesResponses];

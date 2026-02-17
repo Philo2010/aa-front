@@ -30,6 +30,7 @@
 	import ScoutMvp from './routes/scout/ScoutMvp.svelte';
 	import Search from './routes/view/Search.svelte';
 	import Graph from './routes/view/Graph.svelte';
+	import Average from './routes/view/Average.svelte';
 
 	const routes = {
 		'/': Home,
@@ -51,12 +52,13 @@
 		'/pit/assign': PitAssign,
 		'/scout/mvp': ScoutMvp,
 		'/scout/select': ScoutSelect,
-		'/view/search': Search,
 		'/scout/page': ScoutPage,
 		'/pit/get': PitGet,
 		'/pit/insert': PitInsert,
 		'/pit/edit': PitEdit,
 		'/view/graph': Graph,
+		'/view/search': Search,
+		'/view/avg': Average,
 	};
 </script>
 

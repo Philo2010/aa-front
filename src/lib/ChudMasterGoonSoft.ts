@@ -1,6 +1,6 @@
 import { format_team, type TeamData } from "../lib/ParseTeam.svelte";
 import type { GraphTeam } from "./schema/types.gen";
-
+import type { ChartConfiguration, ChartDataset, ChartData } from 'chart.js';
 
 export type GamesGraph = {
     time: string;
@@ -10,24 +10,11 @@ export type GamesGraph = {
     defence: number;
 };
 
-export type ChartDataset = {
-    label: string;
-    data: number[];
-    fill: boolean;
-    borderColor: string;
-    tension: number;
-};
-
-export type ChartData = {
-    labels: string[];
-    datasets: ChartDataset[];
-};
-
 export type GraphDataF = {
-    total: ChartData;
-    auto: ChartData;
-    teleop: ChartData;
-    defense: ChartData;
+    total: ChartData<'line'>;
+    auto: ChartData<'line'>;
+    teleop: ChartData<'line'>;
+    defense: ChartData<'line'>;
 };
 
 function generateColor(index: number): string {
@@ -36,13 +23,11 @@ function generateColor(index: number): string {
 }
 
 export function generateGraphData(teams: GraphTeam[]): GraphDataF {
-    // Use timestamps from the first team for labels
     const labels = teams.length > 0 && teams[0].data.length > 0
         ? teams[0].data.map(item => item.time)
         : [];
 
-    // Generate datasets for each metric
-    const datasetsTotal: ChartDataset[] = teams.map((team, index) => ({
+    const datasetsTotal: ChartDataset<'line'>[] = teams.map((team, index) => ({
         label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Total`,
         data: team.data.map(item => item.total_score),
         fill: false,
@@ -50,7 +35,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         tension: 0.1
     }));
 
-    const datasetsAuto: ChartDataset[] = teams.map((team, index) => ({
+    const datasetsAuto: ChartDataset<'line'>[] = teams.map((team, index) => ({
         label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Auto`,
         data: team.data.map(item => item.auto_score),
         fill: false,
@@ -58,7 +43,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         tension: 0.1
     }));
 
-    const datasetsTeleop: ChartDataset[] = teams.map((team, index) => ({
+    const datasetsTeleop: ChartDataset<'line'>[] = teams.map((team, index) => ({
         label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Teleop`,
         data: team.data.map(item => item.teleop_score),
         fill: false,
@@ -66,7 +51,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         tension: 0.1
     }));
 
-    const datasetsDefense: ChartDataset[] = teams.map((team, index) => ({
+    const datasetsDefense: ChartDataset<'line'>[] = teams.map((team, index) => ({
         label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Defense`,
         data: team.data.map(item => item.defence),
         fill: false,

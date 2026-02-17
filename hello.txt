@@ -1,0 +1,6 @@
+/visitors/ImportDeclaration.js:		if (source.startsWith('svelte/internal')) {
+node_modules/svelte-chartjs/dist/utils/svelte.d.ts:import { SvelteComponent } from 'svelte/internal';
+node_modules/svelte-chartjs/dist/utils/svelte.js:import { SvelteComponent, bubble, listen, current_component, } from 'svelte/internal';
+node_modules/svelte-chartjs/src/utils/svelte.ts:} from 'svelte/internal';
+node_modules/@muonw/powertable/components/PowerTable.d.ts:    export { SvelteComponentDev as default } from 'svelte/internal';
+node_modules/@muonw/mascara/components/AccordionItem.d.ts:    export { SvelteComponentDev as default } from 'svelte/internal';

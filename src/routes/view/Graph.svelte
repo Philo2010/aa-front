@@ -5,7 +5,7 @@
 	import { parse_team } from "$lib/ParseTeam.svelte";
     import { graph } from "$lib/schema/sdk.gen";
     import type { GraphData, TeamData } from "$lib/schema/types.gen";
-	import { Line } from "svelte-chartjs";
+    import LineGraph from "$lib/LineGraph.svelte";
     import {generateGraphData} from "$lib/ChudMasterGoonSoft";
     import type {GraphDataF} from "$lib/ChudMasterGoonSoft";
     
@@ -81,15 +81,5 @@
     <button type="button" onclick={add}>Add</button>
 </FormWithLoading>
 {:else}
-<h2>Total Score Over Time</h2>
-<Line data={final_data.total}></Line>
-
-<h2>Auto Score Over Time</h2>
-<Line data={final_data.auto}></Line>
-
-<h2>Teleop Score Over Time</h2>
-<Line data={final_data.teleop}></Line>
-
-<h2>Defense Rating Over Time</h2>
-<Line data={final_data.defense}></Line>
+<LineGraph data={final_data}></LineGraph>
 {/if}
