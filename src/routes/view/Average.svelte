@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { get_event } from "$lib/GetCurrEvent";
-	import { FlattenDataAvg, type ExampleAvgFlatten } from "$lib/ParseTimeRunTimeBumAssTime";
+	import { FlattenDataAvg, type RebuiltAvgFlatten } from "$lib/ParseTimeRunTimeBumAssTime";
 	import { averages } from "$lib/schema/sdk.gen";
 	import type { TeamAvg } from "$lib/schema/types.gen";
 	import Table from "$lib/Table.svelte";
 	import { onMount } from "svelte";
 
-    let data = $state<string | ExampleAvgFlatten[]>("Loading");
+    let data = $state<string | RebuiltAvgFlatten[]>("Loading");
 
     
 

@@ -7,12 +7,12 @@
 	import SelectTeam from '$lib/SelectTeam.svelte';
 	import { search } from '$lib/schema/sdk.gen';
 	import Table from '$lib/Table.svelte';
-    import { FlattenData, type ExampleGameFlatten } from '$lib/ParseTimeRunTimeBumAssTime';
+    import { FlattenData, type RebuiltGameFlatten } from '$lib/ParseTimeRunTimeBumAssTime';
 
 	let to_add = $state('');
 	let team_string = $state<string>('');
 	let team_error: string | null = $state<null>(null);
-    let data = $state<ExampleGameFlatten[] | null>(null);
+    let data = $state<RebuiltGameFlatten[] | null>(null);
 	let team = $state<TeamData | null>(null);
 	let params: SearchParamData = $state({
 		user: null,

@@ -135,12 +135,22 @@ export type TeamAvg = {
 };
 
 export type GamesAvgSpecific = {
-    ExampleGame: Avg;
+    RebuiltGame: Avg;
 };
 
 export type Avg = {
-    hehe_avg: number;
-    beep_avg: number;
+    defence_main_avg: number;
+    fuel_shoot_teleop_avg: number;
+    fuel_pass_teleop_avg: number;
+    fuel_shoot_auto_avg: number;
+    fuel_pass_auto_avg: number;
+    level_1_avg: number;
+    level_2_avg: number;
+    level_3_avg: number;
+    level_1_avg_auto: number;
+    level_2_avg_auto: number;
+    level_3_avg_auto: number;
+    beach_on_bump: number;
 };
 
 export type ApiResultForArrayOfGraphTeam = {
@@ -200,6 +210,7 @@ export type HeaderFull = {
     event_code: string;
     tournament_level: TournamentLevels;
     station: Stations;
+    comment: string;
     created_at: string;
     is_pending: boolean;
     is_marked: boolean;
@@ -213,15 +224,22 @@ export type TournamentLevels = 'QualificationMatch' | 'Quarterfinal' | 'Semifina
 export type Stations = 'Red1' | 'Red2' | 'Red3' | 'Blue1' | 'Blue2' | 'Blue3';
 
 export type GamesFullSpecific = {
-    ExampleGame: Model2;
+    RebuiltGame: Model2;
 };
 
 export type Model2 = {
     id: number;
-    hehe: number;
-    beep: number;
-    hoohoo: string;
+    defence_main: boolean;
+    fuel_shoot_teleop: number;
+    fuel_pass_teleop: number;
+    fuel_shoot_auto: number;
+    fuel_pass_auto: number;
+    climb_end: ClimbState;
+    climb_auto: ClimbState;
+    beach_on_bump: boolean;
 };
+
+export type ClimbState = 'Nothing' | 'Stage1' | 'Stage2' | 'Stage3';
 
 export type SearchParamData = {
     user?: string | null;
@@ -299,33 +317,45 @@ export type QueueInput = {
 export type EditSnow = {
     snowgrave_scout_id: number;
     defence?: number | null;
+    comment?: string | null;
     game: GamesEditSpecific;
 };
 
 export type GamesEditSpecific = {
-    ExampleGame: Edit2;
+    RebuiltGame: Edit2;
 };
 
 export type Edit2 = {
-    hehe?: number | null;
-    beep?: number | null;
-    hoohoo?: string | null;
+    defence_main?: boolean | null;
+    fuel_shoot_teleop?: number | null;
+    fuel_pass_teleop?: number | null;
+    fuel_shoot_auto?: number | null;
+    fuel_pass_auto?: number | null;
+    climb_end?: ClimbState | null;
+    climb_auto?: ClimbState | null;
+    beach_on_bump?: boolean | null;
 };
 
 export type InsertSnow = {
     snowgrave_scout_id: number;
     game: GamesInsertsSpecific;
     defence: number;
+    comment: string;
 };
 
 export type GamesInsertsSpecific = {
-    ExampleGame: Insert2;
+    RebuiltGame: Insert2;
 };
 
 export type Insert2 = {
-    hehe: number;
-    beep: number;
-    hoohoo: string;
+    defence_main: boolean;
+    fuel_shoot_teleop: number;
+    fuel_pass_teleop: number;
+    fuel_shoot_auto: number;
+    fuel_pass_auto: number;
+    climb_end: ClimbState;
+    climb_auto: ClimbState;
+    beach_on_bump: boolean;
 };
 
 export type ApiResultForArrayOfString = {

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { derived } from 'svelte/store';
 	import FormWithLoading from '../../lib/FormWithLoading.svelte';
 	import { format_team } from '../../lib/ParseTeam.svelte';
 	import { insertScout, mvpInsert } from '../../lib/schema/sdk.gen';
@@ -16,29 +15,35 @@
 	let scouters = $state(new Map<number, string[]>());
 	let redMvps = $state(new Map<number, string>());
 	let blueMvps = $state(new Map<number, string>());
+
+	// Track original server state for diffing
+	let originalScouters = new Map<number, string[]>();
+	let originalRedMvps = new Map<number, string>();
+	let originalBlueMvps = new Map<number, string>();
+
 	let masterScouters = $state<string[]>(['', '', '', '', '', '']);
 	let masterRedMvp = $state('');
 	let masterBlueMvp = $state('');
 	let stop = $derived(validateForm());
 
+	function scoutersEqual(a: string[], b: string[]): boolean {
+		if (a.length !== b.length) return false;
+		return a.every((v, i) => v === b[i]);
+	}
+
 	function validateForm(): boolean {
 		if (typeof all_games === 'string') {
-			// Games haven't loaded yet
 			return false;
 		}
 
-		// Check each game
 		for (const game of all_games) {
-			// Check each team has at least one scouter
 			for (const team of game.teams) {
 				const teamScouters = scouters.get(team.id);
 
-				// Team must have at least one scouter
 				if (!teamScouters || teamScouters.length === 0) {
 					return false;
 				}
 
-				// All scouter slots must be filled (no empty strings)
 				for (const scouter of teamScouters) {
 					if (!scouter || scouter.trim() === '') {
 						return false;
@@ -46,7 +51,6 @@
 				}
 			}
 
-			// Check MVPs are filled
 			const redMvp = redMvps.get(game.id);
 			const blueMvp = blueMvps.get(game.id);
 
@@ -62,33 +66,31 @@
 		return true;
 	}
 
-	function convertToHashMap(): Map<string, number> {
+	function convertToHashMap(
+		scoutersSubset: Map<number, string[]>,
+		redMvpsSubset: Map<number, string>,
+		blueMvpsSubset: Map<number, string>,
+	): Map<string, number> {
 		const result = new Map<string, number>();
 		let currentId = 0;
 
-		// Add all scouters
-		for (const scouterArray of scouters.values()) {
+		for (const scouterArray of scoutersSubset.values()) {
 			for (const scouter of scouterArray) {
 				if (scouter && !result.has(scouter)) {
-					result.set(scouter, currentId);
-					currentId++;
+					result.set(scouter, currentId++);
 				}
 			}
 		}
 
-		// Add all red MVPs
-		for (const mvp of redMvps.values()) {
+		for (const mvp of redMvpsSubset.values()) {
 			if (mvp && !result.has(mvp)) {
-				result.set(mvp, currentId);
-				currentId++;
+				result.set(mvp, currentId++);
 			}
 		}
 
-		// Add all blue MVPs
-		for (const mvp of blueMvps.values()) {
+		for (const mvp of blueMvpsSubset.values()) {
 			if (mvp && !result.has(mvp)) {
-				result.set(mvp, currentId);
-				currentId++;
+				result.set(mvp, currentId++);
 			}
 		}
 
@@ -96,32 +98,68 @@
 	}
 
 	function format_scout_pick_data(): ScouterInsertFront {
-		// Build global player index
-		const player_indexs = convertToHashMap();
-		const matches: MatchData[] = [];
-
 		if (typeof all_games === 'string') {
 			throw new Error('Games not loaded');
 		}
 
-		for (const game of all_games) {
-			for (const team of game.teams) {
-				const teamScouters = scouters.get(team.id) ?? [];
-				const player_team_index: GameTeamDataScouter[] = [];
+		// Build changed-only maps
+		const changedScouters = new Map<number, string[]>();
+		const changedRedMvps = new Map<number, string>();
+		const changedBlueMvps = new Map<number, string>();
 
-				for (const player of teamScouters) {
-					const index = player_indexs.get(player);
-					if (index !== undefined) {
-						player_team_index.push({ index });
-					}
+		for (const game of all_games) {
+			const currentRed = redMvps.get(game.id) ?? '';
+			const currentBlue = blueMvps.get(game.id) ?? '';
+
+			if (currentRed !== (originalRedMvps.get(game.id) ?? '')) {
+				changedRedMvps.set(game.id, currentRed);
+			}
+			if (currentBlue !== (originalBlueMvps.get(game.id) ?? '')) {
+				changedBlueMvps.set(game.id, currentBlue);
+			}
+
+			for (const team of game.teams) {
+				const current = scouters.get(team.id) ?? [];
+				const original = originalScouters.get(team.id) ?? [];
+
+				if (!scoutersEqual(current, original)) {
+					changedScouters.set(team.id, current);
 				}
+			}
+		}
+
+		const player_indexs = convertToHashMap(changedScouters, changedRedMvps, changedBlueMvps);
+		const matches: MatchData[] = [];
+
+		for (const game of all_games) {
+			const hasScouterChange = game.teams.some((team) => changedScouters.has(team.id));
+			const hasRedMvpChange = changedRedMvps.has(game.id);
+			const hasBlueVpChange = changedBlueMvps.has(game.id);
+
+			// Skip games with no changes at all
+			if (!hasScouterChange && !hasRedMvpChange && !hasBlueVpChange) {
+				continue;
+			}
+
+			for (const team of game.teams) {
+				if (!changedScouters.has(team.id) && !hasRedMvpChange && !hasBlueVpChange) {
+					continue;
+				}
+
+				const teamScouters = changedScouters.get(team.id) ?? scouters.get(team.id) ?? [];
+				const player_team_index: GameTeamDataScouter[] = teamScouters
+					.map((player) => {
+						const index = player_indexs.get(player);
+						return index !== undefined ? { index } : null;
+					})
+					.filter((x): x is GameTeamDataScouter => x !== null);
 
 				matches.push({
 					upcoming_team_id: team.id,
 					game_scouters: player_team_index,
 					mvp: {
-						red: redMvps.get(game.id) ?? '',
-						blue: blueMvps.get(game.id) ?? '',
+						red: changedRedMvps.get(game.id) ?? redMvps.get(game.id) ?? '',
+						blue: changedBlueMvps.get(game.id) ?? blueMvps.get(game.id) ?? '',
 					},
 				});
 			}
@@ -156,7 +194,13 @@
 		redMvps = newRedMvps;
 		blueMvps = newBlueMvps;
 
-		// Also reset master assignments
+		// Reset originals too so everything counts as changed after a reset+refill
+		originalScouters = new Map(
+			Array.from(newScouters.entries()).map(([k, v]) => [k, [...v]]),
+		);
+		originalRedMvps = new Map(newRedMvps);
+		originalBlueMvps = new Map(newBlueMvps);
+
 		masterScouters = ['', '', '', '', '', ''];
 		masterRedMvp = '';
 		masterBlueMvp = '';
@@ -178,25 +222,19 @@
 						} else {
 							if (a.tournament_level === 'QualificationMatch') {
 								return 1;
-							} else if (
-								b.tournament_level === 'QualificationMatch'
-							) {
+							} else if (b.tournament_level === 'QualificationMatch') {
 								return -1;
 							} else {
-								return a.tournament_level.localeCompare(
-									b.tournament_level,
-								);
+								return a.tournament_level.localeCompare(b.tournament_level);
 							}
 						}
 					});
 
-					// Initialize scouters, red mvps, and blue mvps for each game
 					const newScouters = new Map<number, string[]>();
 					const newRedMvps = new Map<number, string>();
 					const newBlueMvps = new Map<number, string>();
 
 					all_games.forEach((game) => {
-						// Auto-fill scouters from existing data
 						game.teams.forEach((team) => {
 							newScouters.set(
 								team.id,
@@ -205,8 +243,6 @@
 									: [],
 							);
 						});
-
-						// Auto-fill MVPs from existing data
 						newRedMvps.set(game.id, game.mvp_red || '');
 						newBlueMvps.set(game.id, game.mvp_blue || '');
 					});
@@ -214,6 +250,13 @@
 					scouters = newScouters;
 					redMvps = newRedMvps;
 					blueMvps = newBlueMvps;
+
+					// Snapshot original server state for diffing later
+					originalScouters = new Map(
+						Array.from(newScouters.entries()).map(([k, v]) => [k, [...v]]),
+					);
+					originalRedMvps = new Map(newRedMvps);
+					originalBlueMvps = new Map(newBlueMvps);
 				}
 			}
 		})();
@@ -260,7 +303,6 @@
 		const newBlueMvps = new Map(blueMvps);
 
 		all_games.forEach((game) => {
-			// Apply master scouters to each team based on their index in the game
 			game.teams.forEach((team, teamIndex) => {
 				if (teamIndex < 6 && masterScouters[teamIndex]) {
 					const teamScouters = newScouters.get(team.id) || [];
@@ -269,7 +311,6 @@
 				}
 			});
 
-			// Apply master MVPs
 			if (masterRedMvp) {
 				newRedMvps.set(game.id, masterRedMvp);
 			}
@@ -293,8 +334,7 @@
 
 		if (res.error) {
 			return {
-				message:
-					'Error while sending data: ' + String(res.response.status),
+				message: 'Error while sending data: ' + String(res.response.status),
 				worked: false,
 			};
 		} else {

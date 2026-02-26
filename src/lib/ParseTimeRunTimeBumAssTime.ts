@@ -1,9 +1,9 @@
 
-import type { TournamentLevels, Stations, GamesFull, TeamAvg} from './schema/types.gen';
+import type { TournamentLevels, Stations, GamesFull, TeamAvg, ClimbState} from './schema/types.gen';
 //parses differnt yearly types and "flattens them" for safe printing
 import { format_team } from './ParseTeam.svelte';
 
-export type ExampleGameFlatten = {
+export type RebuiltGameFlatten = {
     id: number;
 	user: string;
     team: string;
@@ -15,22 +15,39 @@ export type ExampleGameFlatten = {
 	station: Stations;
 	created_at: string;
 	is_mvp: boolean;
-	hehe: number;
-	beep: number;
-	hoohoo: string;
+    defence: number;
+    comment: string;
+    defence_main: boolean;
+    fuel_shoot_teleop: number;
+    fuel_pass_teleop: number;
+    fuel_shoot_auto: number;
+    fuel_pass_auto: number;
+    climb_end: ClimbState;
+    climb_auto: ClimbState;
+    beach_on_bump: boolean;
 };
-export type ExampleAvgFlatten = {
+export type RebuiltAvgFlatten = {
 	team: string;
     total_score: number; 
     auto_score: number;
     teleop_score: number;
     defence_score: number;
     mvp_percent: number;
-    hehe_avg: number;
-    beep_avg: number;
+    defence_main_avg: number;
+    fuel_shoot_teleop_avg: number;
+    fuel_pass_teleop_avg: number;
+    fuel_shoot_auto_avg: number;
+    fuel_pass_auto_avg: number;
+    level_1_avg: number;
+    level_2_avg: number;
+    level_3_avg: number;
+    level_1_avg_auto: number;
+    level_2_avg_auto: number;
+    level_3_avg_auto: number;
+    beach_on_bump: number;
 };
 
-export function FlattenData(data: GamesFull): ExampleGameFlatten {
+export function FlattenData(data: GamesFull): RebuiltGameFlatten {
     const date = new Date(data.header.created_at);
 
     const formatted = date.toLocaleString("en-US", {
@@ -54,16 +71,22 @@ export function FlattenData(data: GamesFull): ExampleGameFlatten {
         station: data.header.station,
         created_at: formatted,
         is_mvp: data.header.is_mvp,
-        hehe: data.game.ExampleGame.hehe,
-        beep: data.game.ExampleGame.beep,
-        hoohoo: data.game.ExampleGame.hoohoo
+        defence: data.header.defence,
+        comment: data.header.comment,
+        defence_main: data.game.RebuiltGame.defence_main,
+        fuel_shoot_teleop: data.game.RebuiltGame.fuel_shoot_teleop,
+        fuel_pass_teleop: data.game.RebuiltGame.fuel_pass_teleop,
+        fuel_shoot_auto: data.game.RebuiltGame.fuel_shoot_auto,
+        fuel_pass_auto: data.game.RebuiltGame.fuel_pass_auto,
+        climb_end: data.game.RebuiltGame.climb_end,
+        climb_auto: data.game.RebuiltGame.climb_auto,
+        beach_on_bump: data.game.RebuiltGame.beach_on_bump,
     };
 }
 
 
-export function FlattenDataAvg(data: TeamAvg): ExampleAvgFlatten {
+export function FlattenDataAvg(data: TeamAvg): RebuiltAvgFlatten {
     let team_format = format_team(data.team, data.is_ab_team);
-    let percent = data.mvp_percent * 100;
 
     return {
         team: team_format,
@@ -71,8 +94,18 @@ export function FlattenDataAvg(data: TeamAvg): ExampleAvgFlatten {
         auto_score: data.auto_score,
         teleop_score: data.teleop_score,
         defence_score: data.defence_score,
-        mvp_percent: data.mvp_percent,
-        hehe_avg: data.game.ExampleGame.hehe_avg,
-        beep_avg: data.game.ExampleGame.beep_avg
+        mvp_percent: data.mvp_percent * 100,
+        defence_main_avg: data.game.RebuiltGame.defence_main_avg,
+        fuel_shoot_teleop_avg: data.game.RebuiltGame.fuel_shoot_teleop_avg,
+        fuel_pass_teleop_avg: data.game.RebuiltGame.fuel_pass_teleop_avg,
+        fuel_shoot_auto_avg: data.game.RebuiltGame.fuel_shoot_auto_avg,
+        fuel_pass_auto_avg: data.game.RebuiltGame.fuel_pass_auto_avg,
+        level_1_avg: data.game.RebuiltGame.level_1_avg,
+        level_2_avg: data.game.RebuiltGame.level_2_avg,
+        level_3_avg: data.game.RebuiltGame.level_3_avg,
+        level_1_avg_auto: data.game.RebuiltGame.level_1_avg_auto,
+        level_2_avg_auto: data.game.RebuiltGame.level_2_avg_auto,
+        level_3_avg_auto: data.game.RebuiltGame.level_3_avg_auto,
+        beach_on_bump: data.game.RebuiltGame.beach_on_bump
     };
 }
