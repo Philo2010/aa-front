@@ -2,10 +2,11 @@
   import { onMount } from 'svelte';
 
   // ── Props ──────────────────────────────────────────────────────────────────
-  /** @type {{ fieldImage?: string, label?: string, onsave?: (data: object) => void }} */
+  /** @type {{ fieldImage?: string, label?: string, pathData?: object, onsave?: (data: object) => void }} */
   let {
-    fieldImage = '/field.png',
+    fieldImage = '/feild2026.png',
     label = '',
+    pathData = $bindable([]),
     onsave,
   } = $props();
 
@@ -21,8 +22,8 @@
   let playbackDot = null;   // paper.Shape.Circle for the robot dot
   let rafId = null;
 
-  const FIELD_W = 800;
-  const FIELD_H = 400;
+  const FIELD_W = 600;
+  const FIELD_H = 315;
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   onMount(() => {
@@ -33,16 +34,29 @@
       const paper = paperModule.default;
       if (!mounted) return;
 
+      // Ensure canvas pixel buffer matches attributes before Paper.js reads it
+      canvasEl.width = FIELD_W;
+      canvasEl.height = FIELD_H;
+
       paper.setup(canvasEl);
+      paper.view.viewSize = new paper.Size(FIELD_W, FIELD_H);
       paperScope = paper;
 
       // Draw field image as background
       const raster = new paper.Raster(fieldImage);
-      raster.position = paper.view.center;
-      raster.size = new paper.Size(FIELD_W, FIELD_H);
-      raster.sendToBack();
+      raster.onLoad = () => {
+        raster.position = paper.view.center;
+        raster.size = new paper.Size(FIELD_W, FIELD_H);
+        raster.sendToBack();
+        paper.view.update();
+      };
 
       setupDrawTool(paper);
+
+      // Force initial render on next frame
+      requestAnimationFrame(() => {
+        paper.view.update();
+      });
     })();
 
     return () => {
@@ -79,6 +93,7 @@
       allPaths.push(currentPath);
       hasPaths = true;
       currentPath = null;
+      pathData = serializeStrokes();
     };
   }
 
@@ -96,6 +111,7 @@
     playbackDot = null;
     mode = 'draw';
     hasPaths = false;
+    pathData = [];
   }
 
   // ── Playback ───────────────────────────────────────────────────────────────
@@ -181,17 +197,21 @@
   }
 
   // ── Serialize & Submit ─────────────────────────────────────────────────────
+  function serializeStrokes() {
+    return allPaths.map(path =>
+      path.segments.map(seg => ({
+        x: Math.round(seg.point.x),
+        y: Math.round(seg.point.y),
+      }))
+    );
+  }
+
   function serialize() {
     return {
       label,
       fieldWidth: FIELD_W,
       fieldHeight: FIELD_H,
-      strokes: allPaths.map(path =>
-        path.segments.map(seg => ({
-          x: Math.round(seg.point.x),
-          y: Math.round(seg.point.y),
-        }))
-      ),
+      strokes: serializeStrokes(),
       createdAt: new Date().toISOString(),
     };
   }
@@ -202,10 +222,6 @@
   }
 </script>
 
-<svelte:head>
-  <!-- Paper.js from CDN — swap for npm import if you prefer -->
-  <script src="https://unpkg.com/paper/dist/paper-full.min.js"></script>
-</svelte:head>
 
 <div class="wrapper">
   <!-- Toolbar -->
@@ -329,7 +345,8 @@
     border-radius: 6px;
     border: 1px solid #2a2a2a;
     background: #111;
-    max-width: 100%;
+    width: 600px;
+    height: 315px;
     touch-action: none;
   }
 
