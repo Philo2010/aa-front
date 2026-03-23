@@ -24,6 +24,8 @@
 	let masterRedMvp = $state('');
 	let masterBlueMvp = $state('');
 	let stop = $derived(validateForm());
+	let sliderIndex = $state<number>(0);
+	let sliderGame = $derived(typeof all_games !== 'string' && all_games.length > 0 ? all_games[sliderIndex] : null);
 
 	function scoutersEqual(a: string[], b: string[]): boolean {
 		if (a.length !== b.length) return false;
@@ -348,68 +350,59 @@
 	}
 </script>
 
-<div
-	style="background-color: #2e8b57; padding: 15px; margin: 10px; border-radius: 10px;"
->
-	<h3>Quick Assign by Team Position</h3>
-	<p style="font-size: 0.9em; margin-bottom: 10px;">
-		Assign scouters to team positions (1st team, 2nd team, etc.) across all
-		games
-	</p>
-	{#each masterScouters as scouter, i}
-		<div
-			style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;"
-		>
-			<span style="min-width: 100px;">Team {i + 1}:</span>
-			<UserSelector
-				value={scouter}
-				onchange={(value) => updateMasterScouter(i, value)}
-			/>
-		</div>
-	{/each}
-
-	<div
-		style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #fff;"
-	>
-		<div
-			style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;"
-		>
-			<span style="min-width: 100px;">Red MVP:</span>
-			<UserSelector bind:value={masterRedMvp} />
-		</div>
-		<div
-			style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;"
-		>
-			<span style="min-width: 100px;">Blue MVP:</span>
-			<UserSelector bind:value={masterBlueMvp} />
-		</div>
-	</div>
-
-	<div style="display: flex; gap: 10px; margin-top: 10px;">
-		<button type="button" onclick={applyMasterToAllGames}>
-			Apply to All Games
-		</button>
-		<button
-			type="button"
-			onclick={resetAllAssignments}
-			style="background-color: #dc3545;"
-		>
-			Reset All Assignments
-		</button>
-	</div>
-</div>
-
 {#if typeof all_games === 'string'}
 	{all_games}
 {:else}
-	<FormWithLoading stop={!stop} {dispatch}>
-		{#each all_games as game}
+	<div class="slider-section">
+		<div class="slider-header">
+			<h3>Assign Scouters ({all_games.length} games)</h3>
+			<div class="slider-controls">
+				<button type="button" onclick={() => sliderIndex = Math.max(0, sliderIndex - 1)} disabled={sliderIndex === 0}>&lt;</button>
+				<span>{sliderIndex + 1} / {all_games.length}</span>
+				<button type="button" onclick={() => sliderIndex = Math.min(all_games.length - 1, sliderIndex + 1)} disabled={sliderIndex >= all_games.length - 1}>&gt;</button>
+			</div>
+		</div>
+
+		<input
+			type="range"
+			min="0"
+			max={all_games.length - 1}
+			bind:value={sliderIndex}
+			class="slider"
+		/>
+
+		<div class="master-section">
+			<h4>Quick Assign (applies to all games)</h4>
+			{#each masterScouters as scouter, i}
+				<div class="row">
+					<span class="label">Team {i + 1}:</span>
+					<UserSelector
+						value={scouter}
+						onchange={(value) => updateMasterScouter(i, value)}
+					/>
+				</div>
+			{/each}
+			<div class="row" style="margin-top: 10px;">
+				<span class="label">Red MVP:</span>
+				<UserSelector bind:value={masterRedMvp} />
+			</div>
+			<div class="row">
+				<span class="label">Blue MVP:</span>
+				<UserSelector bind:value={masterBlueMvp} />
+			</div>
+			<div style="display: flex; gap: 10px; margin-top: 10px;">
+				<button type="button" onclick={applyMasterToAllGames}>Apply to All</button>
+				<button type="button" onclick={resetAllAssignments} style="background-color: #dc3545;">Reset All</button>
+			</div>
+		</div>
+	</div>
+
+	{#if sliderGame}
+		<FormWithLoading stop={!stop} {dispatch}>
 			<div class="game-box">
-				<p>Match: {game.match_id}</p>
-				<p>Set: {game.set}</p>
-				<p>Level: {game.tournament_level}</p>
-				<p>Event {game.event_code}</p>
-				{#each game.teams as team, teamIndex}
+				<p><strong>Match {sliderGame.match_id}</strong> (Set {sliderGame.set})</p>
+				<p>{sliderGame.tournament_level} - {sliderGame.event_code}</p>
+				{#each sliderGame.teams as team, teamIndex}
 					<div>
 						<strong>Team {teamIndex + 1}:</strong>
 						{format_team(team.team, team.is_ab_team)} - {team.station}
@@ -427,38 +420,77 @@
 					</div>
 				{/each}
 
-				<div
-					style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #fff;"
-				>
-					<div
-						style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px;"
-					>
+				<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #fff;">
+					<div class="row">
 						<span style="min-width: 80px;">Red MVP:</span>
 						<UserSelector
-							value={redMvps.get(game.id) ?? ''}
-							onchange={(value) => updateRedMvp(game.id, value)}
+							value={redMvps.get(sliderGame.id) ?? ''}
+							onchange={(value) => updateRedMvp(sliderGame.id, value)}
 						/>
 					</div>
-					<div style="display: flex; gap: 10px; align-items: center;">
+					<div class="row">
 						<span style="min-width: 80px;">Blue MVP:</span>
 						<UserSelector
-							value={blueMvps.get(game.id) ?? ''}
-							onchange={(value) => updateBlueMvp(game.id, value)}
+							value={blueMvps.get(sliderGame.id) ?? ''}
+							onchange={(value) => updateBlueMvp(sliderGame.id, value)}
 						/>
 					</div>
 				</div>
 			</div>
-		{/each}
-	</FormWithLoading>
+		</FormWithLoading>
+	{/if}
 {/if}
 
 <style>
 	.game-box {
 		background-color: #3cb371;
-		padding: 10px;
-		padding-left: 30px;
-		padding-right: 30px;
+		padding: 10px 30px;
 		border-radius: 10px;
 		margin: 10px;
+	}
+
+	.slider-section {
+		background-color: #2e8b57;
+		padding: 15px;
+		margin: 10px;
+		border-radius: 10px;
+	}
+
+	.slider-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.slider-controls {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
+
+	.slider-controls button {
+		min-width: 36px;
+	}
+
+	.slider {
+		width: 100%;
+		margin: 10px 0;
+	}
+
+	.master-section {
+		margin-top: 15px;
+		padding-top: 15px;
+		border-top: 1px solid rgba(255, 255, 255, 0.3);
+	}
+
+	.row {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		margin-bottom: 8px;
+	}
+
+	.label {
+		min-width: 100px;
 	}
 </style>

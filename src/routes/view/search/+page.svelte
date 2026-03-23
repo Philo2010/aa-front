@@ -1,4 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { checkadmin } from '$lib/checkadminship';
+
+	if (!checkadmin()) {
+		goto('/notallowed');
+	}
+
 	import NiceErrorTextBox from '$lib/NiceErrorTextBox.svelte';
 	import { parse_team } from '$lib/ParseTeam.svelte';
 	import type { GamesFull, TeamData } from '$lib/schema/types.gen';

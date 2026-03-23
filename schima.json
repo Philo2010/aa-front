@@ -330,7 +330,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResult_for_Array_of_Game"
+                  "$ref": "#/components/schemas/ApiResult_for_Array_of_GamePart"
                 }
               }
             }
@@ -526,7 +526,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResult_for_Array_of_Game2"
+                  "$ref": "#/components/schemas/ApiResult_for_Array_of_Game"
                 }
               }
             }
@@ -820,7 +820,15 @@
           },
           "auto_paths": {
             "type": "array",
-            "items": {},
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PathPoint"
+                }
+              }
+            },
             "nullable": true
           },
           "years_of_driver_experience": {
@@ -894,6 +902,23 @@
             "additionalProperties": false
           }
         ]
+      },
+      "PathPoint": {
+        "type": "object",
+        "required": [
+          "x",
+          "y"
+        ],
+        "properties": {
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       },
       "ClimbState": {
         "type": "string",
@@ -1145,7 +1170,15 @@
           },
           "auto_paths": {
             "type": "array",
-            "items": {}
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PathPoint"
+                }
+              }
+            }
           },
           "years_of_driver_experience": {
             "type": "integer",
@@ -1976,7 +2009,7 @@
           }
         }
       },
-      "ApiResult_for_Array_of_Game": {
+      "ApiResult_for_Array_of_GamePart": {
         "oneOf": [
           {
             "type": "object",
@@ -1994,7 +2027,7 @@
               "message": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/Game"
+                  "$ref": "#/components/schemas/GamePart"
                 }
               }
             }
@@ -2019,7 +2052,7 @@
           }
         ]
       },
-      "Game": {
+      "GamePart": {
         "type": "object",
         "required": [
           "event_code",
@@ -2048,7 +2081,7 @@
             "$ref": "#/components/schemas/ScoutGame"
           },
           "mvp": {
-            "$ref": "#/components/schemas/MvpPair"
+            "$ref": "#/components/schemas/MvpPairPart"
           }
         }
       },
@@ -2214,18 +2247,24 @@
           }
         }
       },
-      "MvpPair": {
+      "MvpPairPart": {
         "type": "object",
-        "required": [
-          "blue",
-          "red"
-        ],
         "properties": {
           "red": {
-            "$ref": "#/components/schemas/MvpUpcoming"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MvpUpcoming"
+              }
+            ],
+            "nullable": true
           },
           "blue": {
-            "$ref": "#/components/schemas/MvpUpcoming"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MvpUpcoming"
+              }
+            ],
+            "nullable": true
           }
         }
       },
@@ -2556,7 +2595,7 @@
           }
         }
       },
-      "ApiResult_for_Array_of_Game2": {
+      "ApiResult_for_Array_of_Game": {
         "oneOf": [
           {
             "type": "object",
@@ -2574,7 +2613,7 @@
               "message": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/Game2"
+                  "$ref": "#/components/schemas/Game"
                 }
               }
             }
@@ -2599,7 +2638,7 @@
           }
         ]
       },
-      "Game2": {
+      "Game": {
         "type": "object",
         "required": [
           "event_code",

@@ -1,4 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { checkadmin } from '$lib/checkadminship';
+
+	if (!checkadmin()) {
+		goto('/notallowed');
+	}
+
 	import FormWithLoading from "$lib/FormWithLoading.svelte";
 	import { get_event } from "$lib/GetCurrEvent";
 	import NiceErrorTextBox from "$lib/NiceErrorTextBox.svelte";

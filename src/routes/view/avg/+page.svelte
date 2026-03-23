@@ -1,4 +1,11 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { checkadmin } from '$lib/checkadminship';
+
+	if (!checkadmin()) {
+		goto('/notallowed');
+	}
+
 	import { get_event } from "$lib/GetCurrEvent";
 	import { FlattenDataAvg, type RebuiltAvgFlatten } from "$lib/ParseTimeRunTimeBumAssTime";
 	import { averages } from "$lib/schema/sdk.gen";
