@@ -1,7 +1,8 @@
-<script>
+<script lang="ts">
 	import RobotPath from "$lib/RobotPath.svelte";
 	import RobotPathView from "$lib/RobotPathView.svelte";
-    let json = $state([
+	import type { AutoPath } from "$lib/types/robotpath";
+    let json: AutoPath = $state([
   [
     {
       "x": 410,

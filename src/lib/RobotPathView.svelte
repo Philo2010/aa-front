@@ -1,13 +1,19 @@
-<script>
+<script lang="ts">
   import { onMount, untrack } from 'svelte';
+  import type { AutoPath } from '$lib/types/robotpath';
 
-  /** @type {{ strokes?: Array<Array<{x: number, y: number}>>, fieldImage?: string, label?: string, fieldWidth?: number, fieldHeight?: number }} */
   let {
     strokes = [],
     fieldImage = '/feild2026.png',
     label = '',
     fieldWidth = 600,
     fieldHeight = 315,
+  }: {
+    strokes?: AutoPath;
+    fieldImage?: string;
+    label?: string;
+    fieldWidth?: number;
+    fieldHeight?: number;
   } = $props();
 
   let canvasEl = $state();

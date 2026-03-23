@@ -6,6 +6,7 @@
 	import { get } from '$lib/schema/sdk.gen';
 	import type { PitGetSend } from '$lib/schema/types.gen';
 	import { format_team } from '$lib/ParseTeam.svelte';
+	import RobotPathView from '$lib/RobotPathView.svelte';
 
 	if (!checkadmin()) {
 		goto('/notallowed');
@@ -85,7 +86,22 @@
 	<p>Team: {format_team(data.header.team, data.header.is_ab_team)}</p>
 	<p>Event Code: {data.header.event_code}</p>
 	<p>Created At: {data.header.created_at}</p>
+
 	<h3>Data</h3>
-	<p>Height: {data.pit.ExamplePit.height}</p>
-	<p>Width: {data.pit.ExamplePit.width}</p>
+	<p>Drivebase: {data.pit.RebuiltPit.is_swerve ? 'Swerve' : data.pit.RebuiltPit.gear_or_drivebase} {data.pit.RebuiltPit.is_swerve ? `(Gear: ${data.pit.RebuiltPit.gear_or_drivebase})` : ''}</p>
+	<p>Years of Driver Experience: {data.pit.RebuiltPit.years_of_driver_experience}</p>
+	<p>Tournament Goals: {data.pit.RebuiltPit.what_they_are_looking_from_the_tournament}</p>
+	<p>Has a Scouter: {data.pit.RebuiltPit.do_they_have_a_scouter}</p>
+	<p>Batteries on Hand: {data.pit.RebuiltPit.how_many_batteries_do_they_have_on_hand}</p>
+	<p>Willing to Play Defence: {data.pit.RebuiltPit.willing_to_play_defence}</p>
+	<p>Strategy: {data.pit.RebuiltPit.strategy}</p>
+	<p>Can Pass: {data.pit.RebuiltPit.can_pass}</p>
+	<p>Can Shoot: {data.pit.RebuiltPit.can_shoot}</p>
+	<p>Climb: {data.pit.RebuiltPit.climb}</p>
+
+	<h3>Auto Paths</h3>
+	{#each data.pit.RebuiltPit.auto_paths as path, i}
+		<h4>Path {i + 1}</h4>
+		<RobotPathView strokes={path} />
+	{/each}
 {/if}

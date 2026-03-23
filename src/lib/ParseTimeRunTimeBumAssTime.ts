@@ -5,7 +5,7 @@ import { format_team } from './ParseTeam.svelte';
 
 export type RebuiltGameFlatten = {
     id: number;
-	user: string;
+	users: Array<string>;
     team: string;
     _team_number: number;
     _is_ab_team: boolean;
@@ -66,7 +66,7 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
     });
     return {
         id: data.header.id,
-        user: data.header.user,
+        users: data.header.user,
         team: format_team(data.header.team, data.header.is_ab_team),
         _team_number: data.header.team,
         _is_ab_team: data.header.is_ab_team,

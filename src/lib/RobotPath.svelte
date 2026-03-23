@@ -1,13 +1,17 @@
-<script>
+<script lang="ts">
   import { onMount } from 'svelte';
+  import type { AutoPath, RobotPathData } from '$lib/types/robotpath';
 
-  // ── Props ──────────────────────────────────────────────────────────────────
-  /** @type {{ fieldImage?: string, label?: string, pathData?: object, onsave?: (data: object) => void }} */
   let {
     fieldImage = '/feild2026.png',
     label = '',
-    pathData = $bindable([]),
+    pathData = $bindable<AutoPath>([]),
     onsave,
+  }: {
+    fieldImage?: string;
+    label?: string;
+    pathData?: AutoPath;
+    onsave?: (data: RobotPathData) => void;
   } = $props();
 
   // ── State ──────────────────────────────────────────────────────────────────
