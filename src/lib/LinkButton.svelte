@@ -1,30 +1,30 @@
 <script>
-	import { push } from 'svelte-spa-router';
-
-	export let to;
-	export let replace = false;
-	export let disabled = false;
-
-	function navigate() {
-		if (disabled) return;
-
-		if (replace) {
-			history.replaceState({}, '', to);
-			push(to);
-		} else {
-			push(to);
-		}
-	}
+	let { to, disabled = false, children } = $props();
 </script>
 
-<button on:click={navigate} {disabled}>
-	<slot />
-</button>
+{#if disabled}
+	<button disabled>
+		{@render children()}
+	</button>
+{:else}
+	<a href={to}>
+		<button>
+			{@render children()}
+		</button>
+	</a>
+{/if}
 
 <style>
 	button {
 		padding: 0.6rem 1rem;
 		border-radius: 6px;
 		cursor: pointer;
+	}
+	button:disabled {
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+	a {
+		text-decoration: none;
 	}
 </style>

@@ -7,6 +7,8 @@ export type RebuiltGameFlatten = {
     id: number;
 	user: string;
     team: string;
+    _team_number: number;
+    _is_ab_team: boolean;
 	match_id: number;
 	set: number;
 	total_score: number;
@@ -28,7 +30,10 @@ export type RebuiltGameFlatten = {
 };
 export type RebuiltAvgFlatten = {
 	team: string;
-    total_score: number; 
+    _team_number: number;
+    _is_ab_team: boolean;
+    _event_code: string;
+    total_score: number;
     auto_score: number;
     teleop_score: number;
     defence_score: number;
@@ -63,6 +68,8 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
         id: data.header.id,
         user: data.header.user,
         team: format_team(data.header.team, data.header.is_ab_team),
+        _team_number: data.header.team,
+        _is_ab_team: data.header.is_ab_team,
         match_id: data.header.match_id,
         set: data.header.set,
         total_score: data.header.total_score,
@@ -85,11 +92,14 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
 }
 
 
-export function FlattenDataAvg(data: TeamAvg): RebuiltAvgFlatten {
+export function FlattenDataAvg(data: TeamAvg, event_code: string): RebuiltAvgFlatten {
     let team_format = format_team(data.team, data.is_ab_team);
 
     return {
         team: team_format,
+        _team_number: data.team,
+        _is_ab_team: data.is_ab_team,
+        _event_code: event_code,
         total_score: data.total_score,
         auto_score: data.auto_score,
         teleop_score: data.teleop_score,
