@@ -12,18 +12,20 @@
 	import NiceErrorTextBox from '$lib/NiceErrorTextBox.svelte';
 	import { parse_team } from '$lib/ParseTeam.svelte';
 	import type { GamesFull, Team } from '$lib/schema/types.gen';
-	import type { SearchParamData } from '$lib/schema/types.gen';
+	import type { SearchParamData, TournamentLevels, Stations } from '$lib/schema/types.gen';
 	import { get_event } from '$lib/GetCurrEvent';
 	import SelectTeam from '$lib/SelectTeam.svelte';
 	import { search } from '$lib/schema/sdk.gen';
 	import Table from '$lib/Table.svelte';
-    import { FlattenData, type RebuiltGameFlatten } from '$lib/ParseTimeRunTimeBumAssTime';
+	import { FlattenData, type RebuiltGameFlatten } from '$lib/ParseTimeRunTimeBumAssTime';
 
-	let to_add = $state('');
 	let team_string = $state<string>('');
 	let team_error: string | null = $state<null>(null);
-    let data = $state<RebuiltGameFlatten[] | null>(null);
+	let data = $state<RebuiltGameFlatten[] | null>(null);
 	let team = $state<Team | null>(null);
+	let submitting = $state(false);
+	let submitError = $state<string | null>(null);
+	let activeKeys = $state<string[]>([]);
 	let params: SearchParamData = $state({
 		user: null,
 		team: null,
@@ -36,18 +38,14 @@
 		station: null,
 		is_mvp: null,
 	});
+
 	$effect(() => {
 		if (!team_string) return;
-
 		const res = parse_team(team_string);
 		if (typeof res === 'string') {
 			team_error = res;
 		} else {
-			if (
-				!team ||
-				team.number !== res.team_number ||
-				team.is_ab_team !== res.is_ab_team
-			) {
+			if (!team || team.number !== res.team_number || team.is_ab_team !== res.is_ab_team) {
 				team = { number: res.team_number, is_ab_team: res.is_ab_team };
 			}
 			team_error = null;
@@ -59,36 +57,34 @@
 		return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 	}
 
-	function add() {
-		if (!to_add) return;
-		const key = to_add as keyof SearchParamData;
+	const availableKeys = $derived([
+		...Object.keys(params).filter(k => !activeKeys.includes(k) && k !== 'team' && k !== 'is_ab_team'),
+		...(team === null ? ['team'] : [])
+	]);
 
-		if (key === 'team') {
-			team = {
-				number: 0,
-				is_ab_team: false,
-			};
-			to_add = '';
+	function addKey(key: string) {
+		const k = key as keyof SearchParamData;
+		if (k === 'team') {
+			team = { number: 0, is_ab_team: false };
 			return;
 		}
-
-		if (key === 'is_ab_team' || key === 'is_mvp') {
-			(params[key] as boolean | null) = false;
-		} else if (
-			key === 'total_score' ||
-			key === 'match_id' ||
-			key === 'set' ||
-			key === 'station'
-		) {
-			(params[key] as number | null) = 0;
+		if (k === 'is_ab_team' || k === 'is_mvp') {
+			(params[k] as boolean | null) = false;
+		} else if (k === 'total_score' || k === 'match_id' || k === 'set') {
+			(params[k] as number | null) = 0;
+		} else if (k === 'station') {
+			params.station = stations[0];
+		} else if (k === 'tournament_level') {
+			params.tournament_level = tournamentLevels[0];
 		} else {
-			(params[key] as string | null) = '';
+			(params[k] as string | null) = '';
 		}
-
-		to_add = '';
+		activeKeys = [...activeKeys, k];
 	}
 
-	async function dispatch(): Promise<{ message: string; worked: boolean }> {
+	async function dispatch() {
+		submitting = true;
+		submitError = null;
 		if (team !== null) {
 			params.team = team.number;
 			params.is_ab_team = team.is_ab_team;
@@ -97,124 +93,360 @@
 			let event = await get_event();
 			params.event_code = event;
 		}
-
-		let res = await search({
-			body: params,
-		});
-
+		let res = await search({ body: params });
+		submitting = false;
 		if (res.error) {
-			return {
-				message: 'CODE: ' + res.response.status,
-				worked: false,
-			};
+			submitError = 'Error ' + res.response.status;
+		} else if (res.data.status === 'Error') {
+			submitError = res.data.message;
 		} else {
-			if (res.data.status === 'Error') {
-				return {
-					message: res.data.message,
-					worked: false,
-				};
-			} else {
-                let formated_data = res.data.message.map(x => FlattenData(x));
-                data = formated_data;
-				return {
-					message: 'Worked!',
-					worked: true,
-				};
-			}
+			data = res.data.message.map((x: any) => FlattenData(x));
 		}
 	}
 
 	function remove(key: keyof SearchParamData) {
 		(params[key] as any) = null;
+		activeKeys = activeKeys.filter(k => k !== key);
 	}
 
 	function isBooleanKey(key: string): key is 'is_ab_team' | 'is_mvp' {
 		return key === 'is_ab_team' || key === 'is_mvp';
 	}
 
-	function isNumberKey(
-		key: string,
-	): key is 'total_score' | 'match_id' | 'set' | 'station' {
-		return (
-			key === 'total_score' ||
-			key === 'match_id' ||
-			key === 'set' ||
-			key === 'station'
-		);
+	function isNumberKey(key: string): key is 'total_score' | 'match_id' | 'set' {
+		return key === 'total_score' || key === 'match_id' || key === 'set';
 	}
-</script>
-{#if data === null}
-<div>
-	<select bind:value={to_add}>
-		<option value="">Select a parameter...</option>
-		{#each Object.entries(params) as [key, value]}
-			{#if value === null && key !== 'team' && key !== 'is_ab_team'}
-				<option value={key}>{formatKey(key)}</option>
-			{/if}
-		{/each}
-		<option value="team">Team</option>
-	</select>
-	<button onclick={add}>Add...</button>
 
-	<div>
-		<h3>Current Params:</h3>
-		<ul>
+	const tournamentLevels: TournamentLevels[] = ['QualificationMatch', 'Quarterfinal', 'Semifinal', 'Final'];
+	const stations: Stations[] = ['Red1', 'Red2', 'Red3', 'Blue1', 'Blue2', 'Blue3'];
+
+	const hasParams = $derived(team !== null || activeKeys.length > 0);
+</script>
+
+{#if data === null}
+<div class="page">
+	<header class="page-header">
+		<div class="header-accent"></div>
+		<h1>SEARCH</h1>
+		<p class="subtitle">filter scouting records</p>
+	</header>
+
+	{#if availableKeys.length > 0}
+	<div class="filter-chips">
+		<span class="section-label">ADD FILTER</span>
+		<div class="chips-row">
+			{#each availableKeys as key}
+				<button class="chip" onclick={() => addKey(key)}>{formatKey(key).toUpperCase()}</button>
+			{/each}
+		</div>
+	</div>
+	{/if}
+
+	{#if hasParams}
+	<div class="params-card">
+		<div class="params-header">
+			<span class="section-label">ACTIVE FILTERS</span>
+		</div>
+		<ul class="params-list">
 			{#if team !== null}
-				Team: <NiceErrorTextBox
-					error={team_error}
-					bind:input={team_string}
-				></NiceErrorTextBox>
+				<li class="param-item">
+					<span class="param-key">TEAM</span>
+					<div class="param-value">
+						<NiceErrorTextBox error={team_error} bind:input={team_string} />
+					</div>
+					<button class="btn-remove" onclick={() => { team = null; team_string = ''; }}>✕</button>
+				</li>
 			{/if}
 			{#each Object.entries(params) as [key, value]}
-				{#if value !== null}
-					<li>
-						<label>
-							{formatKey(key)}:
+				{#if activeKeys.includes(key)}
+					<li class="param-item">
+						<span class="param-key">{formatKey(key).toUpperCase()}</span>
+						<div class="param-value">
 							{#if isBooleanKey(key)}
-								<input
-									type="checkbox"
-									bind:checked={params[key]}
-								/>
+								<input type="checkbox" bind:checked={params[key]} class="param-checkbox" />
 							{:else if isNumberKey(key)}
-								<input type="number" bind:value={params[key]} />
+								<input type="number" bind:value={params[key]} class="param-input" />
+							{:else if key === 'tournament_level'}
+								<select bind:value={params.tournament_level} class="param-enum-select">
+									{#each tournamentLevels as lvl}
+										<option value={lvl}>{lvl}</option>
+									{/each}
+								</select>
+							{:else if key === 'station'}
+								<select bind:value={params.station} class="param-enum-select">
+									{#each stations as s}
+										<option value={s}>{s}</option>
+									{/each}
+								</select>
 							{:else}
-								<input type="text" bind:value={params[key]} />
+								<input type="text" bind:value={params[key]} class="param-input" />
 							{/if}
-						</label>
-						<button
-							onclick={() => remove(key as keyof SearchParamData)}
-							>Remove</button
-						>
+						</div>
+						<button class="btn-remove" onclick={() => remove(key as keyof SearchParamData)}>✕</button>
 					</li>
 				{/if}
 			{/each}
 		</ul>
-
-        <button onclick={async () => {let res = await dispatch();console.log(res)}}>Submit</button>
 	</div>
+	{:else}
+	<p class="state-message">no filters added yet</p>
+	{/if}
+
+	{#if submitError}
+		<p class="error-msg">{submitError}</p>
+	{/if}
+
+	<button class="btn-primary" onclick={dispatch} disabled={submitting}>
+		{submitting ? 'SEARCHING…' : 'SEARCH'}
+	</button>
 </div>
 {:else}
-<Table ptData={data}></Table>
+<div class="page">
+	<header class="page-header">
+		<div class="header-accent"></div>
+		<h1>RESULTS</h1>
+		<p class="subtitle">search results</p>
+	</header>
+	<button class="btn-ghost" onclick={() => { data = null; }}>← BACK</button>
+	<div style="margin-top: 1rem;">
+		<Table ptData={data} />
+	</div>
+</div>
 {/if}
 
 <style>
-	li {
-		margin: 0.5rem 0;
+	.page {
+		max-width: 560px;
+		margin: 0 auto;
+		padding: 1.5rem 1rem 4rem;
+	}
+
+	.page-header {
+		position: relative;
+		padding-left: 1rem;
+		margin-bottom: 2rem;
+	}
+
+	.header-accent {
+		position: absolute;
+		left: 0;
+		top: 0.15em;
+		bottom: 0.15em;
+		width: 3px;
+		background: #3cb371;
+	}
+
+	h1 {
+		font-size: 1.75rem;
+		font-weight: 700;
+		letter-spacing: 0.18em;
+		margin: 0;
+		color: #fff;
+	}
+
+	.subtitle {
+		margin: 0.2rem 0 0;
+		font-size: 0.72rem;
+		letter-spacing: 0.12em;
+		color: rgba(255, 255, 255, 0.35);
+	}
+
+	.filter-chips {
+		margin-bottom: 1.25rem;
 		display: flex;
-		align-items: center;
+		flex-direction: column;
 		gap: 0.5rem;
 	}
 
-	label {
+	.chips-row {
 		display: flex;
-		align-items: center;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		gap: 6px;
 	}
 
-	input[type='text'],
-	input[type='number'] {
-		padding: 0.25rem;
-		border: 1px solid #ccc;
+	.chip {
+		background: transparent;
+		border: 1px dashed rgba(255, 255, 255, 0.18);
+		border-radius: 6px;
+		color: rgba(255, 255, 255, 0.50);
+		font-family: inherit;
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		padding: 0.4rem 0.7rem;
+		min-height: 36px;
+		cursor: pointer;
+		transition: color 0.15s, border-color 0.15s, background 0.15s;
+	}
+
+	.chip:hover {
+		color: #5dde8a;
+		border-color: rgba(60, 179, 113, 0.50);
+		background: rgba(60, 179, 113, 0.08);
+	}
+
+	.params-card {
+		background: #191919;
+		border: 1px solid rgba(255, 255, 255, 0.07);
+		border-radius: 10px;
+		overflow: hidden;
+		margin-bottom: 1.25rem;
+	}
+
+	.params-header {
+		padding: 0.5rem 1rem;
+		background: rgba(255, 255, 255, 0.03);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	.section-label {
+		font-size: 0.60rem;
+		font-weight: 700;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: rgba(255, 255, 255, 0.30);
+	}
+
+	.params-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.param-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.6rem 1rem;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.param-item:last-child {
+		border-bottom: none;
+	}
+
+	.param-key {
+		font-size: 0.60rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		color: rgba(255, 255, 255, 0.40);
+		min-width: 100px;
+	}
+
+	.param-value {
+		flex: 1;
+	}
+
+	.param-input {
+		width: 100%;
+		background: #111;
+		border: 1.5px solid rgba(255, 255, 255, 0.10);
+		border-radius: 6px;
+		color: #fff;
+		font-family: inherit;
+		font-size: 0.85rem;
+		padding: 0.35rem 0.6rem;
+		outline: none;
+	}
+
+	.param-input:focus {
+		border-color: rgba(60, 179, 113, 0.50);
+	}
+
+	.param-enum-select {
+		width: 100%;
+		background: #111;
+		border: 1.5px solid rgba(255, 255, 255, 0.10);
+		border-radius: 6px;
+		color: #fff;
+		font-family: inherit;
+		font-size: 0.85rem;
+		padding: 0.35rem 0.6rem;
+		outline: none;
+	}
+
+	.param-enum-select:focus {
+		border-color: rgba(60, 179, 113, 0.50);
+	}
+
+	.param-checkbox {
+		width: 18px;
+		height: 18px;
+		accent-color: #3cb371;
+	}
+
+	.btn-primary {
+		width: 100%;
+		min-height: 48px;
+		background: rgba(60, 179, 113, 0.15);
+		border: 1px solid rgba(60, 179, 113, 0.35);
+		border-radius: 8px;
+		color: #5dde8a;
+		font-family: inherit;
+		font-size: 0.85rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	.btn-primary:hover:not(:disabled) {
+		background: rgba(60, 179, 113, 0.25);
+	}
+
+	.btn-primary:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.btn-ghost {
+		background: #1a1a1a;
+		border: 1px solid rgba(255, 255, 255, 0.10);
+		border-radius: 6px;
+		color: rgba(255, 255, 255, 0.70);
+		font-family: inherit;
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.10em;
+		padding: 0.5rem 0.9rem;
+		cursor: pointer;
+		transition: border-color 0.15s;
+		white-space: nowrap;
+	}
+
+	.btn-ghost:hover {
+		border-color: rgba(255, 255, 255, 0.25);
+	}
+
+	.btn-remove {
+		background: transparent;
+		border: 1px solid rgba(255, 255, 255, 0.12);
 		border-radius: 4px;
+		color: rgba(255, 255, 255, 0.40);
+		font-size: 0.65rem;
+		padding: 2px 5px;
+		cursor: pointer;
+		transition: color 0.15s, border-color 0.15s;
+	}
+
+	.btn-remove:hover {
+		color: #e05555;
+		border-color: #e05555;
+	}
+
+	.state-message {
+		text-align: center;
+		padding: 3rem;
+		color: rgba(255, 255, 255, 0.30);
+		letter-spacing: 0.10em;
+		font-size: 0.85rem;
+		margin: 0 0 1.25rem;
+	}
+
+	.error-msg {
+		font-size: 0.80rem;
+		color: #e05555;
+		margin: 0 0 1rem;
+		letter-spacing: 0.06em;
 	}
 </style>
