@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import { resetPassword } from '$lib/schema/sdk.gen';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
 	import UserSelector from '$lib/UserSelector.svelte';
@@ -7,9 +8,12 @@
 	let user = $state<string>('');
 	let password = $state<string>('');
 	let stop = $derived(user === '');
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+
+	onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+		}
+	});
 
 	async function handlepass(): Promise<{ message: string; worked: boolean }> {
 		let res = await resetPassword({

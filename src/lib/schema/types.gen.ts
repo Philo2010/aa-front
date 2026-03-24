@@ -467,6 +467,7 @@ export type Team2 = {
     team: number;
     is_ab_team: boolean;
     scouters: Array<string>;
+    done: boolean;
 };
 
 export type SetEvent = {
@@ -476,6 +477,7 @@ export type SetEvent = {
 export type SubScoutForm = {
     og: string;
     replacement: string;
+    game_ids?: Array<number> | null;
 };
 
 export type ApiResultForArrayOfSnowScouterDataLeaderBoard = {
@@ -505,6 +507,7 @@ export type PitEvent = {
     is_ab_team: boolean;
     is_done: boolean;
     event_code: string;
+    user: string | null;
 };
 
 export type AssignScoutFormButCool = {

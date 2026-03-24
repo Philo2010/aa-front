@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { checkadmin } from '$lib/checkadminship';
+	import { onMount } from 'svelte';
 
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+	onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+		}
+	});
 
 	import NiceErrorTextBox from '$lib/NiceErrorTextBox.svelte';
 	import { parse_team } from '$lib/ParseTeam.svelte';
-	import type { GamesFull, TeamData } from '$lib/schema/types.gen';
+	import type { GamesFull, Team } from '$lib/schema/types.gen';
 	import type { SearchParamData } from '$lib/schema/types.gen';
 	import { get_event } from '$lib/GetCurrEvent';
 	import SelectTeam from '$lib/SelectTeam.svelte';
@@ -20,7 +23,7 @@
 	let team_string = $state<string>('');
 	let team_error: string | null = $state<null>(null);
     let data = $state<RebuiltGameFlatten[] | null>(null);
-	let team = $state<TeamData | null>(null);
+	let team = $state<Team | null>(null);
 	let params: SearchParamData = $state({
 		user: null,
 		team: null,
@@ -42,10 +45,10 @@
 		} else {
 			if (
 				!team ||
-				team.team !== res.team_number ||
+				team.number !== res.team_number ||
 				team.is_ab_team !== res.is_ab_team
 			) {
-				team = { team: res.team_number, is_ab_team: res.is_ab_team };
+				team = { number: res.team_number, is_ab_team: res.is_ab_team };
 			}
 			team_error = null;
 		}
@@ -62,7 +65,7 @@
 
 		if (key === 'team') {
 			team = {
-				team: 0,
+				number: 0,
 				is_ab_team: false,
 			};
 			to_add = '';
@@ -87,7 +90,7 @@
 
 	async function dispatch(): Promise<{ message: string; worked: boolean }> {
 		if (team !== null) {
-			params.team = team.team;
+			params.team = team.number;
 			params.is_ab_team = team.is_ab_team;
 		}
 		if (params.event_code === null) {

@@ -1,36 +1,55 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
 	import { checkadmin } from '$lib/checkadminship';
 	import { subScout, getAllSnowgrave } from '$lib/schema/sdk.gen';
 	import type { Game } from '$lib/schema/types.gen';
 	import UserSelector from '$lib/UserSelector.svelte';
+	import DualRangeSlider from '$lib/DualRangeSlider.svelte';
 	import { format_team } from '$lib/ParseTeam.svelte';
 
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+	onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+		}
+	});
 
 	let og = $state<string>('');
 	let replacement = $state<string>('');
 	let all_games = $state<string | Array<Game>>('loading');
-	let currentIndex = $state<number>(0);
+	let beginValue = $state<number>(1);
+	let endValue = $state<number>(1);
 
 	let filteredGames = $derived.by(() => {
 		if (typeof all_games === 'string' || !og) return [];
 		return all_games.filter((game) =>
 			game.teams.some((team) =>
-				team.scouters.some((s) => s === og)
+				!team.done && team.scouters.some((s) => s === og)
 			)
 		);
 	});
 
-	let currentGame = $derived(filteredGames.length > 0 ? filteredGames[currentIndex] : null);
+	let selectedGames = $derived(filteredGames.slice(beginValue - 1, endValue));
 
+	// Reset range only when og changes
+	let prevOg = $state<string>('');
 	$effect(() => {
-		// Reset index when og changes
-		og;
-		currentIndex = 0;
+		if (og !== prevOg) {
+			prevOg = og;
+			beginValue = 1;
+			endValue = filteredGames.length || 1;
+		}
+	});
+
+	// Clamp endValue when filteredGames loads/changes length
+	$effect(() => {
+		if (filteredGames.length > 0 && endValue < 1) {
+			endValue = filteredGames.length;
+		}
+		if (endValue > filteredGames.length) {
+			endValue = filteredGames.length || 1;
+		}
 	});
 
 	$effect(() => {
@@ -54,15 +73,7 @@
 		})();
 	});
 
-	function prev() {
-		if (currentIndex > 0) currentIndex--;
-	}
-
-	function next() {
-		if (currentIndex < filteredGames.length - 1) currentIndex++;
-	}
-
-	async function handleEvent(): Promise<{
+	async function doSub(gameIds: number[] | null): Promise<{
 		message: string;
 		worked: boolean;
 	}> {
@@ -70,6 +81,7 @@
 			body: {
 				og: og,
 				replacement: replacement,
+				game_ids: gameIds,
 			},
 		});
 
@@ -92,6 +104,14 @@
 			}
 		}
 	}
+
+	async function handleRange() {
+		return doSub(selectedGames.map((g) => g.id));
+	}
+
+	async function handleAll() {
+		return doSub(null);
+	}
 </script>
 
 <h1>Sub Scout</h1>
@@ -108,37 +128,31 @@
 		{:else if filteredGames.length === 0}
 			<p class="muted">No pending assignments for this scouter.</p>
 		{:else}
-			<div class="slider-header">
-				<h3>Assignments ({filteredGames.length} games)</h3>
-				<div class="slider-controls">
-					<button type="button" onclick={prev} disabled={currentIndex === 0}>&lt;</button>
-					<span>{currentIndex + 1} / {filteredGames.length}</span>
-					<button type="button" onclick={next} disabled={currentIndex >= filteredGames.length - 1}>&gt;</button>
-				</div>
-			</div>
-
-			<input
-				type="range"
-				min="0"
-				max={filteredGames.length - 1}
-				bind:value={currentIndex}
-				class="slider"
+			<h3>Select Game Range ({selectedGames.length} of {filteredGames.length} games)</h3>
+			<DualRangeSlider
+				min={1}
+				max={filteredGames.length}
+				bind:beginValue
+				bind:endValue
+				games={filteredGames}
 			/>
 
-			{#if currentGame}
-				<div class="game-box">
-					<p><strong>Match {currentGame.match_id}</strong> (Set {currentGame.set})</p>
-					<p>{currentGame.tournament_level} - {currentGame.event_code}</p>
-					{#each currentGame.teams as team}
-						{#if team.scouters.includes(og)}
-							<div class="team-highlight">
-								<span>{format_team(team.team, team.is_ab_team)} ({team.station})</span>
-								<span class="assigned">Assigned: {og}</span>
-							</div>
-						{/if}
-					{/each}
-				</div>
-			{/if}
+			<div class="game-list">
+				{#each selectedGames as game}
+					<div class="game-box">
+						<p><strong>Match {game.match_id}</strong> (Set {game.set})</p>
+						<p>{game.tournament_level} - {game.event_code}</p>
+						{#each game.teams as team}
+							{#if team.scouters.includes(og)}
+								<div class="team-highlight">
+									<span>{format_team(team.team, team.is_ab_team)} ({team.station})</span>
+									<span class="assigned">Assigned: {og}</span>
+								</div>
+							{/if}
+						{/each}
+					</div>
+				{/each}
+			</div>
 		{/if}
 	</div>
 {/if}
@@ -148,8 +162,8 @@
 	<UserSelector bind:value={replacement} />
 </div>
 
-<FormWithLoading dispatch={handleEvent}>
-	<p class="warn">This will replace <strong>all</strong> pending assignments for {og || '...'} with {replacement || '...'}.</p>
+<FormWithLoading dispatch={handleRange}>
+	<p class="warn">This will replace {selectedGames.length} game(s) ({beginValue}–{endValue}) for {og || '...'} with {replacement || '...'}.</p>
 </FormWithLoading>
 
 <style>
@@ -157,24 +171,12 @@
 		margin: 15px 0;
 	}
 
-	.slider-header {
+	.game-list {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.slider-controls {
-		display: flex;
-		gap: 10px;
-		align-items: center;
-	}
-
-	.slider-controls button {
-		min-width: 36px;
-	}
-
-	.slider {
-		width: 100%;
+		flex-direction: column;
+		gap: 8px;
+		max-height: 400px;
+		overflow-y: auto;
 		margin: 10px 0;
 	}
 

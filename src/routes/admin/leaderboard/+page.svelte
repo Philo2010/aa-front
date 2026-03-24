@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { checkadmin } from '$lib/checkadminship';
+	import { onMount } from 'svelte';
 	import { getLeaderboard } from '$lib/schema/sdk.gen';
 	import type { SnowScouterDataLeaderBoard } from '$lib/schema/types.gen';
 
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+	onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+		}
+	});
 
 	let data = $state<SnowScouterDataLeaderBoard[]>();
 	let loading = $state(true);

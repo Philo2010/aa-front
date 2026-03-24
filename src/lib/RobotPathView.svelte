@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
-  import type { AutoPath } from '$lib/types/robotpath';
+  import type { PathPoint } from '$lib/schema/types.gen';
 
   let {
     strokes = [],
@@ -9,15 +9,15 @@
     fieldWidth = 600,
     fieldHeight = 315,
   }: {
-    strokes?: AutoPath;
+    strokes?: PathPoint[][];
     fieldImage?: string;
     label?: string;
     fieldWidth?: number;
     fieldHeight?: number;
   } = $props();
 
-  let canvasEl = $state();
-  let paperScope = $state();
+  let canvasEl: HTMLCanvasElement = $state() as any;
+  let paperScope: any = $state();
   let isPlaying = $state(false);
 
   let drawnPaths = [];
@@ -182,6 +182,7 @@
     <div class="spacer"></div>
 
     <button
+      type="button"
       class="btn accent"
       onclick={startPlayback}
       disabled={isPlaying || !hasDrawnPaths}
@@ -190,17 +191,19 @@
     </button>
 
     {#if isPlaying}
-      <button class="btn" onclick={stopPlayback}>■ Stop</button>
+      <button type="button" class="btn" onclick={stopPlayback}>■ Stop</button>
     {/if}
   </div>
 
-  <canvas
-    bind:this={canvasEl}
-    width={fieldWidth}
-    height={fieldHeight}
-    data-paper-resize="false"
-    class="field-canvas"
-  />
+  <div class="canvas-scaler">
+    <canvas
+      bind:this={canvasEl}
+      width={fieldWidth}
+      height={fieldHeight}
+      data-paper-resize="false"
+      class="field-canvas"
+    ></canvas>
+  </div>
 
   <p class="hint">
     {#if isPlaying}
@@ -217,6 +220,9 @@
     flex-direction: column;
     gap: 8px;
     font-family: 'DM Mono', monospace, sans-serif;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .toolbar {
@@ -262,13 +268,20 @@
   .btn.accent { border-color: #ff3d3d; color: #ff3d3d; }
   .btn.accent:hover:not(:disabled) { background: #2a1010; }
 
+  .canvas-scaler {
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 600 / 315;
+    overflow: hidden;
+  }
+
   .field-canvas {
     display: block;
     border-radius: 6px;
     border: 1px solid #2a2a2a;
     background: #111;
-    width: 600px;
-    height: 315px;
+    width: 100%;
+    height: 100%;
     touch-action: none;
   }
 

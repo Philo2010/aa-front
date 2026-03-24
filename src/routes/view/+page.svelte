@@ -1,11 +1,14 @@
 <script>
 	import { goto } from '$app/navigation';
 	import { checkadmin } from '$lib/checkadminship';
+	import { onMount } from 'svelte';
 	import LinkButton from '$lib/LinkButton.svelte';
 
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+	onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+		}
+	});
 </script>
 
 <main>

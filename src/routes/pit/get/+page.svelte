@@ -102,6 +102,6 @@
 	<h3>Auto Paths</h3>
 	{#each data.pit.RebuiltPit.auto_paths as path, i}
 		<h4>Path {i + 1}</h4>
-		<RobotPathView strokes={path} />
+		<RobotPathView strokes={path as any} />
 	{/each}
 {/if}

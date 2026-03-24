@@ -1,22 +1,20 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type { AutoPath, RobotPathData } from '$lib/types/robotpath';
+  import { onMount, untrack } from 'svelte';
+  import type { PathPoint } from '$lib/schema/types.gen';
 
   let {
     fieldImage = '/feild2026.png',
     label = '',
-    pathData = $bindable<AutoPath>([]),
-    onsave,
+    pathData = $bindable<PathPoint[][]>([]),
   }: {
     fieldImage?: string;
     label?: string;
-    pathData?: AutoPath;
-    onsave?: (data: RobotPathData) => void;
+    pathData?: PathPoint[][];
   } = $props();
 
   // ── State ──────────────────────────────────────────────────────────────────
-  let canvasEl = $state();
-  let paperScope = $state();
+  let canvasEl: HTMLCanvasElement = $state() as any;
+  let paperScope: any = $state();
   let mode = $state('draw');        // 'draw' | 'playback'
   let isPlaying = $state(false);
   let hasPaths = $state(false);
@@ -68,6 +66,24 @@
       if (rafId) cancelAnimationFrame(rafId);
       paperScope?.remove();
     };
+  });
+
+  // ── React to external pathData reset ───────────────────────────────────────
+  $effect(() => {
+    // Only track pathData.length — run cleanup in untrack to avoid loops
+    if (pathData.length === 0) {
+      untrack(() => {
+        if (!hasPaths || !paperScope) return;
+        stopPlayback();
+        allPaths.forEach(p => p.remove());
+        allPaths = [];
+        playbackDot?.remove();
+        playbackDot = null;
+        hasPaths = false;
+        mode = 'draw';
+        paperScope.view.update();
+      });
+    }
   });
 
   // ── Draw tool ──────────────────────────────────────────────────────────────
@@ -210,20 +226,6 @@
     );
   }
 
-  function serialize() {
-    return {
-      label,
-      fieldWidth: FIELD_W,
-      fieldHeight: FIELD_H,
-      strokes: serializeStrokes(),
-      createdAt: new Date().toISOString(),
-    };
-  }
-
-  function handleSave() {
-    if (allPaths.length === 0) return;
-    onsave?.(serialize());
-  }
 </script>
 
 
@@ -239,6 +241,7 @@
     <div class="spacer"></div>
 
     <button
+      type="button"
       class="btn {mode === 'draw' ? 'active' : ''}"
       onclick={() => setMode('draw')}
       disabled={isPlaying}
@@ -247,6 +250,7 @@
     </button>
 
     <button
+      type="button"
       class="btn accent"
       onclick={startPlayback}
       disabled={isPlaying || !hasPaths}
@@ -255,30 +259,24 @@
     </button>
 
     {#if isPlaying}
-      <button class="btn" onclick={stopPlayback}>■ Stop</button>
+      <button type="button" class="btn" onclick={stopPlayback}>■ Stop</button>
     {/if}
 
-    <button class="btn danger" onclick={clearAll} disabled={isPlaying}>
+    <button type="button" class="btn danger" onclick={clearAll} disabled={isPlaying}>
       Clear
-    </button>
-
-    <button
-      class="btn submit"
-      onclick={handleSave}
-      disabled={isPlaying || !hasPaths}
-    >
-      Save
     </button>
   </div>
 
   <!-- Canvas -->
-  <canvas
-    bind:this={canvasEl}
-    width={FIELD_W}
-    height={FIELD_H}
-    data-paper-resize="false"
-    class="field-canvas {mode === 'draw' ? 'drawing' : ''}"
-  />
+  <div class="canvas-scaler">
+    <canvas
+      bind:this={canvasEl}
+      width={FIELD_W}
+      height={FIELD_H}
+      data-paper-resize="false"
+      class="field-canvas {mode === 'draw' ? 'drawing' : ''}"
+    ></canvas>
+  </div>
 
   <p class="hint">
     {#if mode === 'draw'}
@@ -295,6 +293,9 @@
     flex-direction: column;
     gap: 8px;
     font-family: 'DM Mono', monospace, sans-serif;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .toolbar {
@@ -341,16 +342,20 @@
   .btn.accent { border-color: #ff3d3d; color: #ff3d3d; }
   .btn.accent:hover:not(:disabled) { background: #2a1010; }
   .btn.danger:hover:not(:disabled) { background: #1e1010; color: #ff6b6b; }
-  .btn.submit { border-color: #3dffb0; color: #3dffb0; }
-  .btn.submit:hover:not(:disabled) { background: #0a2a1e; }
+  .canvas-scaler {
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 600 / 315;
+    overflow: hidden;
+  }
 
   .field-canvas {
     display: block;
     border-radius: 6px;
     border: 1px solid #2a2a2a;
     background: #111;
-    width: 600px;
-    height: 315px;
+    width: 100%;
+    height: 100%;
     touch-action: none;
   }
 

@@ -1,80 +1,42 @@
 <script lang="ts">
-	let { ptData } = $props();
+	import { PowerTable } from '@muonw/powertable';
 
-	function visibleKeys(row: Record<string, any>): string[] {
-		return Object.keys(row).filter(k => !k.startsWith('_'));
+	import '@muonw/powertable/styles/power-table.scss';
+	import '@muonw/powertable/styles/power-table-mascara.scss';
+
+	let { ptData }: { ptData: Record<string, any>[] } = $props();
+
+	function hasPitLink(data: Record<string, any>[]): boolean {
+		return data.length > 0 && '_team_number' in data[0] && '_is_ab_team' in data[0];
 	}
 
-	function pitGetUrl(row: Record<string, any>): string | null {
-		if ('_team_number' in row && '_is_ab_team' in row) {
+	function buildTableData(data: Record<string, any>[]): Record<string, any>[] {
+		if (!hasPitLink(data)) return data;
+
+		return data.map(row => {
 			const event = row.event_code ?? row._event_code ?? '';
-			return `/pit/get?team=${row._team_number}&is_ab_team=${row._is_ab_team}&event_code=${event}`;
-		}
-		return null;
+			const href = `/pit/get?team=${row._team_number}&is_ab_team=${row._is_ab_team}&event_code=${event}`;
+			return {
+				...row,
+				team: `<a href="${href}">${row.team}</a>`,
+			};
+		});
 	}
+
+	function buildInstructs(data: Record<string, any>[]) {
+		if (!hasPitLink(data) || data.length === 0) return undefined;
+
+		return Object.keys(data[0])
+			.filter(k => !k.startsWith('_'))
+			.map(k => k === 'team' ? { key: k, parseAs: 'unsafe-html' as const } : { key: k });
+	}
+
+	let tableData = $derived(buildTableData(ptData));
+	let ptInstructs = $derived(buildInstructs(ptData));
 </script>
 
-{#if ptData && ptData.length > 0}
-	<div class="table-wrap">
-		<table>
-			<thead>
-				<tr>
-					{#each visibleKeys(ptData[0]) as key}
-						<th>{key.replace(/_/g, ' ')}</th>
-					{/each}
-				</tr>
-			</thead>
-			<tbody>
-				{#each ptData as row}
-					<tr>
-						{#each visibleKeys(row) as key}
-							<td>
-								{#if key === 'team'}
-									{@const href = pitGetUrl(row)}
-									{#if href}
-										<a href={href}>{row[key]}</a>
-									{:else}
-										{row[key]}
-									{/if}
-								{:else}
-									{row[key]}
-								{/if}
-							</td>
-						{/each}
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
+{#if ptInstructs}
+	<PowerTable ptData={tableData} {ptInstructs} />
 {:else}
-	<p>No data</p>
+	<PowerTable ptData={tableData} />
 {/if}
-
-<style>
-	.table-wrap {
-		overflow-x: auto;
-	}
-	table {
-		border-collapse: collapse;
-		width: 100%;
-		font-size: 0.85rem;
-	}
-	th, td {
-		border: 1px solid #333;
-		padding: 6px 10px;
-		text-align: left;
-		white-space: nowrap;
-	}
-	th {
-		background: #1a1a1a;
-		text-transform: capitalize;
-		position: sticky;
-		top: 0;
-	}
-	tr:nth-child(even) {
-		background: #1e1e1e;
-	}
-	a {
-		color: #7ecfff;
-	}
-</style>

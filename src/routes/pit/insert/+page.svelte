@@ -1,16 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
 	import { insert } from '$lib/schema/sdk.gen';
 	import type { ClimbState, Drivebase } from '$lib/schema/types.gen';
-	import type { AutoPath } from '$lib/types/robotpath';
+	import type { PathPoint } from '$lib/schema/types.gen';
 	import RobotPath from '$lib/RobotPath.svelte';
 
 	let is_swerve = $state<boolean>(false);
 	let gear_or_drivetype = $state<string>('');
-	let auto_paths = $state<AutoPath[]>([]);
-	let current_path = $state<AutoPath>([]);
+	let auto_paths = $state<PathPoint[][][]>([]);
+	let current_path = $state<PathPoint[][]>([]);
 	let years_of_driver_experience = $state<number>(0);
 	let what_they_are_looking_from_the_tournament = $state<string>('');
 	let do_they_have_a_scouter = $state<boolean>(false);
@@ -24,16 +25,18 @@
 	let team = $state<string>('');
 	let insert_id: number;
 
-	const params = $page.url.searchParams;
-	if (params.has('id') && params.has('team')) {
-		insert_id = Number(params.get('id'));
-		team = params.get('team') ?? '';
-		if (isNaN(insert_id)) {
+	onMount(() => {
+		const params = $page.url.searchParams;
+		if (params.has('id') && params.has('team')) {
+			insert_id = Number(params.get('id'));
+			team = params.get('team') ?? '';
+			if (isNaN(insert_id)) {
+				goto('/notallowed');
+			}
+		} else {
 			goto('/notallowed');
 		}
-	} else {
-		goto('/notallowed');
-	}
+	});
 
 	function addPath() {
 		if (current_path.length > 0) {
@@ -86,7 +89,7 @@
 				worked: false,
 			};
 		} else {
-			if ((res.data.status = 'Error')) {
+			if (res.data.status === 'Error') {
 				return {
 					message: String(res.data.message),
 					worked: false,
@@ -192,3 +195,54 @@
 		<option value="Stage3">Stage 3</option>
 	</select>
 </FormWithLoading>
+
+<style>
+	h1 {
+		font-size: 1.3rem;
+		word-break: break-word;
+	}
+
+	h2 {
+		font-size: 1.1rem;
+		margin-top: 1.2rem;
+		margin-bottom: 0.3rem;
+	}
+
+	h3 {
+		font-size: 0.95rem;
+		margin-top: 0.5rem;
+		margin-bottom: 0.3rem;
+	}
+
+	input[type='text'],
+	input[type='number'],
+	select {
+		width: 100%;
+		max-width: 400px;
+		padding: 10px 12px;
+		font-size: 1rem;
+		border: 1px solid #555;
+		border-radius: 6px;
+		background: #1a1a1a;
+		color: #fff;
+		box-sizing: border-box;
+	}
+
+	button {
+		padding: 10px 20px;
+		font-size: 1rem;
+		border-radius: 6px;
+		min-height: 44px;
+		touch-action: manipulation;
+	}
+
+	button.active {
+		background-color: #3cb371;
+	}
+
+	select {
+		min-height: 44px;
+	}
+
+
+</style>

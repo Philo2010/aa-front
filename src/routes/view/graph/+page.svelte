@@ -1,17 +1,20 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { checkadmin } from '$lib/checkadminship';
+	import { onMount } from 'svelte';
 
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+	onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+		}
+	});
 
 	import FormWithLoading from "$lib/FormWithLoading.svelte";
 	import { get_event } from "$lib/GetCurrEvent";
 	import NiceErrorTextBox from "$lib/NiceErrorTextBox.svelte";
 	import { parse_team } from "$lib/ParseTeam.svelte";
     import { graph } from "$lib/schema/sdk.gen";
-    import type { GraphData, TeamData } from "$lib/schema/types.gen";
+    import type { GraphData, Team } from "$lib/schema/types.gen";
     import LineGraph from "$lib/LineGraph.svelte";
     import {generateGraphData} from "$lib/ChudMasterGoonSoft";
     import type {GraphDataF} from "$lib/ChudMasterGoonSoft";
@@ -27,12 +30,12 @@
     let final_data = $state<GraphDataF | null>(null);
 
     $effect(() => {
-        done = teamErrors.every(element => element !== null);
+        done = teams_string.length === 0 || teamErrors.some(element => element !== null);
     })
 
     async function dispatch(): Promise<{ message: string; worked: boolean }>  {
         let event = await get_event();
-        let all_teams: Array<TeamData> = new Array();
+        let all_teams: Array<Team> = new Array();
         teams_string.forEach((element) => {
             let type = parse_team(element);
             if (typeof type == 'string') {
@@ -41,9 +44,9 @@
                     worked: false
                 };
             } else {
-                let final: TeamData = {
+                let final: Team = {
                     is_ab_team: type.is_ab_team,
-                    team: type.team_number
+                    number: type.team_number
                 };
                 all_teams.push(final);
             }

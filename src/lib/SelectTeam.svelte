@@ -1,18 +1,16 @@
 <script lang="ts">
 	import NiceErrorTextBox from './NiceErrorTextBox.svelte';
 	import { format_team, parse_team } from './ParseTeam.svelte';
-	import type { TeamData } from './schema/types.gen';
+	import type { Team } from './schema/types.gen';
 	import { getTeamsFromGame } from './schema/sdk.gen';
-	import { onMount } from 'svelte';
-	import { is } from 'zod/locales';
 
 	let {
 		game_id,
 		value = $bindable(),
 		is_blue,
-	} = $props<{ game_id: number; value?: TeamData; is_blue: boolean }>();
+	} = $props<{ game_id: number; value?: Team; is_blue: boolean }>();
 
-	let teams: Array<TeamData> | undefined = $state();
+	let teams: Array<Team> | undefined = $state();
 
 	$effect(() => {
 		if (!Number.isInteger(game_id) || game_id <= 0) return;
@@ -49,7 +47,7 @@
 			error = res;
 		} else {
 			error = null;
-			value = res;
+			value = { number: res.team_number, is_ab_team: res.is_ab_team };
 		}
 	});
 </script>
@@ -60,7 +58,7 @@
 	<select bind:value>
 		{#each teams as team}
 			<option value={team}
-				>{format_team(team.team, team.is_ab_team)}</option
+				>{format_team(team.number, team.is_ab_team)}</option
 			>
 		{/each}
 	</select>

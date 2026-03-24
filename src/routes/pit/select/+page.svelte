@@ -9,7 +9,7 @@
 		(async () => {
 			let res = await getForScout();
 			if (res.error) {
-				data = 'Error code: ' + data;
+				data = 'Error code: ' + res.response.status;
 			} else if (res.data.status === 'Error') {
 				data = 'Error from server: ' + res.data.message;
 			} else {

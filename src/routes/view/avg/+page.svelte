@@ -1,17 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { checkadmin } from '$lib/checkadminship';
-
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+	import { onMount } from "svelte";
 
 	import { get_event } from "$lib/GetCurrEvent";
 	import { FlattenDataAvg, type RebuiltAvgFlatten } from "$lib/ParseTimeRunTimeBumAssTime";
 	import { averages } from "$lib/schema/sdk.gen";
 	import type { TeamAvg } from "$lib/schema/types.gen";
 	import Table from "$lib/Table.svelte";
-	import { onMount } from "svelte";
 
     let data = $state<string | RebuiltAvgFlatten[]>("Loading");
 
@@ -36,6 +32,10 @@
     }
 
     onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+			return;
+		}
 		(async () => {await dispatch();})();
 	});
 </script>

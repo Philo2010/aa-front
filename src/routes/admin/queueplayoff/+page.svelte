@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
 	import { queuePlayoff } from '$lib/schema/sdk.gen';
 	import { checkadmin } from '$lib/checkadminship';
 	let event_code = $state('');
-	if (!checkadmin()) {
-		goto('/notallowed');
-	}
+
+	onMount(() => {
+		if (!checkadmin()) {
+			goto('/notallowed');
+		}
+	});
 
 	async function handleLogin(): Promise<{
 		message: string;

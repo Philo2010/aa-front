@@ -1,4 +1,4 @@
-import { format_team, type TeamData } from "../lib/ParseTeam.svelte";
+import { format_team } from "../lib/ParseTeam.svelte";
 import type { GraphTeam } from "./schema/types.gen";
 import type { ChartConfiguration, ChartDataset, ChartData } from 'chart.js';
 
@@ -28,7 +28,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         : [];
 
     const datasetsTotal: ChartDataset<'line'>[] = teams.map((team, index) => ({
-        label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Total`,
+        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} Total`,
         data: team.data.map(item => item.total_score),
         fill: false,
         borderColor: generateColor(index),
@@ -36,7 +36,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
     }));
 
     const datasetsAuto: ChartDataset<'line'>[] = teams.map((team, index) => ({
-        label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Auto`,
+        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} Auto`,
         data: team.data.map(item => item.auto_score),
         fill: false,
         borderColor: generateColor(index),
@@ -44,7 +44,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
     }));
 
     const datasetsTeleop: ChartDataset<'line'>[] = teams.map((team, index) => ({
-        label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Teleop`,
+        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} Teleop`,
         data: team.data.map(item => item.teleop_score),
         fill: false,
         borderColor: generateColor(index),
@@ -52,7 +52,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
     }));
 
     const datasetsDefense: ChartDataset<'line'>[] = teams.map((team, index) => ({
-        label: `Team ${format_team(team.team.team, team.team.is_ab_team)} Defense`,
+        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} Defense`,
         data: team.data.map(item => item.defence),
         fill: false,
         borderColor: generateColor(index),

@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
-	import type { Insert2, ClimbState } from '$lib/schema/types.gen';
+	import type { Insert2 } from '$lib/schema/types.gen';
 	import { scoutEdit, scoutInsert } from '$lib/schema/sdk.gen';
 	import StarRating from '$lib/StarRating.svelte';
 	import FuelWidget from '$lib/FuelWidget.svelte';
@@ -11,9 +11,10 @@
 	let stop = $state<boolean>(true);
 	let snowgrave_insert_id: number;
 	let edit = $state<boolean>(false);
+	let done = $state<boolean>(false);
 	let defence = $state<number>(0);
 	let comment = $state<string>('');
-	let scout_form: Insert2 = $state<Insert2>({
+	let scout_form = $state<Insert2>({
 		defence_main: false,
 		fuel_shoot_teleop: 0,
 		fuel_pass_teleop: 0,
@@ -25,231 +26,561 @@
 	});
 
 	$effect(() => {
-		if (comment === '') {
-			stop = true;
-		} else {
-			stop = false;
-		}
+		stop = comment.trim() === '';
 	});
 
-	enum States {
-		Auto = 0,
-		Teleop = 1,
-		Endgame = 2,
-	}
-
-	let form_state = $state<States>(States.Auto);
+	const Steps = ['Auto', 'Teleop', 'Endgame'] as const;
+	let step = $state(0);
 
 	const params = $page.url.searchParams;
 
-	if (params.has('edit')) {
-		if (params.get('edit') === 'true') {
-			edit = true;
-		}
-	}
+	if (params.has('edit') && params.get('edit') === 'true') edit = true;
 
 	if (params.has('id') && params.has('team')) {
 		snowgrave_insert_id = Number(params.get('id'));
 		team = params.get('team') ?? '';
-		if (isNaN(snowgrave_insert_id)) {
-			goto('/notallowed');
-		}
+		if (isNaN(snowgrave_insert_id)) goto('/notallowed');
 	} else {
 		goto('/notallowed');
 	}
-
-	$inspect(edit);
 
 	async function dispatch(): Promise<{ message: string; worked: boolean }> {
 		let res = await scoutInsert({
 			body: {
 				snowgrave_scout_id: snowgrave_insert_id,
-				defence: defence,
-				game: {
-					RebuiltGame: {
-						defence_main: scout_form.defence_main,
-						fuel_shoot_teleop: scout_form.fuel_shoot_teleop,
-						fuel_pass_teleop: scout_form.fuel_pass_teleop,
-						fuel_shoot_auto: scout_form.fuel_shoot_auto,
-						fuel_pass_auto: scout_form.fuel_pass_auto,
-						climb_end: scout_form.climb_end,
-						climb_auto: scout_form.climb_auto,
-						beach_on_bump: scout_form.beach_on_bump
-					}
-				},
-				comment: comment
+				defence,
+				game: { RebuiltGame: { ...scout_form } },
+				comment
 			}
 		});
-
-		if (res.error) {
-			return {
-				message: 'HTTP CODE: ' + res.response.status,
-				worked: false,
-			};
-		} else {
-			if (res.data.status === 'Error') {
-				return {
-					message: 'Message send from server: ' + res.data.message,
-					worked: false,
-				};
-			} else {
-				return {
-					message: res.data.message,
-					worked: true,
-				};
-			}
-		}
+		if (res.error) return { message: 'HTTP ' + res.response.status, worked: false };
+		if (res.data.status === 'Error') return { message: res.data.message, worked: false };
+		done = true;
+		return { message: res.data.message, worked: true };
 	}
 
 	async function handleEdit(): Promise<{ message: string; worked: boolean }> {
 		let res = await scoutEdit({
 			body: {
 				snowgrave_scout_id: snowgrave_insert_id,
-				defence: defence,
-				comment: comment,
-				game: {
-					RebuiltGame: {
-						defence_main: scout_form.defence_main,
-						fuel_shoot_teleop: scout_form.fuel_shoot_teleop,
-						fuel_pass_teleop: scout_form.fuel_pass_teleop,
-						fuel_shoot_auto: scout_form.fuel_shoot_auto,
-						fuel_pass_auto: scout_form.fuel_pass_auto,
-						climb_end: scout_form.climb_end,
-						climb_auto: scout_form.climb_auto,
-						beach_on_bump: scout_form.beach_on_bump
-					}
-				},
-			},
-		});
-
-		if (res.error) {
-			return {
-				message: String(res.response.status),
-				worked: false,
-			};
-		} else {
-			if ((res.data.status = 'Error')) {
-				return {
-					message: String(res.data.message),
-					worked: false,
-				};
-			} else {
-				return {
-					message: String(res.data.message),
-					worked: true,
-				};
+				defence,
+				comment,
+				game: { RebuiltGame: { ...scout_form } }
 			}
-		}
+		});
+		if (res.error) return { message: String(res.response.status), worked: false };
+		if (res.data.status === 'Error') return { message: String(res.data.message), worked: false };
+		done = true;
+		return { message: String(res.data.message), worked: true };
 	}
 </script>
 
-<FormWithLoading
-	dispatch={edit ? handleEdit : dispatch}
-	hide_sub={form_state != 2}
-	{stop}
->
-	{#if form_state === States.Auto}
-		<h1>Auto</h1>
-		<h2>Shoot</h2>
-		<FuelWidget bind:count={scout_form.fuel_shoot_auto}></FuelWidget>
-		<h2>Pass</h2>
-		<FuelWidget bind:count={scout_form.fuel_pass_auto}></FuelWidget>
+{#if done}
+	<div class="done-screen">
+		<div class="done-content">
+			<div class="done-icon">✓</div>
+			<div class="done-title">{edit ? 'Redo submitted' : 'Submitted'}</div>
+			<div class="done-team">Team {team}</div>
+			<a href="/scout/select" class="done-back">← Back to assignments</a>
+		</div>
+	</div>
+{:else}
 
-		<h2>Climb Auto</h2>
-		<select bind:value={scout_form.climb_auto}>
-			<option value={'Nothing'}>Nothing</option>
-			<option value={'Stage1'}>Stage 1</option>
-			<option value={'Stage2'}>Stage 2</option>
-			<option value={'Stage3'}>Stage 3</option>
-		</select>
-	{:else if form_state === States.Teleop}
-		<h1>Teleop</h1>
-		<h2>Shoot</h2>
-		<FuelWidget bind:count={scout_form.fuel_shoot_teleop}></FuelWidget>
-		<h2>Pass</h2>
-		<FuelWidget bind:count={scout_form.fuel_pass_teleop}></FuelWidget>
-	{:else}
-		<h1>Endgame</h1>
+<div class="scout-shell">
+	<!-- Header -->
+	<header class="scout-header">
+		<div class="team-chip">
+			{#if edit}<span class="redo-tag">REDO</span>{/if}
+			<span class="team-name">Team {team}</span>
+		</div>
+		<div class="step-dots">
+			{#each Steps as s, i}
+				<button
+					type="button"
+					class="dot"
+					class:active={i === step}
+					class:done={i < step}
+					onclick={() => step = i}
+					title={s}
+				></button>
+			{/each}
+		</div>
+	</header>
 
-		<h2>Climb</h2>
-		<select bind:value={scout_form.climb_end}>
-			<option value={'Nothing'}>Nothing</option>
-			<option value={'Stage1'}>Stage 1</option>
-			<option value={'Stage2'}>Stage 2</option>
-			<option value={'Stage3'}>Stage 3</option>
-		</select>
+	<!-- Step label -->
+	<div class="step-label">
+		<span class="step-name">{Steps[step]}</span>
+		<span class="step-count">{step + 1} / {Steps.length}</span>
+	</div>
 
-		<h2>Defence</h2>
-		Main: <button
-				type="button"
-    			onclick={() => scout_form.defence_main = !scout_form.defence_main}
-				class:active={scout_form.defence_main}>
-				{scout_form.defence_main ? 'True' : 'False'}
-			</button>
-		Beach On Bump: <button
-				type="button"
-    			onclick={() => scout_form.beach_on_bump = !scout_form.beach_on_bump}
-				class:active={scout_form.beach_on_bump}>
-				{scout_form.beach_on_bump ? 'True' : 'False'}
-			</button>
-		<StarRating bind:value={defence}></StarRating>
+	<!-- Form content -->
+	<FormWithLoading
+		dispatch={edit ? handleEdit : dispatch}
+		hide_sub={step !== 2}
+		{stop}
+		submitLabel={edit ? 'Save edit' : 'Submit'}
+	>
+		<div class="form-body">
+			{#if step === 0}
+				<!-- AUTO -->
+				<section class="field-section">
+					<div class="section-label">Shoot</div>
+					<FuelWidget bind:count={scout_form.fuel_shoot_auto} />
+				</section>
 
-		<h2>Comment</h2>
-		<textarea bind:value={comment}></textarea>
-	{/if}
-	<br />
-</FormWithLoading>
-<br />
-<button
-	class="tactical-btn"
-	onclick={() => {
-		form_state--;
-	}}
-	disabled={form_state === 0}>Back page</button
->
-<button
-	class="tactical-btn"
-	onclick={() => {
-		form_state++;
-	}}
-	disabled={form_state > 1}>Next page</button
->
+				<section class="field-section">
+					<div class="section-label">Pass</div>
+					<FuelWidget bind:count={scout_form.fuel_pass_auto} />
+				</section>
+
+				<section class="field-section">
+					<div class="section-label">Climb</div>
+					<div class="option-grid">
+						{#each ['Nothing', 'Stage1', 'Stage2', 'Stage3'] as opt}
+							<button
+								type="button"
+								class="option-btn"
+								class:selected={scout_form.climb_auto === opt}
+								onclick={() => scout_form.climb_auto = opt as any}
+							>
+								{opt === 'Nothing' ? '—' : opt.replace('Stage', 'Stage ')}
+							</button>
+						{/each}
+					</div>
+				</section>
+
+			{:else if step === 1}
+				<!-- TELEOP -->
+				<section class="field-section">
+					<div class="section-label">Shoot</div>
+					<FuelWidget bind:count={scout_form.fuel_shoot_teleop} />
+				</section>
+
+				<section class="field-section">
+					<div class="section-label">Pass</div>
+					<FuelWidget bind:count={scout_form.fuel_pass_teleop} />
+				</section>
+
+			{:else}
+				<!-- ENDGAME -->
+				<section class="field-section">
+					<div class="section-label">Climb</div>
+					<div class="option-grid">
+						{#each ['Nothing', 'Stage1', 'Stage2', 'Stage3'] as opt}
+							<button
+								type="button"
+								class="option-btn"
+								class:selected={scout_form.climb_end === opt}
+								onclick={() => scout_form.climb_end = opt as any}
+							>
+								{opt === 'Nothing' ? '—' : opt.replace('Stage', 'Stage ')}
+							</button>
+						{/each}
+					</div>
+				</section>
+
+				<section class="field-section">
+					<div class="section-label">Defence</div>
+					<div class="toggle-row">
+						<button
+							type="button"
+							class="toggle-btn"
+							class:on={scout_form.defence_main}
+							onclick={() => scout_form.defence_main = !scout_form.defence_main}
+						>
+							<span class="toggle-indicator"></span>
+							<span>Main defender</span>
+						</button>
+						<button
+							type="button"
+							class="toggle-btn"
+							class:on={scout_form.beach_on_bump}
+							onclick={() => scout_form.beach_on_bump = !scout_form.beach_on_bump}
+						>
+							<span class="toggle-indicator"></span>
+							<span>Beach on bump</span>
+						</button>
+					</div>
+					<div class="defence-rating">
+						<div class="rating-label">Rating (0–5)</div>
+						<StarRating bind:value={defence} />
+					</div>
+				</section>
+
+				<section class="field-section">
+					<div class="section-label">Comment <span class="required">required</span></div>
+					<textarea
+						bind:value={comment}
+						placeholder="Notes about this team…"
+						rows="4"
+					></textarea>
+				</section>
+			{/if}
+		</div>
+	</FormWithLoading>
+
+	<!-- Nav -->
+	<div class="nav-bar">
+		<button
+			type="button"
+			class="nav-btn back"
+			onclick={() => step--}
+			disabled={step === 0}
+		>← Back</button>
+		<button
+			type="button"
+			class="nav-btn next"
+			onclick={() => step++}
+			disabled={step >= 2}
+		>Next →</button>
+	</div>
+</div>
+
+{/if}
 
 <style>
-	.tactical-btn {
-		padding: 0.9rem 1.6rem;
-		font-size: 0.95rem;
+	/* ── Shell ──────────────────────────── */
+	.scout-shell {
+		display: flex;
+		flex-direction: column;
+		min-height: 100dvh;
+		max-width: 480px;
+		margin: 0 auto;
+		padding: 0 0 1rem;
+	}
+
+	/* ── Header ─────────────────────────── */
+	.scout-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem 1rem;
+		border-bottom: 1px solid rgba(255,255,255,0.07);
+		position: sticky;
+		top: 0;
+		background: #242424;
+		z-index: 10;
+	}
+
+	.team-chip {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.redo-tag {
+		font-size: 0.58rem;
 		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		background: rgba(255,160,0,0.2);
+		color: #ffa000;
+		border: 1px solid rgba(255,160,0,0.35);
+		padding: 2px 7px;
+		border-radius: 3px;
+	}
 
-		color: #eaeaea;
-		background: linear-gradient(180deg, #2b2f33, #1a1d20);
-		border: 2px solid #3a3f44;
-		border-radius: 6px;
+	.team-name {
+		font-size: 1rem;
+		font-weight: 700;
+		color: #fff;
+	}
 
-		box-shadow:
-			inset 0 1px 0 rgba(255, 255, 255, 0.08),
-			0 4px 12px rgba(0, 0, 0, 0.6);
+	.step-dots {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
 
+	.dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		border: none;
 		cursor: pointer;
-		transition: all 0.15s ease;
+		padding: 0;
+		background: rgba(255,255,255,0.15);
+		transition: background 0.2s, transform 0.15s;
 	}
 
-	.tactical-btn:hover:not(:disabled) {
-		background: linear-gradient(180deg, #353a40, #1f2327);
-		border-color: #5a6066;
-		transform: translateY(-1px);
+	.dot.done    { background: rgba(60,179,113,0.5); }
+	.dot.active  { background: #3cb371; transform: scale(1.3); }
+
+	/* ── Step label ─────────────────────── */
+	.step-label {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		padding: 0.9rem 1rem 0.4rem;
 	}
 
-	.tactical-btn:active:not(:disabled) {
-		transform: translateY(1px);
-		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+	.step-name {
+		font-size: 1.4rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		color: #fff;
 	}
 
-	.tactical-btn:disabled {
-		opacity: 0.45;
+	.step-count {
+		font-size: 0.65rem;
+		letter-spacing: 0.1em;
+		color: rgba(255,255,255,0.3);
+	}
+
+	/* ── Form body ──────────────────────── */
+	.form-body {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		padding: 0.5rem 1rem 1rem;
+	}
+
+	.field-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+
+	.section-label {
+		font-size: 0.62rem;
+		font-weight: 700;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: rgba(255,255,255,0.35);
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.required {
+		font-size: 0.55rem;
+		color: #e05555;
+		letter-spacing: 0.08em;
+	}
+
+	/* ── Option grid (climb) ────────────── */
+	.option-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 8px;
+	}
+
+	.option-btn {
+		padding: 0.75rem 0;
+		border-radius: 8px;
+		border: 1.5px solid rgba(255,255,255,0.1);
+		background: #1a1a1a;
+		color: rgba(255,255,255,0.55);
+		font-size: 0.8rem;
+		font-weight: 600;
+		font-family: inherit;
+		cursor: pointer;
+		transition: all 0.12s;
+		touch-action: manipulation;
+	}
+
+	.option-btn:active { transform: scale(0.95); }
+
+	.option-btn.selected {
+		background: rgba(60,179,113,0.18);
+		border-color: #3cb371;
+		color: #5dde8a;
+	}
+
+	/* ── Toggle buttons (defence) ───────── */
+	.toggle-row {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.toggle-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem 1rem;
+		border-radius: 8px;
+		border: 1.5px solid rgba(255,255,255,0.08);
+		background: #1a1a1a;
+		color: rgba(255,255,255,0.6);
+		font-size: 0.88rem;
+		font-weight: 600;
+		font-family: inherit;
+		cursor: pointer;
+		text-align: left;
+		transition: all 0.12s;
+		touch-action: manipulation;
+	}
+
+	.toggle-btn:active { transform: scale(0.98); }
+
+	.toggle-indicator {
+		width: 20px;
+		height: 20px;
+		border-radius: 4px;
+		border: 2px solid rgba(255,255,255,0.2);
+		flex-shrink: 0;
+		transition: all 0.12s;
+	}
+
+	.toggle-btn.on {
+		border-color: rgba(60,179,113,0.4);
+		color: #fff;
+	}
+
+	.toggle-btn.on .toggle-indicator {
+		background: #3cb371;
+		border-color: #3cb371;
+	}
+
+	/* ── Defence rating ─────────────────── */
+	.defence-rating {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.rating-label {
+		font-size: 0.7rem;
+		color: rgba(255,255,255,0.4);
+		letter-spacing: 0.06em;
+	}
+
+	/* ── Textarea ───────────────────────── */
+	textarea {
+		width: 100%;
+		background: #111;
+		border: 1.5px solid rgba(255,255,255,0.1);
+		border-radius: 10px;
+		color: #fff;
+		font-family: inherit;
+		font-size: 0.9rem;
+		line-height: 1.6;
+		padding: 0.75rem;
+		resize: vertical;
+		box-sizing: border-box;
+		outline: none;
+		transition: border-color 0.15s;
+	}
+
+	textarea:focus { border-color: rgba(60,179,113,0.5); }
+	textarea::placeholder { color: rgba(255,255,255,0.2); }
+
+	/* ── Nav bar ────────────────────────── */
+	.nav-bar {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 10px;
+		padding: 1rem 1rem 0;
+		position: sticky;
+		bottom: 0;
+		background: #242424;
+		border-top: 1px solid rgba(255,255,255,0.07);
+	}
+
+	.nav-btn {
+		padding: 0.9rem;
+		border-radius: 10px;
+		font-size: 0.9rem;
+		font-weight: 700;
+		font-family: inherit;
+		letter-spacing: 0.05em;
+		cursor: pointer;
+		transition: all 0.12s;
+		touch-action: manipulation;
+		border: 1.5px solid rgba(255,255,255,0.1);
+	}
+
+	.nav-btn:active:not(:disabled) { transform: scale(0.97); }
+
+	.nav-btn:disabled {
+		opacity: 0.25;
 		cursor: not-allowed;
-		box-shadow: none;
 	}
+
+	.back {
+		background: #1a1a1a;
+		color: rgba(255,255,255,0.7);
+	}
+
+	.back:hover:not(:disabled) { background: #242424; }
+
+	.next {
+		background: rgba(60,179,113,0.15);
+		border-color: rgba(60,179,113,0.4);
+		color: #5dde8a;
+	}
+
+	.next:hover:not(:disabled) { background: rgba(60,179,113,0.25); }
+
+	/* ── Done screen ─────────────────────── */
+	.done-screen {
+		position: fixed;
+		inset: 0;
+		background: #242424;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 100;
+		animation: fadeIn 0.25s ease both;
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to   { opacity: 1; }
+	}
+
+	.done-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+	}
+
+	@keyframes popIn {
+		from { opacity: 0; transform: scale(0.85); }
+		to   { opacity: 1; transform: scale(1); }
+	}
+
+	.done-icon {
+		width: 80px;
+		height: 80px;
+		border-radius: 50%;
+		background: rgba(60, 179, 113, 0.15);
+		border: 2px solid rgba(60, 179, 113, 0.4);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 2.2rem;
+		color: #3cb371;
+	}
+
+	.done-title {
+		font-size: 1.5rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		color: #fff;
+	}
+
+	.done-team {
+		font-size: 0.8rem;
+		letter-spacing: 0.12em;
+		color: rgba(255, 255, 255, 0.4);
+	}
+
+	.done-back {
+		margin-top: 0.5rem;
+		padding: 0.7rem 1.5rem;
+		border-radius: 8px;
+		background: rgba(60, 179, 113, 0.12);
+		border: 1.5px solid rgba(60, 179, 113, 0.3);
+		color: #5dde8a;
+		text-decoration: none;
+		font-size: 0.82rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		transition: background 0.15s;
+	}
+
+	.done-back:hover { background: rgba(60, 179, 113, 0.22); }
 </style>

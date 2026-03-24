@@ -11,6 +11,32 @@
 
 	let players: Map<number, string> = $state(new Map<number, string>());
 
+	let autoFillScouters = $state<string[]>(['']);
+
+	function addAutoFillScouter() {
+		autoFillScouters = [...autoFillScouters, ''];
+	}
+
+	function removeAutoFillScouter(index: number) {
+		autoFillScouters = autoFillScouters.filter((_, i) => i !== index);
+	}
+
+	function autoFill() {
+		if (typeof games === 'string') return;
+		const valid = autoFillScouters.filter(s => s.trim() !== '');
+		if (valid.length === 0) return;
+
+		const newPlayers = new Map(players);
+		let idx = 0;
+		for (const game of games) {
+			if (!newPlayers.has(game.id) || newPlayers.get(game.id) === '') {
+				newPlayers.set(game.id, valid[idx % valid.length]);
+				idx++;
+			}
+		}
+		players = newPlayers;
+	}
+
 	function format_data(player_data: Map<number, string>): {
 		players: Array<string>;
 		games: PitAssigment[];
@@ -52,6 +78,13 @@
 				games = 'Error from server: ' + res.data.message;
 			} else {
 				games = res.data.message;
+				const loaded = new Map<number, string>();
+				for (const game of games) {
+					if (game.user) {
+						loaded.set(game.id, game.user);
+					}
+				}
+				players = loaded;
 			}
 		})();
 	});
@@ -91,6 +124,22 @@
 {#if typeof games === 'string'}
 	<p>{games}</p>
 {:else}
+	<div class="auto-fill-section">
+		<h4>Auto Fill Evenly</h4>
+		{#each autoFillScouters as scouter, i}
+			<div class="auto-fill-row">
+				<UserSelector bind:value={autoFillScouters[i]} />
+				{#if autoFillScouters.length > 1}
+					<button type="button" class="btn-sm" onclick={() => removeAutoFillScouter(i)}>-</button>
+				{/if}
+			</div>
+		{/each}
+		<div style="display: flex; gap: 8px; margin-top: 8px;">
+			<button type="button" class="btn-sm" onclick={addAutoFillScouter}>+ Add scouter</button>
+			<button type="button" onclick={autoFill}>Auto Fill</button>
+		</div>
+	</div>
+
 	<FormWithLoading dispatch={handleInsert} bind:stop>
 		{#each games as game}
 			<div class="pit-game-box">
@@ -109,6 +158,25 @@
 {/if}
 
 <style>
+	.auto-fill-section {
+		background-color: #2e8b57;
+		padding: 15px;
+		margin: 10px;
+		border-radius: 10px;
+	}
+
+	.auto-fill-row {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		margin: 6px 0;
+	}
+
+	.btn-sm {
+		padding: 2px 8px;
+		font-size: 0.85em;
+	}
+
 	.pit-game-box {
 		background-color: #3cb371;
 		padding: 10px;
