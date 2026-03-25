@@ -12,6 +12,7 @@
   "devDependencies": {
     "@hey-api/openapi-ts": "0.90.2",
     "@lucide/svelte": "latest",
+    "@muonw/mascara": "^0.4.2",
     "@muonw/powertable": "^2.3.5",
     "@sveltejs/adapter-auto": "^7.0.1",
     "@sveltejs/kit": "^2.21.0",
