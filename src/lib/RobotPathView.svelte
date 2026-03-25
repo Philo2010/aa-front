@@ -41,28 +41,29 @@
 
     (async () => {
       const paperModule = await import('paper');
-      const paper = paperModule.default;
       if (!mounted) return;
 
       canvasEl.width = fieldWidth;
       canvasEl.height = fieldHeight;
 
-      paper.setup(canvasEl);
-      paper.view.viewSize = new paper.Size(fieldWidth, fieldHeight);
-      paperScope = paper;
+      const scope = new paperModule.default.PaperScope();
+      scope.setup(canvasEl);
+      scope.view.viewSize = new scope.Size(fieldWidth, fieldHeight);
+      paperScope = scope;
 
-      const raster = new paper.Raster(fieldImage);
+      scope.activate();
+      const raster = new scope.Raster(fieldImage);
       raster.onLoad = () => {
-        raster.position = paper.view.center;
-        raster.size = new paper.Size(fieldWidth, fieldHeight);
+        raster.position = scope.view.center;
+        raster.size = new scope.Size(fieldWidth, fieldHeight);
         raster.sendToBack();
-        paper.view.update();
+        scope.view.update();
       };
 
       drawFromData();
 
       requestAnimationFrame(() => {
-        paper.view.update();
+        scope.view.update();
       });
     })();
 
@@ -76,6 +77,7 @@
   function drawFromData() {
     const paper = paperScope;
     if (!paper || !strokes) return;
+    paper.activate();
 
     // Clear old paths
     drawnPaths.forEach(p => p.remove());
@@ -103,6 +105,7 @@
     if (drawnPaths.length === 0) return;
     stopPlayback();
     const paper = paperScope;
+    paper.activate();
 
     drawnPaths.forEach(p => { p.opacity = 0.2; });
 
