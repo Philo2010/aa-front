@@ -112,7 +112,7 @@
 							<div class="mvp-list">
 								{#if game.mvp.blue}
 									<a
-										href="/scout/mvp?id={game.mvp.blue.id}&is_blue=true&game_id={game.match_id}"
+										href="/scout/mvp?id={game.mvp.blue.id}&is_blue=true&game_id={game.id}"
 										class="scout-btn status-mvp-blue"
 									>
 										<span class="btn-tag">MVP</span>
@@ -121,7 +121,7 @@
 								{/if}
 								{#if game.mvp.red}
 									<a
-										href="/scout/mvp?id={game.mvp.red.id}&is_blue=false&game_id={game.match_id}"
+										href="/scout/mvp?id={game.mvp.red.id}&is_blue=false&game_id={game.id}"
 										class="scout-btn status-mvp-red"
 									>
 										<span class="btn-tag">MVP</span>

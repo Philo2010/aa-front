@@ -22,7 +22,9 @@
 		fuel_pass_auto: 0,
 		climb_end: 'Stage1',
 		climb_auto: 'Stage1',
-		beach_on_bump: false
+		beach_on_bump: false,
+		dead: false,
+		dnf: false
 	});
 
 	$effect(() => {
@@ -176,6 +178,30 @@
 								{opt === 'Nothing' ? '—' : opt.replace('Stage', 'Stage ')}
 							</button>
 						{/each}
+					</div>
+				</section>
+
+				<section class="field-section">
+					<div class="section-label">Status</div>
+					<div class="toggle-row">
+						<button
+							type="button"
+							class="toggle-btn"
+							class:on={scout_form.dead}
+							onclick={() => scout_form.dead = !scout_form.dead}
+						>
+							<span class="toggle-indicator"></span>
+							<span>Dead</span>
+						</button>
+						<button
+							type="button"
+							class="toggle-btn"
+							class:on={scout_form.dnf}
+							onclick={() => scout_form.dnf = !scout_form.dnf}
+						>
+							<span class="toggle-indicator"></span>
+							<span>DNF</span>
+						</button>
 					</div>
 				</section>
 

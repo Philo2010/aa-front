@@ -185,6 +185,8 @@ export type Avg = {
     fuel_pass_teleop_avg: number;
     fuel_shoot_auto_avg: number;
     fuel_pass_auto_avg: number;
+    dead_avg: number;
+    dnf_avg: number;
     level_1_avg: number;
     level_2_avg: number;
     level_3_avg: number;
@@ -275,6 +277,8 @@ export type Model2 = {
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
+    dead: boolean;
+    dnf: boolean;
 };
 
 export type SearchParamData = {
@@ -310,6 +314,7 @@ export type ApiResultForArrayOfGamePart = {
 };
 
 export type GamePart = {
+    id: number;
     event_code: string;
     match_id: number;
     set: number;
@@ -405,6 +410,8 @@ export type Edit2 = {
     climb_end?: ClimbState | null;
     climb_auto?: ClimbState | null;
     beach_on_bump?: boolean | null;
+    dead?: boolean | null;
+    dnf?: boolean | null;
 };
 
 export type InsertSnow = {
@@ -427,6 +434,8 @@ export type Insert2 = {
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
+    dead: boolean;
+    dnf: boolean;
 };
 
 export type ApiResultForArrayOfString = {
@@ -477,6 +486,9 @@ export type SetEvent = {
 export type SubScoutForm = {
     og: string;
     replacement: string;
+    /**
+     * When provided, only replace assignments for these game IDs (selective sub). When None or empty, replace ALL pending assignments (full sub).
+     */
     game_ids?: Array<number> | null;
 };
 
@@ -507,7 +519,7 @@ export type PitEvent = {
     is_ab_team: boolean;
     is_done: boolean;
     event_code: string;
-    user: string | null;
+    user?: string | null;
 };
 
 export type AssignScoutFormButCool = {
