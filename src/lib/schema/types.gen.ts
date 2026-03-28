@@ -257,6 +257,7 @@ export type HeaderFull = {
     created_at: string;
     is_mvp: boolean;
     defence: number;
+    mvp_comment?: string | null;
 };
 
 export type TournamentLevels = 'QualificationMatch' | 'Quarterfinal' | 'Semifinal' | 'Final';
@@ -968,3 +969,16 @@ export type GetTeamsFromGameResponses = {
 };
 
 export type GetTeamsFromGameResponse = GetTeamsFromGameResponses[keyof GetTeamsFromGameResponses];
+
+export type DeleteEventData = {
+    body: { event: string };
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/delete_event';
+};
+
+export type DeleteEventResponses = {
+    200: ApiResultForString;
+};
+
+export type DeleteEventResponse = DeleteEventResponses[keyof DeleteEventResponses];

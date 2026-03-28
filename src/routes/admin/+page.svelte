@@ -54,6 +54,10 @@
 			<span class="nav-label">SEND WARNING</span>
 			<span class="nav-sub">notify scouters</span>
 		</a>
+		<a href="/admin/deleteevent" class="nav-card danger">
+			<span class="nav-label">DELETE EVENT</span>
+			<span class="nav-sub">remove event queue and assignments</span>
+		</a>
 	</div>
 </div>
 
@@ -123,6 +127,16 @@
 	.nav-card.ghost {
 		background: transparent;
 		border-color: rgba(255, 255, 255, 0.05);
+	}
+
+	.nav-card.danger {
+		background: rgba(192, 57, 43, 0.06);
+		border-color: rgba(192, 57, 43, 0.2);
+	}
+
+	.nav-card.danger:hover {
+		background: rgba(192, 57, 43, 0.12);
+		border-color: rgba(192, 57, 43, 0.45);
 	}
 
 	.nav-label {

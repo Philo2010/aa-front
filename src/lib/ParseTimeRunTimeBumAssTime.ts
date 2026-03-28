@@ -27,6 +27,7 @@ export type RebuiltGameFlatten = {
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
+    mvp_comment: string | null;
 };
 export type RebuiltAvgFlatten = {
 	team: string;
@@ -88,6 +89,7 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
         climb_end: data.game.RebuiltGame.climb_end,
         climb_auto: data.game.RebuiltGame.climb_auto,
         beach_on_bump: data.game.RebuiltGame.beach_on_bump,
+        mvp_comment: data.header.mvp_comment ?? null,
     };
 }
 

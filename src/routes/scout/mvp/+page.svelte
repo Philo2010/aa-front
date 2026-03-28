@@ -61,6 +61,11 @@
 	}
 
 	const alliance = $derived(is_blue ? 'BLUE' : 'RED');
+	const canSubmit = $derived(
+		mvp_team !== undefined &&
+		total_score !== undefined &&
+		penalty_score !== undefined
+	);
 </script>
 
 {#if done}
@@ -143,7 +148,7 @@
 					class="submit-btn"
 					class:blue={is_blue}
 					class:red={!is_blue}
-					disabled={loading}
+					disabled={loading || !canSubmit}
 				>
 					{loading ? 'submitting…' : 'submit mvp'}
 				</button>
