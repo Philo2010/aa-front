@@ -30,7 +30,8 @@
 
             if (hasPitLink(data)) {
                 const event = row.event_code ?? row._event_code ?? '';
-                const href = `/pit/get?team=${row._team_number}&is_ab_team=${row._is_ab_team}&event_code=${event}`;
+                const paddedTeam = String(row._team_number).padStart(5, '0');
+                const href = `/pit/get?team=${paddedTeam}&is_ab_team=${row._is_ab_team}&event_code=${event}`;
                 newRow.team = `<a href="${href}">${row.team}</a>`;
             }
 
