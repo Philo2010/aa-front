@@ -16,44 +16,50 @@
     function buildTableData(data: Record<string, any>[]): Record<string, any>[] {
         if (data.length === 0) return data;
 
-        const keys = Object.keys(data[0]).filter(k => !k.startsWith('_'));
-        const numericKeys = new Set(keys.filter(k => k !== 'team' && isNumericColumn(data, k)));
-
-        const mapped = data.map(row => {
-            const newRow: Record<string, any> = { ...row };
-
-            for (const k of numericKeys) {
-                if (row[k] !== null && row[k] !== undefined && row[k] !== '') {
-                    newRow[k] = Number(row[k]);
-                }
-            }
-
-            if (hasPitLink(data)) {
+        if (hasPitLink(data)) {
+            return data.map(row => {
+                const newRow: Record<string, any> = { ...row };
                 const event = row.event_code ?? row._event_code ?? '';
                 const paddedTeam = String(row._team_number).padStart(5, '0');
                 const href = `/pit/get?team=${paddedTeam}&is_ab_team=${row._is_ab_team}&event_code=${event}`;
                 newRow.team = `<a href="${href}">${row.team}</a>`;
-            }
+                return newRow;
+            });
+        }
 
-            return newRow;
-        });
-
-        return mapped;
+        return data;
     }
 
+    const numericSort = (v1: string, v2: string) => Number(v1) - Number(v2);
+
     function buildInstructs(data: Record<string, any>[]) {
-        if (!hasPitLink(data) || data.length === 0) return undefined;
-        return Object.keys(data[0])
-            .filter(k => !k.startsWith('_'))
-            .map(k => k === 'team' ? { key: k, parseAs: 'unsafe-html' as const } : { key: k });
+        if (data.length === 0) return [];
+
+        const keys = Object.keys(data[0]).filter(k => !k.startsWith('_'));
+
+        return keys.map(k => {
+            if (k === 'team' && hasPitLink(data)) {
+                return {
+                    key: k,
+                    parseAs: 'unsafe-html' as const,
+                    userFunctions: {
+                        customSort: (v1: string, v2: string) => {
+                            const n1 = Number(v1.match(/team=(\d+)/)?.[1] ?? 0);
+                            const n2 = Number(v2.match(/team=(\d+)/)?.[1] ?? 0);
+                            return n1 - n2;
+                        }
+                    }
+                };
+            } else if (k !== 'team' && isNumericColumn(data, k)) {
+                return { key: k, userFunctions: { customSort: numericSort } };
+            } else {
+                return { key: k };
+            }
+        });
     }
 
     let tableData = $derived(buildTableData(ptData));
     let ptInstructs = $derived(buildInstructs(ptData));
 </script>
 
-{#if ptInstructs}
-    <PowerTable ptData={tableData} {ptInstructs} />
-{:else}
-    <PowerTable ptData={tableData} />
-{/if}
+<PowerTable ptData={tableData} {ptInstructs} />
