@@ -14,6 +14,7 @@
 
   // ── State ──────────────────────────────────────────────────────────────────
   let canvasEl: HTMLCanvasElement = $state() as any;
+  let containerEl: HTMLDivElement = $state() as any;
   let paperScope: any = $state();
   let mode = $state('draw');        // 'draw' | 'playback'
   let isPlaying = $state(false);
@@ -30,6 +31,7 @@
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   onMount(() => {
     let mounted = true;
+    let ro: ResizeObserver | null = null;
 
     (async () => {
       const paperModule = await import('paper');
@@ -41,8 +43,24 @@
       canvasEl.height = FIELD_H;
 
       paper.setup(canvasEl);
-      paper.view.viewSize = new paper.Size(FIELD_W, FIELD_H);
       paperScope = paper;
+
+      // Scale the Paper.js view to match the container's CSS size so that
+      // event coordinates and drawing always align with the background.
+      function updateView() {
+        if (!containerEl) return;
+        const W = containerEl.clientWidth;
+        const H = containerEl.clientHeight;
+        if (!W || !H) return;
+        paper.view.viewSize = new paper.Size(W, H);
+        paper.view.zoom = W / FIELD_W;
+        paper.view.center = new paper.Point(FIELD_W / 2, FIELD_H / 2);
+        paper.view.update();
+      }
+
+      updateView();
+      ro = new ResizeObserver(updateView);
+      ro.observe(containerEl);
 
       // Draw field image as background
       const raster = new paper.Raster(fieldImage);
@@ -63,6 +81,7 @@
 
     return () => {
       mounted = false;
+      ro?.disconnect();
       if (rafId) cancelAnimationFrame(rafId);
       paperScope?.remove();
     };
@@ -268,7 +287,7 @@
   </div>
 
   <!-- Canvas -->
-  <div class="canvas-scaler">
+  <div class="canvas-scaler" bind:this={containerEl}>
     <canvas
       bind:this={canvasEl}
       width={FIELD_W}
@@ -346,7 +365,6 @@
     width: 100%;
     max-width: 600px;
     aspect-ratio: 600 / 315;
-    overflow: hidden;
   }
 
   .field-canvas {
@@ -354,8 +372,6 @@
     border-radius: 6px;
     border: 1px solid #2a2a2a;
     background: #111;
-    width: 100%;
-    height: 100%;
     touch-action: none;
   }
 
