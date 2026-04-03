@@ -28,8 +28,10 @@
 	let masterRedMvp = $state<RangeEntry[]>([{ user: '', begin: 1, end: 1 }]);
 	let masterBlueMvp = $state<RangeEntry[]>([{ user: '', begin: 1, end: 1 }]);
 
-	let maxGame = $derived(typeof all_games !== 'string' ? all_games.length : 1);
+	let undoneGames = $derived(typeof all_games !== 'string' ? all_games.filter(g => !isGameDone(g)) : []);
+	let maxGame = $derived(undoneGames.length || 1);
 	let stop = $derived(validateForm());
+	let hideDone = $state(false);
 
 	function isGameDone(game: Game): boolean {
 		return game.teams.every((t) => t.done);
@@ -240,14 +242,15 @@
 		const newRedMvps = new Map<number, string>();
 		const newBlueMvps = new Map<number, string>();
 
-		all_games.forEach((game, gameIndex) => {
-			const gameNum = gameIndex + 1;
+		let undoneIndex = 0;
+		all_games.forEach((game) => {
 			if (isGameDone(game)) {
 				game.teams.forEach((team) => newScouters.set(team.id, scouters.get(team.id) ?? []));
 				newRedMvps.set(game.id, redMvps.get(game.id) ?? '');
 				newBlueMvps.set(game.id, blueMvps.get(game.id) ?? '');
 				return;
 			}
+			const gameNum = ++undoneIndex;
 			newRedMvps.set(game.id, '');
 			newBlueMvps.set(game.id, '');
 			game.teams.forEach((team, teamIndex) => {
@@ -319,7 +322,7 @@
 									max={maxGame}
 									bind:beginValue={entry.begin}
 									bind:endValue={entry.end}
-									games={all_games}
+									games={undoneGames}
 								/>
 								{#if entries.length > 1}
 									<button
@@ -346,7 +349,7 @@
 					{#each masterRedMvp as entry, entryIdx}
 						<div class="range-row">
 							<UserSelector bind:value={entry.user} />
-							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={all_games} />
+							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={undoneGames} />
 							{#if masterRedMvp.length > 1}
 								<button type="button" class="icon-btn remove" onclick={() => { removeRangeEntry(masterRedMvp, entryIdx); masterRedMvp = [...masterRedMvp]; }}>✕</button>
 							{/if}
@@ -359,7 +362,7 @@
 					{#each masterBlueMvp as entry, entryIdx}
 						<div class="range-row">
 							<UserSelector bind:value={entry.user} />
-							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={all_games} />
+							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={undoneGames} />
 							{#if masterBlueMvp.length > 1}
 								<button type="button" class="icon-btn remove" onclick={() => { removeRangeEntry(masterBlueMvp, entryIdx); masterBlueMvp = [...masterBlueMvp]; }}>✕</button>
 							{/if}
@@ -378,8 +381,13 @@
 
 	<!-- ── Per-game list ──────────────────────────────── -->
 	<FormWithLoading stop={!stop} {dispatch} submitLabel="Save assignments">
+		<div class="list-controls">
+			<button type="button" class="btn-hide-done" onclick={() => hideDone = !hideDone}>
+				{hideDone ? 'Show done' : 'Hide done'}
+			</button>
+		</div>
 		<div class="game-list">
-			{#each all_games as game}
+			{#each (hideDone ? all_games.filter(g => !isGameDone(g)) : all_games) as game}
 				{@const done = isGameDone(game)}
 				<div class="match-card" class:is-done={done}>
 					<!-- Header -->
@@ -681,6 +689,26 @@
 	.btn-reset:hover { background: rgba(200,50,50,0.2); }
 
 	/* ── Game list ───────────────────────── */
+	.list-controls {
+		display: flex;
+		justify-content: flex-end;
+		margin-bottom: 0.5rem;
+	}
+
+	.btn-hide-done {
+		background: rgba(255,255,255,0.05);
+		border: 1px solid rgba(255,255,255,0.12);
+		border-radius: 6px;
+		color: rgba(255,255,255,0.5);
+		cursor: pointer;
+		font-size: 0.7rem;
+		letter-spacing: 0.08em;
+		padding: 0.3rem 0.8rem;
+		transition: color 0.15s, border-color 0.15s;
+	}
+
+	.btn-hide-done:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+
 	.game-list {
 		display: flex;
 		flex-direction: column;
