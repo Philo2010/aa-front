@@ -29,7 +29,8 @@
 	let masterBlueMvp = $state<RangeEntry[]>([{ user: '', begin: 1, end: 1 }]);
 
 	let undoneGames = $derived(typeof all_games !== 'string' ? all_games.filter(g => !isGameDone(g)) : []);
-	let maxGame = $derived(undoneGames.length || 1);
+	let assignableGames = $derived(typeof all_games !== 'string' ? all_games.filter(g => g.teams.every(t => !t.is_inserted)) : []);
+	let maxGame = $derived(assignableGames.length || 1);
 	let stop = $derived(validateForm());
 	let hideDone = $state(false);
 
@@ -244,7 +245,7 @@
 
 		let undoneIndex = 0;
 		all_games.forEach((game) => {
-			if (isGameDone(game)) {
+			if (game.teams.some(t => t.is_inserted)) {
 				game.teams.forEach((team) => newScouters.set(team.id, scouters.get(team.id) ?? []));
 				newRedMvps.set(game.id, redMvps.get(game.id) ?? '');
 				newBlueMvps.set(game.id, blueMvps.get(game.id) ?? '');
@@ -322,7 +323,7 @@
 									max={maxGame}
 									bind:beginValue={entry.begin}
 									bind:endValue={entry.end}
-									games={undoneGames}
+									games={assignableGames}
 								/>
 								{#if entries.length > 1}
 									<button
@@ -349,7 +350,7 @@
 					{#each masterRedMvp as entry, entryIdx}
 						<div class="range-row">
 							<UserSelector bind:value={entry.user} />
-							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={undoneGames} />
+							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={assignableGames} />
 							{#if masterRedMvp.length > 1}
 								<button type="button" class="icon-btn remove" onclick={() => { removeRangeEntry(masterRedMvp, entryIdx); masterRedMvp = [...masterRedMvp]; }}>✕</button>
 							{/if}
@@ -362,7 +363,7 @@
 					{#each masterBlueMvp as entry, entryIdx}
 						<div class="range-row">
 							<UserSelector bind:value={entry.user} />
-							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={undoneGames} />
+							<DualRangeSlider min={1} max={maxGame} bind:beginValue={entry.begin} bind:endValue={entry.end} games={assignableGames} />
 							{#if masterBlueMvp.length > 1}
 								<button type="button" class="icon-btn remove" onclick={() => { removeRangeEntry(masterBlueMvp, entryIdx); masterBlueMvp = [...masterBlueMvp]; }}>✕</button>
 							{/if}

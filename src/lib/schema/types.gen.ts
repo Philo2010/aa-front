@@ -478,6 +478,7 @@ export type Team2 = {
     is_ab_team: boolean;
     scouters: Array<string>;
     done: boolean;
+    is_inserted: boolean;
 };
 
 export type SetEvent = {
