@@ -20,8 +20,8 @@
 		fuel_pass_teleop: 0,
 		fuel_shoot_auto: 0,
 		fuel_pass_auto: 0,
-		climb_end: 'Stage1',
-		climb_auto: 'Stage1',
+		climb_end: 'Nothing',
+		climb_auto: 'Nothing',
 		beach_on_bump: false,
 		dead: false,
 		dnf: false
