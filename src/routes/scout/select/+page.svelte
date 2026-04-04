@@ -14,20 +14,19 @@
 				games = 'Error from server: ' + res.data.message;
 			} else {
 				games = res.data.message;
-				games.sort((a, b) => {
-					if (
-						a.tournament_level === 'QualificationMatch' &&
-						b.tournament_level != 'QualificationMatch'
-					) {
-						return -1;
-					} else if (
-						a.tournament_level != 'QualificationMatch' &&
-						b.tournament_level === 'QualificationMatch'
-					) {
-						return 1;
-					}
-					return a.match_id - b.match_id;
-				});
+				const levelOrder: Record<string, number> = {
+						QualificationMatch: 0,
+						Quarterfinal: 1,
+						Semifinal: 2,
+						Final: 3,
+					};
+					games.sort((a, b) => {
+						const la = levelOrder[a.tournament_level] ?? 99;
+						const lb = levelOrder[b.tournament_level] ?? 99;
+						if (la !== lb) return la - lb;
+						if (a.match_id !== b.match_id) return a.match_id - b.match_id;
+						return a.set - b.set;
+					});
 			}
 		})();
 	});
@@ -78,9 +77,11 @@
 					<div class="match-meta">
 						<div class="match-id">
 							<span class="level-tag">{shortLevel(game.tournament_level)}</span>
-							<span class="match-num">#{game.match_id}</span>
-							{#if game.set > 1}
-								<span class="set-tag">set {game.set}</span>
+							{#if game.tournament_level === 'QualificationMatch'}
+								<span class="match-num">#{game.match_id}</span>
+							{:else}
+								<span class="match-num">set {game.set}</span>
+								<span class="set-tag">m{game.match_id}</span>
 							{/if}
 						</div>
 						<div class="event-code">{game.event_code}</div>
