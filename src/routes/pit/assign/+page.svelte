@@ -29,10 +29,8 @@
 		const newPlayers = new Map(players);
 		let idx = 0;
 		for (const game of games) {
-			if (!newPlayers.has(game.id) || newPlayers.get(game.id) === '') {
-				newPlayers.set(game.id, valid[idx % valid.length]);
-				idx++;
-			}
+			newPlayers.set(game.id, valid[idx % valid.length]);
+			idx++;
 		}
 		players = newPlayers;
 	}
