@@ -228,7 +228,7 @@
 						</button>
 					</div>
 					<div class="defence-rating">
-						<div class="rating-label">Rating (0–5)</div>
+						<div class="rating-label">Defence Rating (0–5)</div>
 						<StarRating bind:value={defence} />
 					</div>
 				</section>
