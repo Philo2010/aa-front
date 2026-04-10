@@ -6,5 +6,8 @@ export default {
     alias: {
       $lib: './src/lib',
     },
+    paths: {
+      relative: false,
+    },
   },
 };
