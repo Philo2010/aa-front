@@ -30,6 +30,10 @@
 			<span class="nav-label">AVERAGES</span>
 			<span class="nav-sub">per-team stat summaries</span>
 		</a>
+		<a href="/view/pit" class="nav-card">
+			<span class="nav-label">PIT</span>
+			<span class="nav-sub">lookup pit scouting data</span>
+		</a>
 	</nav>
 </div>
 
