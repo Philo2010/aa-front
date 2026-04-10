@@ -353,25 +353,9 @@
 	}
 
 	/* ── Form body ──────────────────────── */
-	.form-body {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-		padding: 0.5rem 1rem 1rem;
-	}
-
-	.field-section {
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-	}
+	.form-body { padding: 0.5rem 1rem 1rem; }
 
 	.section-label {
-		font-size: 0.62rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		color: rgba(255,255,255,0.35);
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -390,72 +374,11 @@
 		gap: 8px;
 	}
 
-	.option-btn {
-		padding: 0.75rem 0;
-		border-radius: 8px;
-		border: 1.5px solid rgba(255,255,255,0.1);
-		background: #1a1a1a;
-		color: rgba(255,255,255,0.55);
-		font-size: 0.8rem;
-		font-weight: 600;
-		font-family: inherit;
-		cursor: pointer;
-		transition: all 0.12s;
-		touch-action: manipulation;
-	}
-
-	.option-btn:active { transform: scale(0.95); }
-
-	.option-btn.selected {
-		background: rgba(60,179,113,0.18);
-		border-color: #3cb371;
-		color: #5dde8a;
-	}
-
-	/* ── Toggle buttons (defence) ───────── */
+	/* ── Toggle row ─────────────────────── */
 	.toggle-row {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-	}
-
-	.toggle-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		border-radius: 8px;
-		border: 1.5px solid rgba(255,255,255,0.08);
-		background: #1a1a1a;
-		color: rgba(255,255,255,0.6);
-		font-size: 0.88rem;
-		font-weight: 600;
-		font-family: inherit;
-		cursor: pointer;
-		text-align: left;
-		transition: all 0.12s;
-		touch-action: manipulation;
-	}
-
-	.toggle-btn:active { transform: scale(0.98); }
-
-	.toggle-indicator {
-		width: 20px;
-		height: 20px;
-		border-radius: 4px;
-		border: 2px solid rgba(255,255,255,0.2);
-		flex-shrink: 0;
-		transition: all 0.12s;
-	}
-
-	.toggle-btn.on {
-		border-color: rgba(60,179,113,0.4);
-		color: #fff;
-	}
-
-	.toggle-btn.on .toggle-indicator {
-		background: #3cb371;
-		border-color: #3cb371;
 	}
 
 	/* ── Defence rating ─────────────────── */

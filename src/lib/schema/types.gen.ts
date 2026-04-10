@@ -73,7 +73,7 @@ export type Model = {
     id: number;
     is_swerve: boolean;
     gear_or_drivebase: string;
-    auto_paths: Array<unknown>;
+    auto_paths: unknown;
     years_of_driver_experience: number;
     what_they_are_looking_from_the_tournament: string;
     do_they_have_a_scouter: boolean;
@@ -573,6 +573,41 @@ export type TeamWithAlliance = {
     team: Team;
 };
 
+export type ManualInsertMatchFront = {
+    event_code: string;
+    match_id: number;
+    set: number;
+    tournament_level: TournamentLevels;
+    mvps: MvpInsertMatchFront;
+    teams_red: [
+        ManualInsertTeamFront,
+        ManualInsertTeamFront,
+        ManualInsertTeamFront
+    ];
+    teams_blue: [
+        ManualInsertTeamFront,
+        ManualInsertTeamFront,
+        ManualInsertTeamFront
+    ];
+};
+
+export type MvpInsertMatchFront = {
+    red_username: string;
+    blue_username: string;
+};
+
+export type ManualInsertTeamFront = {
+    team: Team2;
+    scouters: Array<string>;
+};
+
+export type BypassCheckRequest = {
+    game_id: number;
+    alliance: AllianceFront;
+};
+
+export type AllianceFront = 'red' | 'blue';
+
 export type EditPitData = {
     body: PitEditSpecific;
     path: {
@@ -972,7 +1007,9 @@ export type GetTeamsFromGameResponses = {
 export type GetTeamsFromGameResponse = GetTeamsFromGameResponses[keyof GetTeamsFromGameResponses];
 
 export type DeleteEventData = {
-    body: { event: string };
+    body: {
+        event: string;
+    };
     path?: never;
     query?: never;
     url: '/api/snowgrave/delete_event';
@@ -983,3 +1020,29 @@ export type DeleteEventResponses = {
 };
 
 export type DeleteEventResponse = DeleteEventResponses[keyof DeleteEventResponses];
+
+export type ManualAddMatchData = {
+    body: ManualInsertMatchFront;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/manual_add_match';
+};
+
+export type ManualAddMatchResponses = {
+    200: ApiResultForString;
+};
+
+export type ManualAddMatchResponse = ManualAddMatchResponses[keyof ManualAddMatchResponses];
+
+export type BypassCheckData = {
+    body: BypassCheckRequest;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/bypass_check';
+};
+
+export type BypassCheckResponses = {
+    200: ApiResultForString;
+};
+
+export type BypassCheckResponse = BypassCheckResponses[keyof BypassCheckResponses];

@@ -3,10 +3,11 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
-	import { editPit } from '$lib/schema/sdk.gen';
+	import { editPit, get } from '$lib/schema/sdk.gen';
 	import type { ClimbState, Drivebase } from '$lib/schema/types.gen';
 	import type { PathPoint } from '$lib/schema/types.gen';
 	import RobotPath from '$lib/RobotPath.svelte';
+	import RobotPathView from '$lib/RobotPathView.svelte';
 
 	let is_swerve = $state<boolean>(false);
 	let gear_or_drivetype = $state<string>('');
@@ -24,18 +25,66 @@
 
 	let team = $state<string>('');
 	let insert_id: number;
+	let loading = $state(true);
+	let load_error = $state<string | null>(null);
 
 	onMount(() => {
-		const params = $page.url.searchParams;
-		if (params.has('id') && params.has('team')) {
-			insert_id = Number(params.get('id'));
-			team = params.get('team') ?? '';
-			if (isNaN(insert_id)) {
+		(async () => {
+			const params = $page.url.searchParams;
+			if (params.has('id') && params.has('team')) {
+				insert_id = Number(params.get('id'));
+				team = params.get('team') ?? '';
+				if (isNaN(insert_id)) {
+					goto('/notallowed');
+					return;
+				}
+			} else {
 				goto('/notallowed');
+				return;
 			}
-		} else {
-			goto('/notallowed');
-		}
+
+			const team_num_raw = Number(params.get('team_num'));
+			const is_ab_team_raw = params.get('is_ab_team');
+			const event_code_raw = params.get('event_code');
+
+			if (
+				params.has('team_num') &&
+				params.has('is_ab_team') &&
+				params.has('event_code') &&
+				!isNaN(team_num_raw) &&
+				(is_ab_team_raw === 'true' || is_ab_team_raw === 'false')
+			) {
+				const res = await get({
+					body: {
+						team: team_num_raw,
+						is_ab_team: is_ab_team_raw === 'true',
+						event_code: event_code_raw!,
+					},
+				});
+
+				if (res.error) {
+					load_error = 'Failed to load existing data (code ' + res.response.status + ')';
+				} else if (res.data.status === 'Error') {
+					load_error = 'Error: ' + res.data.message;
+				} else {
+					const pit = res.data.message.pit.RebuiltPit;
+					is_swerve = pit.is_swerve;
+					gear_or_drivetype = pit.gear_or_drivebase ?? '';
+					auto_paths = (pit.auto_paths as PathPoint[][][]) ?? [];
+					years_of_driver_experience = pit.years_of_driver_experience ?? null;
+					what_they_are_looking_from_the_tournament = pit.what_they_are_looking_from_the_tournament ?? null;
+					do_they_have_a_scouter = pit.do_they_have_a_scouter ?? null;
+					how_many_batteries_do_they_have_on_hand = pit.how_many_batteries_do_they_have_on_hand ?? null;
+					willing_to_play_defence = pit.willing_to_play_defence ?? null;
+					strategy = pit.strategy ?? null;
+					can_pass = pit.can_pass ?? null;
+					can_shoot = pit.can_shoot ?? null;
+					climb = pit.climb ?? null;
+				}
+			}
+
+			loading = false;
+		})();
 	});
 
 	function addPath() {
@@ -118,6 +167,13 @@
 		</div>
 	</header>
 
+	{#if loading}
+		<p class="load-status">Loading…</p>
+	{:else}
+	{#if load_error}
+		<p class="load-error">{load_error}</p>
+	{/if}
+
 	<FormWithLoading dispatch={handleInsert} submitLabel="Save Changes">
 		<div class="form-body">
 
@@ -153,6 +209,7 @@
 						<span class="path-info">Path {i + 1} — {path.length} stroke{path.length !== 1 ? 's' : ''}</span>
 						<button type="button" class="remove-btn" onclick={() => removePath(i)}>Remove</button>
 					</div>
+					<RobotPathView strokes={path} />
 				{/each}
 
 				{#if auto_paths.length < 3}
@@ -267,6 +324,7 @@
 
 		</div>
 	</FormWithLoading>
+	{/if}
 </div>
 
 <style>
@@ -314,108 +372,11 @@
 		color: #fff;
 	}
 
-	/* ── Form body ───────────────────────── */
-	.form-body {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-		padding: 1rem;
-	}
-
-	.field-section {
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-	}
-
+	/* ── Section label (flex for badge) ─── */
 	.section-label {
-		font-size: 0.62rem;
-		font-weight: 700;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
-		color: rgba(255, 255, 255, 0.35);
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-	}
-
-	.count-badge {
-		font-size: 0.55rem;
-		background: rgba(255, 255, 255, 0.07);
-		color: rgba(255, 255, 255, 0.4);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		border-radius: 3px;
-		padding: 1px 6px;
-		letter-spacing: 0.08em;
-	}
-
-	/* ── Text inputs ─────────────────────── */
-	.text-input {
-		width: 100%;
-		background: #111;
-		border: 1.5px solid rgba(255, 255, 255, 0.1);
-		border-radius: 10px;
-		color: #fff;
-		font-family: inherit;
-		font-size: 0.9rem;
-		padding: 0.75rem;
-		box-sizing: border-box;
-		outline: none;
-		transition: border-color 0.15s;
-	}
-
-	.text-input:focus {
-		border-color: rgba(60, 179, 113, 0.5);
-	}
-
-	.text-input::placeholder {
-		color: rgba(255, 255, 255, 0.2);
-	}
-
-	/* ── Toggle buttons ──────────────────── */
-	.toggle-col {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	.toggle-btn {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem 1rem;
-		border-radius: 8px;
-		border: 1.5px solid rgba(255, 255, 255, 0.08);
-		background: #1a1a1a;
-		color: rgba(255, 255, 255, 0.6);
-		font-size: 0.88rem;
-		font-weight: 600;
-		font-family: inherit;
-		cursor: pointer;
-		text-align: left;
-		transition: all 0.12s;
-		touch-action: manipulation;
-	}
-
-	.toggle-btn:active { transform: scale(0.98); }
-
-	.toggle-indicator {
-		width: 20px;
-		height: 20px;
-		border-radius: 4px;
-		border: 2px solid rgba(255, 255, 255, 0.2);
-		flex-shrink: 0;
-		transition: all 0.12s;
-	}
-
-	.toggle-btn.on {
-		border-color: rgba(60, 179, 113, 0.4);
-		color: #fff;
-	}
-
-	.toggle-btn.on .toggle-indicator {
-		background: #3cb371;
-		border-color: #3cb371;
 	}
 
 	/* ── Option grid (climb) ─────────────── */
@@ -425,80 +386,14 @@
 		gap: 8px;
 	}
 
-	.option-btn {
-		padding: 0.75rem 0;
-		border-radius: 8px;
-		border: 1.5px solid rgba(255, 255, 255, 0.1);
-		background: #1a1a1a;
-		color: rgba(255, 255, 255, 0.55);
-		font-size: 0.8rem;
-		font-weight: 600;
-		font-family: inherit;
-		cursor: pointer;
-		transition: all 0.12s;
-		touch-action: manipulation;
+	.load-status {
+		padding: 1rem;
+		color: rgba(255, 255, 255, 0.5);
 	}
 
-	.option-btn:active { transform: scale(0.95); }
-
-	.option-btn.selected {
-		background: rgba(60, 179, 113, 0.18);
-		border-color: #3cb371;
-		color: #5dde8a;
-	}
-
-	/* ── Auto path rows ──────────────────── */
-	.path-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0.6rem 0.75rem;
-		border-radius: 8px;
-		background: rgba(255, 255, 255, 0.04);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-	}
-
-	.path-info {
-		font-size: 0.82rem;
-		color: rgba(255, 255, 255, 0.6);
-	}
-
-	.remove-btn {
-		font-size: 0.75rem;
-		padding: 4px 10px;
-		border-radius: 5px;
-		border: 1px solid rgba(229, 85, 85, 0.35);
-		background: rgba(229, 85, 85, 0.1);
-		color: #e05555;
-		font-family: inherit;
-		cursor: pointer;
-		transition: background 0.12s;
-		touch-action: manipulation;
-	}
-
-	.remove-btn:hover { background: rgba(229, 85, 85, 0.2); }
-
-	.add-path-btn {
-		padding: 0.7rem;
-		border-radius: 8px;
-		border: 1.5px dashed rgba(255, 255, 255, 0.15);
-		background: transparent;
-		color: rgba(255, 255, 255, 0.4);
+	.load-error {
+		padding: 0.5rem 1rem;
+		color: #f87171;
 		font-size: 0.85rem;
-		font-weight: 600;
-		font-family: inherit;
-		cursor: pointer;
-		transition: all 0.12s;
-		touch-action: manipulation;
-	}
-
-	.add-path-btn:hover:not(:disabled) {
-		border-color: rgba(60, 179, 113, 0.4);
-		color: #5dde8a;
-	}
-
-	.add-path-btn:disabled {
-		opacity: 0.3;
-		cursor: not-allowed;
 	}
 </style>

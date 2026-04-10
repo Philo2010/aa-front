@@ -1,13 +1,13 @@
 <script lang="ts">
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
 	import { format_team } from '$lib/ParseTeam.svelte';
-	import { insertScout } from '$lib/schema/sdk.gen';
-	import { getAllSnowgrave } from '$lib/schema/sdk.gen';
+	import { insertScout, getAllSnowgrave, bypassCheck } from '$lib/schema/sdk.gen';
 	import type {
 		Game,
 		GameTeamDataScouter,
 		MatchData,
 		ScouterInsertFront,
+		AllianceFront,
 	} from '$lib/schema/types.gen';
 	import DualRangeSlider from '$lib/DualRangeSlider.svelte';
 	import UserSelector from '$lib/UserSelector.svelte';
@@ -33,6 +33,25 @@
 	let maxGame = $derived(assignableGames.length || 1);
 	let stop = $derived(validateForm());
 	let hideDone = $state(false);
+
+	// bypass check: maps game.id → { red: message|null, blue: message|null }
+	type BypassStatus = { red: string | null; blue: string | null };
+	let bypassStatus = $state(new Map<number, BypassStatus>());
+	let bypassPending = $state(new Set<string>()); // "gameId-alliance"
+
+	async function doBypass(game_id: number, alliance: AllianceFront) {
+		const key = `${game_id}-${alliance}`;
+		bypassPending = new Set(bypassPending).add(key);
+		const res = await bypassCheck({ body: { game_id, alliance } });
+		const prev = bypassStatus.get(game_id) ?? { red: null, blue: null };
+		const msg = res.error
+			? `Error ${res.response.status}`
+			: res.data.message;
+		bypassStatus = new Map(bypassStatus).set(game_id, { ...prev, [alliance]: msg });
+		const next = new Set(bypassPending);
+		next.delete(key);
+		bypassPending = next;
+	}
 
 	function isGameDone(game: Game): boolean {
 		return game.teams.every((t) => t.done);
@@ -497,6 +516,29 @@
 								/>
 							</div>
 						</div>
+
+						<!-- Bypass bar -->
+						{@const bp = bypassStatus.get(game.id)}
+						<div class="bypass-bar">
+							<div class="bypass-field">
+								<button
+									type="button"
+									class="bypass-btn red-bypass"
+									disabled={bypassPending.has(`${game.id}-red`)}
+									onclick={() => doBypass(game.id, 'red')}
+								>BYPASS RED</button>
+								{#if bp?.red}<span class="bypass-msg">{bp.red}</span>{/if}
+							</div>
+							<div class="bypass-field">
+								<button
+									type="button"
+									class="bypass-btn blue-bypass"
+									disabled={bypassPending.has(`${game.id}-blue`)}
+									onclick={() => doBypass(game.id, 'blue')}
+								>BYPASS BLUE</button>
+								{#if bp?.blue}<span class="bypass-msg">{bp.blue}</span>{/if}
+							</div>
+						</div>
 					{:else}
 						<!-- Compact done view -->
 						<div class="done-summary">
@@ -918,6 +960,60 @@
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		white-space: nowrap;
+	}
+
+	/* Bypass bar */
+	.bypass-bar {
+		display: flex;
+		gap: 0;
+		padding: 0.4rem 0.8rem 0.5rem;
+		border-top: 1px solid rgba(255,255,255,0.05);
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.bypass-field {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex: 1;
+		min-width: 120px;
+	}
+
+	.bypass-btn {
+		font-size: 0.58rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		padding: 3px 8px;
+		border-radius: 4px;
+		cursor: pointer;
+		font-family: inherit;
+		transition: background 0.12s;
+		white-space: nowrap;
+	}
+
+	.bypass-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+	.red-bypass {
+		background: rgba(220, 60, 60, 0.1);
+		border: 1px solid rgba(220, 60, 60, 0.3);
+		color: #e06060;
+	}
+
+	.red-bypass:hover:not(:disabled) { background: rgba(220, 60, 60, 0.2); }
+
+	.blue-bypass {
+		background: rgba(60, 110, 220, 0.1);
+		border: 1px solid rgba(60, 110, 220, 0.3);
+		color: #6699ee;
+	}
+
+	.blue-bypass:hover:not(:disabled) { background: rgba(60, 110, 220, 0.2); }
+
+	.bypass-msg {
+		font-size: 0.65rem;
+		color: rgba(255,255,255,0.45);
+		letter-spacing: 0.04em;
 	}
 
 	/* Done summary */

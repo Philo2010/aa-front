@@ -46,47 +46,5 @@
 </div>
 
 <style>
-	.page {
-		max-width: 560px;
-		margin: 0 auto;
-		padding: 1.5rem 1rem 4rem;
-	}
-
-	.page-header {
-		position: relative;
-		padding-left: 1rem;
-		margin-bottom: 2rem;
-	}
-
-	.header-accent {
-		position: absolute;
-		left: 0;
-		top: 0.15em;
-		bottom: 0.15em;
-		width: 3px;
-		background: #3cb371;
-	}
-
-	h1 {
-		font-size: 1.75rem;
-		font-weight: 700;
-		letter-spacing: 0.18em;
-		margin: 0;
-		color: #fff;
-	}
-
-	.subtitle {
-		margin: 0.2rem 0 0;
-		font-size: 0.72rem;
-		letter-spacing: 0.12em;
-		color: rgba(255, 255, 255, 0.35);
-	}
-
-	.state-message {
-		text-align: center;
-		padding: 3rem;
-		color: rgba(255, 255, 255, 0.30);
-		letter-spacing: 0.10em;
-		font-size: 0.85rem;
-	}
+	.page-header { margin-bottom: 2rem; }
 </style>

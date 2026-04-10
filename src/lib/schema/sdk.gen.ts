@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, CreateUserFrontData, CreateUserFrontResponses, DeleteEventData, DeleteEventResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllSnowgraveData, GetAllSnowgraveResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetTeamsFromGameData, GetTeamsFromGameResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
+import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, BypassCheckData, BypassCheckResponses, CreateUserFrontData, CreateUserFrontResponses, DeleteEventData, DeleteEventResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllSnowgraveData, GetAllSnowgraveResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetTeamsFromGameData, GetTeamsFromGameResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, ManualAddMatchData, ManualAddMatchResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -70,15 +70,6 @@ export const sendScoutwarn = <ThrowOnError extends boolean = false>(options: Opt
 export const averages = <ThrowOnError extends boolean = false>(options: Options<AveragesData, ThrowOnError>) => (options.client ?? client).get<AveragesResponses, unknown, ThrowOnError>({ url: '/api/averages/{event}', ...options });
 
 export const deleteScout = <ThrowOnError extends boolean = false>(options: Options<DeleteScoutData, ThrowOnError>) => (options.client ?? client).get<DeleteScoutResponses, unknown, ThrowOnError>({ url: '/api/delete/{id}', ...options });
-
-export const deleteEvent = <ThrowOnError extends boolean = false>(options: Options<DeleteEventData, ThrowOnError>) => (options.client ?? client).delete<DeleteEventResponses, unknown, ThrowOnError>({
-    url: '/api/snowgrave/delete_event',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
 
 export const graph = <ThrowOnError extends boolean = false>(options: Options<GraphData, ThrowOnError>) => (options.client ?? client).post<GraphResponses, unknown, ThrowOnError>({
     url: '/api/graph_sub',
@@ -219,3 +210,30 @@ export const createUserFront = <ThrowOnError extends boolean = false>(options: O
 });
 
 export const getTeamsFromGame = <ThrowOnError extends boolean = false>(options: Options<GetTeamsFromGameData, ThrowOnError>) => (options.client ?? client).get<GetTeamsFromGameResponses, unknown, ThrowOnError>({ url: '/api/pit/get_teams_from_game/{id_upcoming_game}', ...options });
+
+export const deleteEvent = <ThrowOnError extends boolean = false>(options: Options<DeleteEventData, ThrowOnError>) => (options.client ?? client).delete<DeleteEventResponses, unknown, ThrowOnError>({
+    url: '/api/snowgrave/delete_event',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const manualAddMatch = <ThrowOnError extends boolean = false>(options: Options<ManualAddMatchData, ThrowOnError>) => (options.client ?? client).post<ManualAddMatchResponses, unknown, ThrowOnError>({
+    url: '/api/snowgrave/manual_add_match',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const bypassCheck = <ThrowOnError extends boolean = false>(options: Options<BypassCheckData, ThrowOnError>) => (options.client ?? client).post<BypassCheckResponses, unknown, ThrowOnError>({
+    url: '/api/snowgrave/bypass_check',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
