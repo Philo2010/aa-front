@@ -196,6 +196,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "include_midway",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
           }
         ],
         "responses": {
@@ -748,37 +756,6 @@
         }
       }
     },
-    "/api/snowgrave/delete_event": {
-      "delete": {
-        "operationId": "delete_event",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["event"],
-                "properties": {
-                  "event": { "type": "string" }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResult_for_String"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/snowgrave/manual_add_match": {
       "post": {
         "operationId": "manual_add_match",
@@ -814,6 +791,33 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/BypassCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/snowgrave/delete_event": {
+      "delete": {
+        "operationId": "delete_event_route",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteEventInput"
               }
             }
           },
@@ -2067,6 +2071,10 @@
           "is_mvp": {
             "type": "boolean",
             "nullable": true
+          },
+          "include_midway": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
@@ -3309,6 +3317,17 @@
           "red",
           "blue"
         ]
+      },
+      "DeleteEventInput": {
+        "type": "object",
+        "required": [
+          "event"
+        ],
+        "properties": {
+          "event": {
+            "type": "string"
+          }
+        }
       }
     }
   }

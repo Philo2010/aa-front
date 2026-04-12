@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { checkadmin } from '$lib/checkadminship';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
-	import { deleteEvent } from '$lib/schema/sdk.gen';
+	import { deleteEventRoute as deleteEvent } from '$lib/schema/sdk.gen';
 
 	let event = $state('');
 	let confirmed = $state(false);

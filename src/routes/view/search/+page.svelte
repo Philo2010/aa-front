@@ -26,6 +26,7 @@
 	let submitting = $state(false);
 	let submitError = $state<string | null>(null);
 	let activeKeys = $state<string[]>([]);
+	let includeMidway = $state(false);
 	let params: SearchParamData = $state({
 		user: null,
 		team: null,
@@ -37,6 +38,7 @@
 		tournament_level: null,
 		station: null,
 		is_mvp: null,
+		include_midway: null,
 	});
 
 	$effect(() => {
@@ -58,7 +60,7 @@
 	}
 
 	const availableKeys = $derived([
-		...Object.keys(params).filter(k => !activeKeys.includes(k) && k !== 'team' && k !== 'is_ab_team'),
+		...Object.keys(params).filter(k => !activeKeys.includes(k) && k !== 'team' && k !== 'is_ab_team' && k !== 'include_midway'),
 		...(team === null ? ['team'] : [])
 	]);
 
@@ -93,6 +95,7 @@
 			let event = await get_event();
 			params.event_code = event;
 		}
+		params.include_midway = includeMidway || null;
 		let res = await search({ body: params });
 		submitting = false;
 		if (res.error) {
@@ -191,6 +194,13 @@
 	{:else}
 	<p class="state-message">no filters added yet</p>
 	{/if}
+
+	<div class="midway-row">
+		<label class="midway-label">
+			<input type="checkbox" bind:checked={includeMidway} class="midway-check" />
+			<span>INCLUDE MIDWAY DATA</span>
+		</label>
+	</div>
 
 	{#if submitError}
 		<p class="error-msg">{submitError}</p>
@@ -395,6 +405,33 @@
 	.btn-remove:hover {
 		color: #e05555;
 		border-color: #e05555;
+	}
+
+	.midway-row {
+		margin-bottom: 1rem;
+	}
+
+	.midway-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		color: rgba(255, 255, 255, 0.40);
+		transition: color 0.15s;
+	}
+
+	.midway-label:hover {
+		color: rgba(255, 255, 255, 0.65);
+	}
+
+	.midway-check {
+		width: 16px;
+		height: 16px;
+		accent-color: #3cb371;
+		cursor: pointer;
 	}
 
 	.state-message { margin: 0 0 1.25rem; }

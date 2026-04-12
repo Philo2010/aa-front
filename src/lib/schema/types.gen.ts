@@ -293,6 +293,7 @@ export type SearchParamData = {
     tournament_level?: TournamentLevels | null;
     station?: Stations | null;
     is_mvp?: boolean | null;
+    include_midway?: boolean | null;
 };
 
 export type LoginRes = {
@@ -608,6 +609,10 @@ export type BypassCheckRequest = {
 
 export type AllianceFront = 'red' | 'blue';
 
+export type DeleteEventInput = {
+    event: string;
+};
+
 export type EditPitData = {
     body: PitEditSpecific;
     path: {
@@ -706,7 +711,9 @@ export type AveragesData = {
     path: {
         event: string;
     };
-    query?: never;
+    query?: {
+        include_midway?: boolean | null;
+    };
     url: '/api/averages/{event}';
 };
 
@@ -1006,21 +1013,6 @@ export type GetTeamsFromGameResponses = {
 
 export type GetTeamsFromGameResponse = GetTeamsFromGameResponses[keyof GetTeamsFromGameResponses];
 
-export type DeleteEventData = {
-    body: {
-        event: string;
-    };
-    path?: never;
-    query?: never;
-    url: '/api/snowgrave/delete_event';
-};
-
-export type DeleteEventResponses = {
-    200: ApiResultForString;
-};
-
-export type DeleteEventResponse = DeleteEventResponses[keyof DeleteEventResponses];
-
 export type ManualAddMatchData = {
     body: ManualInsertMatchFront;
     path?: never;
@@ -1046,3 +1038,16 @@ export type BypassCheckResponses = {
 };
 
 export type BypassCheckResponse = BypassCheckResponses[keyof BypassCheckResponses];
+
+export type DeleteEventRouteData = {
+    body: DeleteEventInput;
+    path?: never;
+    query?: never;
+    url: '/api/snowgrave/delete_event';
+};
+
+export type DeleteEventRouteResponses = {
+    200: ApiResultForString;
+};
+
+export type DeleteEventRouteResponse = DeleteEventRouteResponses[keyof DeleteEventRouteResponses];
