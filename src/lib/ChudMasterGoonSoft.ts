@@ -8,6 +8,7 @@ export type GamesGraph = {
     auto_score: number;
     teleop_score: number;
     defence: number;
+    dpdg: number | null;
 };
 
 export type GraphDataF = {
@@ -15,6 +16,7 @@ export type GraphDataF = {
     auto: ChartData<'line'>;
     teleop: ChartData<'line'>;
     defense: ChartData<'line'>;
+    dpdg: ChartData<'line'>;
 };
 
 function generateColor(index: number): string {
@@ -59,10 +61,19 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         tension: 0.1
     }));
 
+    const datasetsDpdg: ChartDataset<'line'>[] = teams.map((team, index) => ({
+        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} DPDG`,
+        data: team.data.map(item => item.dpdg ?? null),
+        fill: false,
+        borderColor: generateColor(index),
+        tension: 0.1
+    }));
+
     return {
         total: { labels, datasets: datasetsTotal },
         auto: { labels, datasets: datasetsAuto },
         teleop: { labels, datasets: datasetsTeleop },
-        defense: { labels, datasets: datasetsDefense }
+        defense: { labels, datasets: datasetsDefense },
+        dpdg: { labels, datasets: datasetsDpdg }
     };
 }

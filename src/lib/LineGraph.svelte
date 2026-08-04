@@ -11,6 +11,7 @@
 	let canvasAuto: HTMLCanvasElement;
 	let canvasTeleop: HTMLCanvasElement;
 	let canvasDefense: HTMLCanvasElement;
+	let canvasDpdg: HTMLCanvasElement;
 
 	$effect(() => {
 		const snap = $state.snapshot(data);
@@ -19,6 +20,7 @@
 			new Chart(canvasAuto,    { type: 'line', data: snap.auto }    as ChartConfiguration<'line'>),
 			new Chart(canvasTeleop,  { type: 'line', data: snap.teleop }  as ChartConfiguration<'line'>),
 			new Chart(canvasDefense, { type: 'line', data: snap.defense } as ChartConfiguration<'line'>),
+			new Chart(canvasDpdg,    { type: 'line', data: snap.dpdg }    as ChartConfiguration<'line'>),
 		];
 		return () => charts.forEach(c => c.destroy());
 	});
@@ -33,5 +35,7 @@
 	<canvas bind:this={canvasTeleop}></canvas>
 	<h2>Defense Score:</h2>
 	<canvas bind:this={canvasDefense}></canvas>
+	<h2>DPDG:</h2>
+	<canvas bind:this={canvasDpdg}></canvas>
 </div>
 

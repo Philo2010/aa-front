@@ -16,14 +16,16 @@ export type RebuiltGameFlatten = {
 	tournament_level: TournamentLevels;
 	station: Stations;
 	created_at: string;
-	is_mvp: boolean;
+    is_mvp: boolean;
     defence: number;
+    dpdg: number | null;
     comment: string;
     defence_main: boolean;
     fuel_shoot_teleop: number;
     fuel_pass_teleop: number;
     fuel_shoot_auto: number;
     fuel_pass_auto: number;
+    auto_time: number;
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
@@ -38,12 +40,14 @@ export type RebuiltAvgFlatten = {
     auto_score: number;
     teleop_score: number;
     defence_score: number;
+    dpdg: number | null;
     mvp_percent: number;
     defence_main_avg: number;
     fuel_shoot_teleop_avg: number;
     fuel_pass_teleop_avg: number;
     fuel_shoot_auto_avg: number;
     fuel_pass_auto_avg: number;
+    auto_time_avg: number;
     level_1_avg: number;
     level_2_avg: number;
     level_3_avg: number;
@@ -80,12 +84,14 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
         created_at: formatted,
         is_mvp: data.header.is_mvp,
         defence: data.header.defence,
+        dpdg: data.header.dpdg ?? null,
         comment: data.header.comment,
         defence_main: data.game.RebuiltGame.defence_main,
         fuel_shoot_teleop: data.game.RebuiltGame.fuel_shoot_teleop,
         fuel_pass_teleop: data.game.RebuiltGame.fuel_pass_teleop,
         fuel_shoot_auto: data.game.RebuiltGame.fuel_shoot_auto,
         fuel_pass_auto: data.game.RebuiltGame.fuel_pass_auto,
+        auto_time: data.game.RebuiltGame.auto_time,
         climb_end: data.game.RebuiltGame.climb_end,
         climb_auto: data.game.RebuiltGame.climb_auto,
         beach_on_bump: data.game.RebuiltGame.beach_on_bump,
@@ -106,12 +112,14 @@ export function FlattenDataAvg(data: TeamAvg, event_code: string): RebuiltAvgFla
         auto_score: data.auto_score,
         teleop_score: data.teleop_score,
         defence_score: data.defence_score,
+        dpdg: data.dpdg ?? null,
         mvp_percent: data.mvp_percent * 100,
         defence_main_avg: data.game.RebuiltGame.defence_main_avg,
         fuel_shoot_teleop_avg: data.game.RebuiltGame.fuel_shoot_teleop_avg,
         fuel_pass_teleop_avg: data.game.RebuiltGame.fuel_pass_teleop_avg,
         fuel_shoot_auto_avg: data.game.RebuiltGame.fuel_shoot_auto_avg,
         fuel_pass_auto_avg: data.game.RebuiltGame.fuel_pass_auto_avg,
+        auto_time_avg: data.game.RebuiltGame.auto_time_avg,
         level_1_avg: data.game.RebuiltGame.level_1_avg,
         level_2_avg: data.game.RebuiltGame.level_2_avg,
         level_3_avg: data.game.RebuiltGame.level_3_avg,

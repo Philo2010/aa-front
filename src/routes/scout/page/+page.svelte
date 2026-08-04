@@ -6,6 +6,7 @@
 	import { scoutEdit, scoutInsert } from '$lib/schema/sdk.gen';
 	import StarRating from '$lib/StarRating.svelte';
 	import FuelWidget from '$lib/FuelWidget.svelte';
+	import AutoTime from '$lib/AutoTime.svelte';
 
 	let team = $state<string>('');
 	let stop = $state<boolean>(true);
@@ -24,7 +25,8 @@
 		climb_auto: 'Nothing',
 		beach_on_bump: false,
 		dead: false,
-		dnf: false
+		dnf: false,
+		auto_time: 0
 	});
 
 	$effect(() => {
@@ -149,6 +151,11 @@
 							</button>
 						{/each}
 					</div>
+				</section>
+
+				<section class="field-section">
+					<div class="section-label">Auto Time</div>
+					<AutoTime bind:current_time_in_seconds={scout_form.auto_time} />
 				</section>
 
 			{:else if step === 1}

@@ -11,26 +11,28 @@
 
 	import NiceErrorTextBox from '$lib/NiceErrorTextBox.svelte';
 	import { parse_team } from '$lib/ParseTeam.svelte';
-	import type { GamesFull, Team } from '$lib/schema/types.gen';
+	import type { Team } from '$lib/schema/types.gen';
 	import type { SearchParamData, TournamentLevels, Stations } from '$lib/schema/types.gen';
 	import { get_event } from '$lib/GetCurrEvent';
-	import SelectTeam from '$lib/SelectTeam.svelte';
 	import { search } from '$lib/schema/sdk.gen';
 	import Table from '$lib/Table.svelte';
 	import { FlattenData, type RebuiltGameFlatten } from '$lib/ParseTimeRunTimeBumAssTime';
 
-	let team_string = $state<string>('');
-	let team_error: string | null = $state<null>(null);
+	let team_strings = $state<string[]>([]);
+	const teamErrors = $derived(
+		team_strings.map((value) => {
+			const res = parse_team(value);
+			return typeof res === 'string' ? res : null;
+		})
+	);
 	let data = $state<RebuiltGameFlatten[] | null>(null);
-	let team = $state<Team | null>(null);
 	let submitting = $state(false);
 	let submitError = $state<string | null>(null);
 	let activeKeys = $state<string[]>([]);
 	let includeMidway = $state(false);
 	let params: SearchParamData = $state({
 		user: null,
-		team: null,
-		is_ab_team: null,
+		teams: null,
 		match_id: null,
 		set: null,
 		total_score: null,
@@ -41,36 +43,22 @@
 		include_midway: null,
 	});
 
-	$effect(() => {
-		if (!team_string) return;
-		const res = parse_team(team_string);
-		if (typeof res === 'string') {
-			team_error = res;
-		} else {
-			if (!team || team.number !== res.team_number || team.is_ab_team !== res.is_ab_team) {
-				team = { number: res.team_number, is_ab_team: res.is_ab_team };
-			}
-			team_error = null;
-		}
-	});
-	$inspect(team_string, team);
-
 	function formatKey(key: string) {
 		return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 	}
 
 	const availableKeys = $derived([
-		...Object.keys(params).filter(k => !activeKeys.includes(k) && k !== 'team' && k !== 'is_ab_team' && k !== 'include_midway'),
-		...(team === null ? ['team'] : [])
+		...Object.keys(params).filter(k => !activeKeys.includes(k) && k !== 'teams' && k !== 'include_midway'),
+		'team',
 	]);
 
 	function addKey(key: string) {
 		const k = key as keyof SearchParamData;
 		if (k === 'team') {
-			team = { number: 0, is_ab_team: false };
+			team_strings = [...team_strings, ''];
 			return;
 		}
-		if (k === 'is_ab_team' || k === 'is_mvp') {
+		if (k === 'is_mvp') {
 			(params[k] as boolean | null) = false;
 		} else if (k === 'total_score' || k === 'match_id' || k === 'set') {
 			(params[k] as number | null) = 0;
@@ -87,10 +75,17 @@
 	async function dispatch() {
 		submitting = true;
 		submitError = null;
-		if (team !== null) {
-			params.team = team.number;
-			params.is_ab_team = team.is_ab_team;
+		const teams: Team[] = [];
+		for (const s of team_strings) {
+			const res = parse_team(s);
+			if (typeof res === 'string') {
+				submitError = 'Invalid team: ' + s;
+				submitting = false;
+				return;
+			}
+			teams.push({ number: res.team_number, is_ab_team: res.is_ab_team });
 		}
+		params.teams = teams.length > 0 ? teams : null;
 		if (params.event_code === null) {
 			let event = await get_event();
 			params.event_code = event;
@@ -112,8 +107,12 @@
 		activeKeys = activeKeys.filter(k => k !== key);
 	}
 
-	function isBooleanKey(key: string): key is 'is_ab_team' | 'is_mvp' {
-		return key === 'is_ab_team' || key === 'is_mvp';
+	function removeTeam(i: number) {
+		team_strings = team_strings.filter((_, idx) => idx !== i);
+	}
+
+	function isBooleanKey(key: string): key is 'is_mvp' {
+		return key === 'is_mvp';
 	}
 
 	function isNumberKey(key: string): key is 'total_score' | 'match_id' | 'set' {
@@ -123,7 +122,7 @@
 	const tournamentLevels: TournamentLevels[] = ['QualificationMatch', 'Quarterfinal', 'Semifinal', 'Final'];
 	const stations: Stations[] = ['Red1', 'Red2', 'Red3', 'Blue1', 'Blue2', 'Blue3'];
 
-	const hasParams = $derived(team !== null || activeKeys.length > 0);
+	const hasParams = $derived(team_strings.length > 0 || activeKeys.length > 0);
 </script>
 
 {#if data === null}
@@ -151,15 +150,15 @@
 			<span class="section-label">ACTIVE FILTERS</span>
 		</div>
 		<ul class="params-list">
-			{#if team !== null}
+			{#each team_strings as t, i}
 				<li class="param-item">
 					<span class="param-key">TEAM</span>
 					<div class="param-value">
-						<NiceErrorTextBox error={team_error} bind:input={team_string} />
+						<NiceErrorTextBox bind:input={team_strings[i]} error={teamErrors[i]} />
 					</div>
-					<button class="btn-remove" onclick={() => { team = null; team_string = ''; }}>✕</button>
+					<button class="btn-remove" onclick={() => removeTeam(i)}>✕</button>
 				</li>
-			{/if}
+			{/each}
 			{#each Object.entries(params) as [key, value]}
 				{#if activeKeys.includes(key)}
 					<li class="param-item">

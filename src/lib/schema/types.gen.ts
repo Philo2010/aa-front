@@ -172,6 +172,7 @@ export type TeamAvg = {
     teleop_score: number;
     defence_score: number;
     mvp_percent: number;
+    dpdg?: number | null;
     game: GamesAvgSpecific;
 };
 
@@ -187,6 +188,8 @@ export type Avg = {
     fuel_pass_auto_avg: number;
     dead_avg: number;
     dnf_avg: number;
+    auto_time_avg: number;
+    dpdg_avg?: number | null;
     level_1_avg: number;
     level_2_avg: number;
     level_3_avg: number;
@@ -215,6 +218,7 @@ export type GamesGraph = {
     auto_score: number;
     teleop_score: number;
     defence: number;
+    dpdg?: number | null;
 };
 
 export type Team = {
@@ -258,6 +262,7 @@ export type HeaderFull = {
     is_mvp: boolean;
     defence: number;
     mvp_comment?: string | null;
+    dpdg?: number | null;
 };
 
 export type TournamentLevels = 'QualificationMatch' | 'Quarterfinal' | 'Semifinal' | 'Final';
@@ -280,12 +285,13 @@ export type Model2 = {
     beach_on_bump: boolean;
     dead: boolean;
     dnf: boolean;
+    auto_time: number;
+    dpdg?: number | null;
 };
 
 export type SearchParamData = {
     user?: string | null;
-    team?: number | null;
-    is_ab_team?: boolean | null;
+    teams?: Array<Team> | null;
     match_id?: number | null;
     set?: number | null;
     total_score?: number | null;
@@ -414,6 +420,8 @@ export type Edit2 = {
     beach_on_bump?: boolean | null;
     dead?: boolean | null;
     dnf?: boolean | null;
+    auto_time?: number | null;
+    dpdg?: number | null;
 };
 
 export type InsertSnow = {
@@ -438,6 +446,8 @@ export type Insert2 = {
     beach_on_bump: boolean;
     dead: boolean;
     dnf: boolean;
+    auto_time: number;
+    dpdg?: number | null;
 };
 
 export type ApiResultForArrayOfString = {
