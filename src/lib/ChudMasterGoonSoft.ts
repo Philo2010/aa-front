@@ -9,6 +9,7 @@ export type GamesGraph = {
     teleop_score: number;
     defence: number;
     dpdg: number | null;
+    dpdg_raw: number | null;
 };
 
 export type GraphDataF = {
@@ -16,8 +17,11 @@ export type GraphDataF = {
     auto: ChartData<'line'>;
     teleop: ChartData<'line'>;
     defense: ChartData<'line'>;
-    dpdg: ChartData<'line'>;
+    dpdg_raw: ChartData<'line'>;
+    dpdg_pct: ChartData<'line'>;
 };
+
+export type DpdgMode = 'raw' | 'pct';
 
 function generateColor(index: number): string {
     const hue = (index * 137.508) % 360;
@@ -61,8 +65,16 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         tension: 0.1
     }));
 
-    const datasetsDpdg: ChartDataset<'line'>[] = teams.map((team, index) => ({
-        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} DPDG`,
+    const datasetsDpdgRaw: ChartDataset<'line'>[] = teams.map((team, index) => ({
+        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} DPDG Points`,
+        data: team.data.map(item => item.dpdg_raw ?? null),
+        fill: false,
+        borderColor: generateColor(index),
+        tension: 0.1
+    }));
+
+    const datasetsDpdgPct: ChartDataset<'line'>[] = teams.map((team, index) => ({
+        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} DPDG %`,
         data: team.data.map(item => item.dpdg ?? null),
         fill: false,
         borderColor: generateColor(index),
@@ -74,6 +86,7 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         auto: { labels, datasets: datasetsAuto },
         teleop: { labels, datasets: datasetsTeleop },
         defense: { labels, datasets: datasetsDefense },
-        dpdg: { labels, datasets: datasetsDpdg }
+        dpdg_raw: { labels, datasets: datasetsDpdgRaw },
+        dpdg_pct: { labels, datasets: datasetsDpdgPct }
     };
 }
