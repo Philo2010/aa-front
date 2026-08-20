@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, BypassCheckData, BypassCheckResponses, CreateUserFrontData, CreateUserFrontResponses, DeleteEventRouteData, DeleteEventRouteResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllSnowgraveData, GetAllSnowgraveResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetTeamsFromGameData, GetTeamsFromGameResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, ManualAddMatchData, ManualAddMatchResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
+import type { AssignPitData, AssignPitResponses, AveragesData, AveragesResponses, BypassCheckData, BypassCheckResponses, CreateUserFrontData, CreateUserFrontResponses, DeleteEventRouteData, DeleteEventRouteResponses, DeleteScoutData, DeleteScoutResponses, EditPitData, EditPitResponses, ForgiveScoutwarnData, ForgiveScoutwarnResponses, GetAllSnowgraveData, GetAllSnowgraveResponses, GetAllUsersData, GetAllUsersResponses, GetData, GetEventData, GetEventResponses, GetForScoutData, GetForScoutResponses, GetLeaderboardData, GetLeaderboardResponses, GetResponses, GetScoutwarnData, GetScoutwarnResponses, GetTeamsFromGameData, GetTeamsFromGameResponses, GetYearsData, GetYearsResponses, GraphData, GraphResponses, InsertData, InsertResponses, InsertScoutData, InsertScoutResponses, LoginData, LoginResponses, ManualAddMatchData, ManualAddMatchResponses, MvpInsertData, MvpInsertResponses, PitGetAllData, PitGetAllResponses, PrescoutInsertData, PrescoutInsertResponses, QueueData, QueuePlayoffData, QueuePlayoffResponses, QueueResponses, ResetPasswordData, ResetPasswordResponses, ScoutEditData, ScoutEditResponses, ScoutInsertData, ScoutInsertResponses, SearchData, SearchResponses, SendScoutwarnData, SendScoutwarnResponses, SetEventData, SetEventResponses, SubScoutData, SubScoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -231,6 +231,18 @@ export const bypassCheck = <ThrowOnError extends boolean = false>(options: Optio
 
 export const deleteEventRoute = <ThrowOnError extends boolean = false>(options: Options<DeleteEventRouteData, ThrowOnError>) => (options.client ?? client).delete<DeleteEventRouteResponses, unknown, ThrowOnError>({
     url: '/api/snowgrave/delete_event',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Store admin-entered prescout data. Unlike the other snowgrave insert routes this one is admin-gated — it writes straight to final storage with no check phase in front of it.
+ */
+export const prescoutInsert = <ThrowOnError extends boolean = false>(options: Options<PrescoutInsertData, ThrowOnError>) => (options.client ?? client).post<PrescoutInsertResponses, unknown, ThrowOnError>({
+    url: '/api/prescout/insert',
     ...options,
     headers: {
         'Content-Type': 'application/json',

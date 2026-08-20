@@ -19,6 +19,7 @@ export type RebuiltGameFlatten = {
     is_mvp: boolean;
     defence: number;
     dpdg: number | null;
+    dpdg_raw: number | null;
     comment: string;
     defence_main: boolean;
     fuel_shoot_teleop: number;
@@ -41,6 +42,7 @@ export type RebuiltAvgFlatten = {
     teleop_score: number;
     defence_score: number;
     dpdg: number | null;
+    dpdg_raw: number | null;
     mvp_percent: number;
     defence_main_avg: number;
     fuel_shoot_teleop_avg: number;
@@ -85,6 +87,7 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
         is_mvp: data.header.is_mvp,
         defence: data.header.defence,
         dpdg: data.header.dpdg ?? null,
+        dpdg_raw: data.header.dpdg_raw ?? null,
         comment: data.header.comment,
         defence_main: data.game.RebuiltGame.defence_main,
         fuel_shoot_teleop: data.game.RebuiltGame.fuel_shoot_teleop,
@@ -113,6 +116,7 @@ export function FlattenDataAvg(data: TeamAvg, event_code: string): RebuiltAvgFla
         teleop_score: data.teleop_score,
         defence_score: data.defence_score,
         dpdg: data.dpdg ?? null,
+        dpdg_raw: data.dpdg_raw ?? null,
         mvp_percent: data.mvp_percent * 100,
         defence_main_avg: data.game.RebuiltGame.defence_main_avg,
         fuel_shoot_teleop_avg: data.game.RebuiltGame.fuel_shoot_teleop_avg,

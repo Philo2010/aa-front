@@ -94,7 +94,7 @@
 								{#each activeScouts as scout}
 									{@const status = getScoutStatus(scout)}
 									<a
-										href="/scout/page?id={scout.id}&team={format_team(scout.team.number, scout.team.is_ab_team)}{status === 'redo' ? '&edit=true' : ''}"
+										href="/scout/page?id={scout.id}&team={format_team(scout.team.number, scout.team.is_ab_team)}&game_id={game.id}&is_blue={scout.station.startsWith('Blue')}{status === 'redo' ? '&edit=true' : ''}"
 										class="scout-btn status-{status}"
 									>
 										{#if status === 'redo'}

@@ -58,6 +58,10 @@
 			<span class="nav-label">ADD MATCH</span>
 			<span class="nav-sub">manually insert a match</span>
 		</a>
+		<a href="/admin/prescout" class="nav-card">
+			<span class="nav-label">PRESCOUT</span>
+			<span class="nav-sub">enter match data by hand, kept out of averages</span>
+		</a>
 		<a href="/admin/deleteevent" class="nav-card danger">
 			<span class="nav-label">DELETE EVENT</span>
 			<span class="nav-sub">remove event queue and assignments</span>

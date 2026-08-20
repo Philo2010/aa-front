@@ -173,6 +173,7 @@ export type TeamAvg = {
     defence_score: number;
     mvp_percent: number;
     dpdg?: number | null;
+    dpdg_raw?: number | null;
     game: GamesAvgSpecific;
 };
 
@@ -190,6 +191,7 @@ export type Avg = {
     dnf_avg: number;
     auto_time_avg: number;
     dpdg_avg?: number | null;
+    dpdg_raw_avg?: number | null;
     level_1_avg: number;
     level_2_avg: number;
     level_3_avg: number;
@@ -219,6 +221,7 @@ export type GamesGraph = {
     teleop_score: number;
     defence: number;
     dpdg?: number | null;
+    dpdg_raw?: number | null;
 };
 
 export type Team = {
@@ -262,7 +265,14 @@ export type HeaderFull = {
     is_mvp: boolean;
     defence: number;
     mvp_comment?: string | null;
+    /**
+     * DPDG as a percentage of the opposing teams' event averages.
+     */
     dpdg?: number | null;
+    /**
+     * DPDG as a raw point value.
+     */
+    dpdg_raw?: number | null;
 };
 
 export type TournamentLevels = 'QualificationMatch' | 'Quarterfinal' | 'Semifinal' | 'Final';
@@ -276,6 +286,10 @@ export type GamesFullSpecific = {
 export type Model2 = {
     id: number;
     defence_main: boolean;
+    /**
+     * What the main defender was defending (whole alliance vs. a single bot). `Some` only when `defence_main` is set.
+     */
+    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop: number;
     fuel_pass_teleop: number;
     fuel_shoot_auto: number;
@@ -286,7 +300,23 @@ export type Model2 = {
     dead: boolean;
     dnf: boolean;
     auto_time: number;
+    /**
+     * DPDG as a percentage of the opposing teams' event averages.
+     */
     dpdg?: number | null;
+    /**
+     * DPDG as a raw point value (opponent event averages minus their scores).
+     */
+    dpdg_raw?: number | null;
+};
+
+/**
+ * What a main defender spent the match defending.
+ *
+ * Only meaningful when the game is flagged as the main defender — it is `Some` exactly when that flag is set, and `None` otherwise. `Alliance` means the defence was spread across the whole opposing alliance (the original DPDG behaviour, summed over all three opponents); `Bot` means a single opposing robot was targeted, and DPDG is computed against only that robot's score and event average.
+ */
+export type DefenceTarget = 'Alliance' | {
+    Bot: Team;
 };
 
 export type SearchParamData = {
@@ -300,6 +330,10 @@ export type SearchParamData = {
     station?: Stations | null;
     is_mvp?: boolean | null;
     include_midway?: boolean | null;
+    /**
+     * Return prescout rows *and only* prescout rows. Prescout data is never mixed with real scouting data, so this replaces the normal results rather than adding to them.
+     */
+    prescout_only?: boolean | null;
 };
 
 export type LoginRes = {
@@ -411,6 +445,7 @@ export type GamesEditSpecific = {
 
 export type Edit2 = {
     defence_main?: boolean | null;
+    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop?: number | null;
     fuel_pass_teleop?: number | null;
     fuel_shoot_auto?: number | null;
@@ -422,6 +457,7 @@ export type Edit2 = {
     dnf?: boolean | null;
     auto_time?: number | null;
     dpdg?: number | null;
+    dpdg_raw?: number | null;
 };
 
 export type InsertSnow = {
@@ -437,6 +473,7 @@ export type GamesInsertsSpecific = {
 
 export type Insert2 = {
     defence_main: boolean;
+    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop: number;
     fuel_pass_teleop: number;
     fuel_shoot_auto: number;
@@ -448,6 +485,7 @@ export type Insert2 = {
     dnf: boolean;
     auto_time: number;
     dpdg?: number | null;
+    dpdg_raw?: number | null;
 };
 
 export type ApiResultForArrayOfString = {
@@ -621,6 +659,22 @@ export type AllianceFront = 'red' | 'blue';
 
 export type DeleteEventInput = {
     event: string;
+};
+
+export type PrescoutInsert = {
+    team: number;
+    is_ab_team: boolean;
+    match_id: number;
+    set: number;
+    event_code: string;
+    tournament_level: TournamentLevels;
+    station: Stations;
+    /**
+     * Defence rating, 0-5, same scale as a normal scout submission.
+     */
+    defence: number;
+    comment: string;
+    game: GamesInsertsSpecific;
 };
 
 export type EditPitData = {
@@ -1061,3 +1115,16 @@ export type DeleteEventRouteResponses = {
 };
 
 export type DeleteEventRouteResponse = DeleteEventRouteResponses[keyof DeleteEventRouteResponses];
+
+export type PrescoutInsertData = {
+    body: PrescoutInsert;
+    path?: never;
+    query?: never;
+    url: '/api/prescout/insert';
+};
+
+export type PrescoutInsertResponses = {
+    200: ApiResultForString;
+};
+
+export type PrescoutInsertResponse = PrescoutInsertResponses[keyof PrescoutInsertResponses];

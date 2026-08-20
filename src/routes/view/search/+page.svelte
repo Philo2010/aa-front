@@ -30,6 +30,10 @@
 	let submitError = $state<string | null>(null);
 	let activeKeys = $state<string[]>([]);
 	let includeMidway = $state(false);
+	// Prescout is admin-entered data that never mixes with real scouting data,
+	// so this replaces the results rather than adding to them.
+	let prescoutOnly = $state(false);
+	let resultsArePrescout = $state(false);
 	let params: SearchParamData = $state({
 		user: null,
 		teams: null,
@@ -41,6 +45,7 @@
 		station: null,
 		is_mvp: null,
 		include_midway: null,
+		prescout_only: null,
 	});
 
 	function formatKey(key: string) {
@@ -48,7 +53,7 @@
 	}
 
 	const availableKeys = $derived([
-		...Object.keys(params).filter(k => !activeKeys.includes(k) && k !== 'teams' && k !== 'include_midway'),
+		...Object.keys(params).filter(k => !activeKeys.includes(k) && k !== 'teams' && k !== 'include_midway' && k !== 'prescout_only'),
 		'team',
 	]);
 
@@ -90,7 +95,9 @@
 			let event = await get_event();
 			params.event_code = event;
 		}
-		params.include_midway = includeMidway || null;
+		// Midway records can never be prescout, so asking for both is meaningless.
+		params.prescout_only = prescoutOnly || null;
+		params.include_midway = (includeMidway && !prescoutOnly) || null;
 		let res = await search({ body: params });
 		submitting = false;
 		if (res.error) {
@@ -98,6 +105,7 @@
 		} else if (res.data.status === 'Error') {
 			submitError = res.data.message;
 		} else {
+			resultsArePrescout = prescoutOnly;
 			data = res.data.message.map((x: any) => FlattenData(x));
 		}
 	}
@@ -195,10 +203,19 @@
 	{/if}
 
 	<div class="midway-row">
-		<label class="midway-label">
-			<input type="checkbox" bind:checked={includeMidway} class="midway-check" />
+		<label class="midway-label" class:disabled={prescoutOnly}>
+			<input type="checkbox" bind:checked={includeMidway} class="midway-check" disabled={prescoutOnly} />
 			<span>INCLUDE MIDWAY DATA</span>
 		</label>
+		<label class="midway-label prescout-label" class:on={prescoutOnly}>
+			<input type="checkbox" bind:checked={prescoutOnly} class="midway-check" />
+			<span>PRESCOUT ONLY</span>
+		</label>
+		{#if prescoutOnly}
+			<p class="prescout-hint">
+				showing admin-entered prescout data only — never counted in averages, graphs or DPDG
+			</p>
+		{/if}
 	</div>
 
 	{#if submitError}
@@ -214,8 +231,13 @@
 	<header class="page-header">
 		<div class="header-accent"></div>
 		<h1>RESULTS</h1>
-		<p class="subtitle">search results</p>
+		<p class="subtitle">{resultsArePrescout ? 'prescout data only' : 'search results'}</p>
 	</header>
+	{#if resultsArePrescout}
+		<div class="prescout-banner">
+			PRESCOUT — admin-entered data, excluded from averages, graphs and DPDG
+		</div>
+	{/if}
 	<button class="btn-ghost" onclick={() => { data = null; }}>← BACK</button>
 	<div style="margin-top: 1rem;">
 		<Table ptData={data} />
@@ -408,6 +430,9 @@
 
 	.midway-row {
 		margin-bottom: 1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
 	}
 
 	.midway-label {
@@ -431,6 +456,47 @@
 		height: 16px;
 		accent-color: #3cb371;
 		cursor: pointer;
+	}
+
+	.midway-label.disabled {
+		opacity: 0.35;
+		cursor: not-allowed;
+	}
+
+	.midway-label.disabled:hover {
+		color: rgba(255, 255, 255, 0.40);
+	}
+
+	.prescout-label.on {
+		color: #ffa000;
+	}
+
+	.prescout-label.on:hover {
+		color: #ffb733;
+	}
+
+	.prescout-label .midway-check {
+		accent-color: #ffa000;
+	}
+
+	.prescout-hint {
+		margin: 0;
+		font-size: 0.65rem;
+		line-height: 1.5;
+		letter-spacing: 0.04em;
+		color: rgba(255, 190, 110, 0.7);
+	}
+
+	.prescout-banner {
+		background: rgba(255, 160, 0, 0.12);
+		border: 1px solid rgba(255, 160, 0, 0.35);
+		border-radius: 6px;
+		color: #ffa000;
+		font-size: 0.62rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		padding: 0.5rem 0.8rem;
+		margin-bottom: 1rem;
 	}
 
 	.state-message { margin: 0 0 1.25rem; }
