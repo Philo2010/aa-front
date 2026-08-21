@@ -10,11 +10,27 @@
 	import { get_event } from '$lib/GetCurrEvent';
 	import { prescoutInsert } from '$lib/schema/sdk.gen';
 	import type {
-		Insert2,
+		ClimbState,
+		DefenceTarget,
 		PrescoutInsert,
 		Stations,
 		TournamentLevels
 	} from '$lib/schema/types.gen';
+
+	type ScoutFormState = {
+		fuel_shoot_teleop: number;
+		fuel_pass_teleop: number;
+		fuel_shoot_auto: number;
+		fuel_pass_auto: number;
+		climb_end: ClimbState;
+		climb_auto: ClimbState;
+		beach_on_bump: boolean;
+		defence_main: boolean;
+		defence_target: DefenceTarget | null;
+		auto_time: number;
+		dead: boolean;
+		dnf: boolean;
+	};
 
 	onMount(async () => {
 		if (!checkadmin()) {
@@ -37,12 +53,10 @@
 
 	const levels: TournamentLevels[] = ['QualificationMatch', 'Quarterfinal', 'Semifinal', 'Final'];
 	const stations: Stations[] = ['Red1', 'Red2', 'Red3', 'Blue1', 'Blue2', 'Blue3'];
-	const climbs: Insert2['climb_end'][] = ['Nothing', 'Stage1', 'Stage2', 'Stage3'];
+	const climbs: ClimbState[] = ['Nothing', 'Stage1', 'Stage2', 'Stage3'];
 
 	// Game data — same shape a scout submits.
-	let scout_form = $state<Insert2>({
-		defence_main: false,
-		defence_target: null,
+	let scout_form = $state<ScoutFormState>({
 		fuel_shoot_teleop: 0,
 		fuel_pass_teleop: 0,
 		fuel_shoot_auto: 0,
@@ -50,9 +64,11 @@
 		climb_end: 'Nothing',
 		climb_auto: 'Nothing',
 		beach_on_bump: false,
+		defence_main: false,
+		defence_target: null,
+		auto_time: 0,
 		dead: false,
 		dnf: false,
-		auto_time: 0
 	});
 	let defence = $state<number>(0);
 	let comment = $state<string>('');
@@ -106,6 +122,7 @@
 		const parsed = parse_team(team_str);
 		if (typeof parsed === 'string') return { message: `Team parse error: ${parsed}`, worked: false };
 
+		const { defence_main, defence_target, auto_time, dead, dnf, ...game_fields } = scout_form;
 		const body: PrescoutInsert = {
 			team: parsed.team_number,
 			is_ab_team: parsed.is_ab_team,
@@ -116,7 +133,12 @@
 			station,
 			defence,
 			comment,
-			game: { RebuiltGame: { ...scout_form } }
+			defence_main,
+			defence_target,
+			auto_time,
+			dead,
+			dnf,
+			game: { RebuiltGame: game_fields },
 		};
 
 		const res = await prescoutInsert({ body });
@@ -127,8 +149,6 @@
 		// clear the per-match data so nothing carries over by accident.
 		match_id = match_id + 1;
 		scout_form = {
-			defence_main: false,
-			defence_target: null,
 			fuel_shoot_teleop: 0,
 			fuel_pass_teleop: 0,
 			fuel_shoot_auto: 0,
@@ -136,9 +156,11 @@
 			climb_end: 'Nothing',
 			climb_auto: 'Nothing',
 			beach_on_bump: false,
+			defence_main: false,
+			defence_target: null,
+			auto_time: 0,
 			dead: false,
 			dnf: false,
-			auto_time: 0
 		};
 		defence = 0;
 		comment = '';

@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import FormWithLoading from '$lib/FormWithLoading.svelte';
-	import type { Insert2 } from '$lib/schema/types.gen';
 	import { scoutEdit, scoutInsert } from '$lib/schema/sdk.gen';
 	import StarRating from '$lib/StarRating.svelte';
 	import FuelWidget from '$lib/FuelWidget.svelte';
@@ -10,7 +9,22 @@
 	import NiceErrorTextBox from '$lib/NiceErrorTextBox.svelte';
 	import SelectTeam from '$lib/SelectTeam.svelte';
 	import { parse_team } from '$lib/ParseTeam.svelte';
-	import type { Team } from '$lib/schema/types.gen';
+	import type { ClimbState, DefenceTarget, Team } from '$lib/schema/types.gen';
+
+	type ScoutFormState = {
+		fuel_shoot_teleop: number;
+		fuel_pass_teleop: number;
+		fuel_shoot_auto: number;
+		fuel_pass_auto: number;
+		climb_end: ClimbState;
+		climb_auto: ClimbState;
+		beach_on_bump: boolean;
+		defence_main: boolean;
+		defence_target: DefenceTarget | null;
+		auto_time: number;
+		dead: boolean;
+		dnf: boolean;
+	};
 
 	let team = $state<string>('');
 	let stop = $state<boolean>(true);
@@ -19,9 +33,7 @@
 	let done = $state<boolean>(false);
 	let defence = $state<number>(0);
 	let comment = $state<string>('');
-	let scout_form = $state<Insert2>({
-		defence_main: false,
-		defence_target: null,
+	let scout_form = $state<ScoutFormState>({
 		fuel_shoot_teleop: 0,
 		fuel_pass_teleop: 0,
 		fuel_shoot_auto: 0,
@@ -29,9 +41,11 @@
 		climb_end: 'Nothing',
 		climb_auto: 'Nothing',
 		beach_on_bump: false,
+		defence_main: false,
+		defence_target: null,
+		auto_time: 0,
 		dead: false,
 		dnf: false,
-		auto_time: 0
 	});
 
 	// Who the main defender was defending: the whole alliance, or one bot on it.
@@ -96,12 +110,18 @@
 	const can_pick_bot = params.has('game_id') && params.has('is_blue') && Number.isInteger(upcoming_game_id) && upcoming_game_id > 0;
 
 	async function dispatch(): Promise<{ message: string; worked: boolean }> {
+		const { defence_main, defence_target, auto_time, dead, dnf, ...game_fields } = scout_form;
 		let res = await scoutInsert({
 			body: {
 				snowgrave_scout_id: snowgrave_insert_id,
 				defence,
-				game: { RebuiltGame: { ...scout_form } },
-				comment
+				comment,
+				defence_main,
+				defence_target,
+				auto_time,
+				dead,
+				dnf,
+				game: { RebuiltGame: game_fields },
 			}
 		});
 		if (res.error) return { message: 'HTTP ' + res.response.status, worked: false };
@@ -111,12 +131,18 @@
 	}
 
 	async function handleEdit(): Promise<{ message: string; worked: boolean }> {
+		const { defence_main, defence_target, auto_time, dead, dnf, ...game_fields } = scout_form;
 		let res = await scoutEdit({
 			body: {
 				snowgrave_scout_id: snowgrave_insert_id,
 				defence,
 				comment,
-				game: { RebuiltGame: { ...scout_form } }
+				defence_main,
+				defence_target,
+				auto_time,
+				dead,
+				dnf,
+				game: { RebuiltGame: game_fields },
 			}
 		});
 		if (res.error) return { message: String(res.response.status), worked: false };

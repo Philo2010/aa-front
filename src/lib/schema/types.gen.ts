@@ -172,6 +172,10 @@ export type TeamAvg = {
     teleop_score: number;
     defence_score: number;
     mvp_percent: number;
+    defence_main_avg: number;
+    auto_time_avg: number;
+    dead_avg: number;
+    dnf_avg: number;
     dpdg?: number | null;
     dpdg_raw?: number | null;
     game: GamesAvgSpecific;
@@ -182,16 +186,10 @@ export type GamesAvgSpecific = {
 };
 
 export type Avg = {
-    defence_main_avg: number;
     fuel_shoot_teleop_avg: number;
     fuel_pass_teleop_avg: number;
     fuel_shoot_auto_avg: number;
     fuel_pass_auto_avg: number;
-    dead_avg: number;
-    dnf_avg: number;
-    auto_time_avg: number;
-    dpdg_avg?: number | null;
-    dpdg_raw_avg?: number | null;
     level_1_avg: number;
     level_2_avg: number;
     level_3_avg: number;
@@ -265,6 +263,11 @@ export type HeaderFull = {
     is_mvp: boolean;
     defence: number;
     mvp_comment?: string | null;
+    defence_main: boolean;
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
     /**
      * DPDG as a percentage of the opposing teams' event averages.
      */
@@ -285,11 +288,6 @@ export type GamesFullSpecific = {
 
 export type Model2 = {
     id: number;
-    defence_main: boolean;
-    /**
-     * What the main defender was defending (whole alliance vs. a single bot). `Some` only when `defence_main` is set.
-     */
-    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop: number;
     fuel_pass_teleop: number;
     fuel_shoot_auto: number;
@@ -297,17 +295,6 @@ export type Model2 = {
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
-    dead: boolean;
-    dnf: boolean;
-    auto_time: number;
-    /**
-     * DPDG as a percentage of the opposing teams' event averages.
-     */
-    dpdg?: number | null;
-    /**
-     * DPDG as a raw point value (opponent event averages minus their scores).
-     */
-    dpdg_raw?: number | null;
 };
 
 /**
@@ -396,6 +383,11 @@ export type ScoutMatchData = {
     tournament_level: TournamentLevels;
     station: Stations;
     created_at: string;
+    defence_main: boolean;
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
     game: GamesFullSpecific;
     game_id: number;
     game_type_id: number;
@@ -436,6 +428,11 @@ export type EditSnow = {
     snowgrave_scout_id: number;
     defence?: number | null;
     comment?: string | null;
+    defence_main?: boolean | null;
+    defence_target?: DefenceTarget | null;
+    auto_time?: number | null;
+    dead?: boolean | null;
+    dnf?: boolean | null;
     game: GamesEditSpecific;
 };
 
@@ -444,8 +441,6 @@ export type GamesEditSpecific = {
 };
 
 export type Edit2 = {
-    defence_main?: boolean | null;
-    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop?: number | null;
     fuel_pass_teleop?: number | null;
     fuel_shoot_auto?: number | null;
@@ -453,11 +448,6 @@ export type Edit2 = {
     climb_end?: ClimbState | null;
     climb_auto?: ClimbState | null;
     beach_on_bump?: boolean | null;
-    dead?: boolean | null;
-    dnf?: boolean | null;
-    auto_time?: number | null;
-    dpdg?: number | null;
-    dpdg_raw?: number | null;
 };
 
 export type InsertSnow = {
@@ -465,6 +455,11 @@ export type InsertSnow = {
     game: GamesInsertsSpecific;
     defence: number;
     comment: string;
+    defence_main: boolean;
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
 };
 
 export type GamesInsertsSpecific = {
@@ -472,8 +467,6 @@ export type GamesInsertsSpecific = {
 };
 
 export type Insert2 = {
-    defence_main: boolean;
-    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop: number;
     fuel_pass_teleop: number;
     fuel_shoot_auto: number;
@@ -481,11 +474,6 @@ export type Insert2 = {
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
-    dead: boolean;
-    dnf: boolean;
-    auto_time: number;
-    dpdg?: number | null;
-    dpdg_raw?: number | null;
 };
 
 export type ApiResultForArrayOfString = {
@@ -674,6 +662,11 @@ export type PrescoutInsert = {
      */
     defence: number;
     comment: string;
+    defence_main: boolean;
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
     game: GamesInsertsSpecific;
 };
 
