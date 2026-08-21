@@ -66,6 +66,10 @@
 			<span class="nav-label">DELETE EVENT</span>
 			<span class="nav-sub">remove event queue and assignments</span>
 		</a>
+		<a href="/admin/picklist" class="nav-card">
+			<span class="nav-label">PICK LIST</span>
+			<span class="nav-sub">defence / offence / general picks</span>
+		</a>
 	</div>
 </div>
 
