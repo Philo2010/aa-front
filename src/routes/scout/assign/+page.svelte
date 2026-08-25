@@ -10,8 +10,10 @@
 	} from '$lib/schema/types.gen';
 	import QuickAssignPanel from './QuickAssignPanel.svelte';
 	import RoundRobinPanel from './RoundRobinPanel.svelte';
+	import RedoRoundRobinPanel from './RedoRoundRobinPanel.svelte';
 	import GameCard from './GameCard.svelte';
 	import { stationLabels, type RangeEntry, type BypassStatus } from './types';
+	import { format_team } from '$lib/ParseTeam.svelte';
 
 	let all_games = $state<string | Array<Game>>('loading');
 	let scouters = $state(new Map<number, string[]>());
@@ -26,11 +28,20 @@
 	let masterRedMvp = $state<RangeEntry[]>([{ user: '', begin: 1, end: 1 }]);
 	let masterBlueMvp = $state<RangeEntry[]>([{ user: '', begin: 1, end: 1 }]);
 
-	let activeTab = $state<'quick' | 'roundrobin'>('quick');
+	let activeTab = $state<'quick' | 'roundrobin' | 'redoroundrobin'>('quick');
 
 	// "Not a redo": no team on the game has any scouting data submitted yet.
 	let assignableGames = $derived(typeof all_games !== 'string' ? all_games.filter(g => g.teams.every(t => !t.is_inserted)) : []);
 	let maxGame = $derived(assignableGames.length || 1);
+
+	// Teams currently flagged for a redo, across every game — the pool the
+	// redo round robin rotates over. Kept entirely separate from
+	// assignableGames/applyRoundRobin so the two rotations never mix.
+	let redoTeams = $derived(typeof all_games !== 'string'
+		? all_games.flatMap((game) => game.teams
+			.filter((t) => t.is_redo)
+			.map((t) => ({ id: t.id, label: `${shortLevel(game.tournament_level)} ${game.match_id} · ${format_team(t.team, t.is_ab_team)}` })))
+		: []);
 	let stop = $derived(validateForm());
 	let hideDone = $state(false);
 
@@ -307,6 +318,19 @@
 		scouters = newScouters;
 	}
 
+	// Redo round robin: a separate rotation over teams currently flagged for
+	// redo, indexed by its own position in redoTeams — never shares a list or
+	// an index with applyRoundRobin above, so the two modes can't collide.
+	function applyRedoRoundRobin(scouterList: string[]) {
+		if (scouterList.length < 1) return;
+		const newScouters = new Map(scouters);
+		redoTeams.forEach((team, i) => {
+			const scouter = scouterList[i % scouterList.length];
+			newScouters.set(team.id, [scouter]);
+		});
+		scouters = newScouters;
+	}
+
 	async function dispatch(): Promise<{ message: string; worked: boolean }> {
 		let data = format_scout_pick_data();
 		let res = await insertScout({ body: data });
@@ -344,6 +368,12 @@
 				class:active={activeTab === 'roundrobin'}
 				onclick={() => activeTab = 'roundrobin'}
 			>Round Robin</button>
+			<button
+				type="button"
+				class="tab-btn"
+				class:active={activeTab === 'redoroundrobin'}
+				onclick={() => activeTab = 'redoroundrobin'}
+			>Redo Round Robin</button>
 		</div>
 
 		{#if activeTab === 'quick'}
@@ -356,8 +386,10 @@
 				onApply={applyMasterToAllGames}
 				onReset={resetAllAssignments}
 			/>
-		{:else}
+		{:else if activeTab === 'roundrobin'}
 			<RoundRobinPanel {assignableGames} onGenerate={applyRoundRobin} />
+		{:else}
+			<RedoRoundRobinPanel {redoTeams} onGenerate={applyRedoRoundRobin} />
 		{/if}
 	</div>
 

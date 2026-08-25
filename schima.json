@@ -3050,6 +3050,7 @@
           "id",
           "is_ab_team",
           "is_inserted",
+          "is_redo",
           "scouters",
           "station",
           "team"
@@ -3079,6 +3080,9 @@
             "type": "boolean"
           },
           "is_inserted": {
+            "type": "boolean"
+          },
+          "is_redo": {
             "type": "boolean"
           }
         }
