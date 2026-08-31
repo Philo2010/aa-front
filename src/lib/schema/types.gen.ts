@@ -174,6 +174,10 @@ export type TeamAvg = {
     mvp_percent: number;
     dpdg?: number | null;
     dpdg_raw?: number | null;
+    defence_main_avg: number;
+    auto_time_avg: number;
+    dead_avg: number;
+    dnf_avg: number;
     game: GamesAvgSpecific;
 };
 
@@ -182,16 +186,10 @@ export type GamesAvgSpecific = {
 };
 
 export type Avg = {
-    defence_main_avg: number;
     fuel_shoot_teleop_avg: number;
     fuel_pass_teleop_avg: number;
     fuel_shoot_auto_avg: number;
     fuel_pass_auto_avg: number;
-    dead_avg: number;
-    dnf_avg: number;
-    auto_time_avg: number;
-    dpdg_avg?: number | null;
-    dpdg_raw_avg?: number | null;
     level_1_avg: number;
     level_2_avg: number;
     level_3_avg: number;
@@ -264,6 +262,14 @@ export type HeaderFull = {
     created_at: string;
     is_mvp: boolean;
     defence: number;
+    defence_main: boolean;
+    /**
+     * What the main defender was defending. For a finalized game this is always present (`Alliance` for a non-defender); `null` only for a midway row that hasn't been reconciled yet.
+     */
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
     mvp_comment?: string | null;
     /**
      * DPDG as a percentage of the opposing teams' event averages.
@@ -279,17 +285,21 @@ export type TournamentLevels = 'QualificationMatch' | 'Quarterfinal' | 'Semifina
 
 export type Stations = 'Red1' | 'Red2' | 'Red3' | 'Blue1' | 'Blue2' | 'Blue3';
 
+/**
+ * What a main defender spent the match defending.
+ *
+ * Only meaningful when the game is flagged as the main defender — it is `Some` exactly when that flag is set, and `None` otherwise. `Alliance` means the defence was spread across the whole opposing alliance; `Bot` means a single opposing robot was targeted.
+ */
+export type DefenceTarget = 'Alliance' | {
+    Bot: Team;
+};
+
 export type GamesFullSpecific = {
     RebuiltGame: Model2;
 };
 
 export type Model2 = {
     id: number;
-    defence_main: boolean;
-    /**
-     * What the main defender was defending (whole alliance vs. a single bot). `Some` only when `defence_main` is set.
-     */
-    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop: number;
     fuel_pass_teleop: number;
     fuel_shoot_auto: number;
@@ -297,26 +307,6 @@ export type Model2 = {
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
-    dead: boolean;
-    dnf: boolean;
-    auto_time: number;
-    /**
-     * DPDG as a percentage of the opposing teams' event averages.
-     */
-    dpdg?: number | null;
-    /**
-     * DPDG as a raw point value (opponent event averages minus their scores).
-     */
-    dpdg_raw?: number | null;
-};
-
-/**
- * What a main defender spent the match defending.
- *
- * Only meaningful when the game is flagged as the main defender — it is `Some` exactly when that flag is set, and `None` otherwise. `Alliance` means the defence was spread across the whole opposing alliance (the original DPDG behaviour, summed over all three opponents); `Bot` means a single opposing robot was targeted, and DPDG is computed against only that robot's score and event average.
- */
-export type DefenceTarget = 'Alliance' | {
-    Bot: Team;
 };
 
 export type SearchParamData = {
@@ -399,6 +389,11 @@ export type ScoutMatchData = {
     game: GamesFullSpecific;
     game_id: number;
     game_type_id: number;
+    defence_main: boolean;
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
 };
 
 export type MvpPairPart = {
@@ -437,6 +432,11 @@ export type EditSnow = {
     defence?: number | null;
     comment?: string | null;
     game: GamesEditSpecific;
+    defence_main?: boolean | null;
+    defence_target?: DefenceTarget | null;
+    auto_time?: number | null;
+    dead?: boolean | null;
+    dnf?: boolean | null;
 };
 
 export type GamesEditSpecific = {
@@ -444,8 +444,6 @@ export type GamesEditSpecific = {
 };
 
 export type Edit2 = {
-    defence_main?: boolean | null;
-    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop?: number | null;
     fuel_pass_teleop?: number | null;
     fuel_shoot_auto?: number | null;
@@ -453,11 +451,6 @@ export type Edit2 = {
     climb_end?: ClimbState | null;
     climb_auto?: ClimbState | null;
     beach_on_bump?: boolean | null;
-    dead?: boolean | null;
-    dnf?: boolean | null;
-    auto_time?: number | null;
-    dpdg?: number | null;
-    dpdg_raw?: number | null;
 };
 
 export type InsertSnow = {
@@ -465,6 +458,11 @@ export type InsertSnow = {
     game: GamesInsertsSpecific;
     defence: number;
     comment: string;
+    defence_main: boolean;
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
 };
 
 export type GamesInsertsSpecific = {
@@ -472,8 +470,6 @@ export type GamesInsertsSpecific = {
 };
 
 export type Insert2 = {
-    defence_main: boolean;
-    defence_target?: DefenceTarget | null;
     fuel_shoot_teleop: number;
     fuel_pass_teleop: number;
     fuel_shoot_auto: number;
@@ -481,11 +477,6 @@ export type Insert2 = {
     climb_end: ClimbState;
     climb_auto: ClimbState;
     beach_on_bump: boolean;
-    dead: boolean;
-    dnf: boolean;
-    auto_time: number;
-    dpdg?: number | null;
-    dpdg_raw?: number | null;
 };
 
 export type ApiResultForArrayOfString = {
@@ -608,6 +599,7 @@ export type CreateUserForm = {
     username: string;
     password: string;
     is_admin: string;
+    is_pick: string;
 };
 
 export type ApiResultForArrayOfTeamWithAlliance = {
@@ -676,18 +668,11 @@ export type PrescoutInsert = {
     defence: number;
     comment: string;
     game: GamesInsertsSpecific;
-};
-
-export type PickEntry = {
-    team: Team;
-    team_avg: TeamAvg;
-    is_selected_defence: boolean;
-    is_selected_offence: boolean;
-    is_selected_general: boolean;
-};
-
-export type PickLists = {
-    results: Array<PickEntry>;
+    defence_main: boolean;
+    defence_target?: DefenceTarget | null;
+    auto_time: number;
+    dead: boolean;
+    dnf: boolean;
 };
 
 export type ApiResultForPickLists = {
@@ -696,6 +681,18 @@ export type ApiResultForPickLists = {
 } | {
     status: 'Error';
     message: string;
+};
+
+export type PickLists = {
+    results: Array<PickEntry>;
+};
+
+export type PickEntry = {
+    team: Team;
+    team_avg: TeamAvg;
+    is_selected_defence: boolean;
+    is_selected_offence: boolean;
+    is_selected_general: boolean;
 };
 
 export type GetPickListRequest = {
