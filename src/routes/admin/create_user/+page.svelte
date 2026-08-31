@@ -5,13 +5,15 @@
 	let username = $state<string>('');
 	let password = $state<string>('');
 	let is_admin = $state<boolean>(false);
+	let is_pick = $state<boolean>(false);
 
 	async function dispatch(): Promise<{ message: string; worked: boolean }> {
 		const res = await createUserFront({
 			body: {
 				username,
 				password,
-				is_admin: String(is_admin),
+				is_admin: is_admin ? 'yes' : 'no',
+				is_pick: is_pick ? 'yes' : 'no',
 			},
 		});
 		if (res.error) {
@@ -66,6 +68,19 @@
 				>
 					<div class="toggle-indicator"></div>
 					<span>{is_admin ? 'admin' : 'scouter'}</span>
+				</button>
+			</section>
+
+			<section class="section">
+				<div class="section-label">PICK LIST ACCESS</div>
+				<button
+					type="button"
+					class="toggle-btn"
+					class:on={is_pick}
+					onclick={() => (is_pick = !is_pick)}
+				>
+					<div class="toggle-indicator"></div>
+					<span>{is_pick ? 'can edit picks' : 'no pick access'}</span>
 				</button>
 			</section>
 		</FormWithLoading>
