@@ -142,6 +142,36 @@
 						</div>
 						<span class="score">{scoreFor(activeTab, entry).toFixed(1)}</span>
 					</div>
+					<div class="stats-row">
+						{#if activeTab === 'offence'}
+							<div class="stat-item">
+								<span class="stat-label">AUTO</span>
+								<span class="stat-value">{entry.team_avg.auto_score.toFixed(1)}</span>
+							</div>
+							<div class="stat-item">
+								<span class="stat-label">TELEOP</span>
+								<span class="stat-value">{entry.team_avg.teleop_score.toFixed(1)}</span>
+							</div>
+						{/if}
+						{#if activeTab === 'defence'}
+							<div class="stat-item">
+								<span class="stat-label">DEFENCE</span>
+								<span class="stat-value">{entry.team_avg.defence_score.toFixed(1)}</span>
+							</div>
+						{/if}
+						{#if entry.team_avg.dpdg != null}
+							<div class="stat-item">
+								<span class="stat-label">DPDG %</span>
+								<span class="stat-value">{entry.team_avg.dpdg.toFixed(1)}%</span>
+							</div>
+						{/if}
+						{#if entry.team_avg.dpdg_raw != null}
+							<div class="stat-item">
+								<span class="stat-label">DPDG PTS</span>
+								<span class="stat-value">{entry.team_avg.dpdg_raw.toFixed(1)}</span>
+							</div>
+						{/if}
+					</div>
 					<label class="card-body toggle-row">
 						<input
 							type="checkbox"
@@ -281,6 +311,33 @@
 
 	.card-body {
 		padding: 0.65rem 0.9rem;
+	}
+
+	.stats-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem 1rem;
+		padding: 0.5rem 0.9rem;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	}
+
+	.stat-item {
+		display: flex;
+		align-items: baseline;
+		gap: 0.35rem;
+	}
+
+	.stat-label {
+		font-size: 0.6rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		color: rgba(255, 255, 255, 0.35);
+	}
+
+	.stat-value {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: rgba(255, 255, 255, 0.7);
 	}
 
 	.toggle-row {
