@@ -4,7 +4,7 @@
 	import { checkadmin } from '$lib/checkadminship';
 	import { get_event } from '$lib/GetCurrEvent';
 	import { format_team } from '$lib/ParseTeam.svelte';
-	import { getPickList, setPickList } from '$lib/schema/sdk.gen';
+	import { getPickList, reorderPickList, setPickList } from '$lib/schema/sdk.gen';
 	import type { PickEntry, PickLists } from '$lib/schema/types.gen';
 
 	type Tab = 'defence' | 'offence' | 'general';
@@ -27,6 +27,13 @@
 				? 'is_selected_offence'
 				: 'is_selected_general';
 
+	const orderKey = (tab: Tab) =>
+		tab === 'defence'
+			? 'order_defence'
+			: tab === 'offence'
+				? 'order_offence'
+				: 'order_general';
+
 	const scoreFor = (tab: Tab, entry: PickEntry) =>
 		tab === 'defence'
 			? entry.team_avg.defence_score
@@ -37,7 +44,7 @@
 	const sorted = $derived(
 		typeof data === 'string'
 			? data
-			: [...data.results].sort((a, b) => scoreFor(activeTab, b) - scoreFor(activeTab, a))
+			: [...data.results].sort((a, b) => a[orderKey(activeTab)] - b[orderKey(activeTab)])
 	);
 
 	async function dispatch() {
@@ -81,6 +88,34 @@
 			}
 		} catch (e) {
 			entry[key] = previous;
+			toggleError = 'Failed to reach server';
+		}
+	}
+
+	const categoryName = (tab: Tab): 'Defence' | 'Offence' | 'General' =>
+		tab === 'defence' ? 'Defence' : tab === 'offence' ? 'Offence' : 'General';
+
+	async function moveOrder(entry: PickEntry, direction: 'Up' | 'Down') {
+		if (typeof sorted === 'string') return;
+		if (typeof data === 'string') return;
+		toggleError = '';
+		try {
+			const res = await reorderPickList({
+				body: {
+					team: entry.team,
+					event_code: currentEvent,
+					category: categoryName(activeTab),
+					direction
+				}
+			});
+			if (res.error) {
+				toggleError = 'Error code: ' + res.response.status;
+			} else if (res.data.status === 'Error') {
+				toggleError = 'Error from server: ' + res.data.message;
+			} else {
+				await dispatch();
+			}
+		} catch (e) {
 			toggleError = 'Failed to reach server';
 		}
 	}
@@ -171,6 +206,20 @@
 								<span class="stat-value">{entry.team_avg.dpdg_raw.toFixed(1)}</span>
 							</div>
 						{/if}
+					</div>
+					<div class="card-body order-row">
+						<span class="order-label">ORDER</span>
+						<button
+							class="order-btn"
+							onclick={() => moveOrder(entry, 'Up')}
+							disabled={entry[orderKey(activeTab)] === 1}
+						>▲</button>
+						<span class="order-val">{entry[orderKey(activeTab)]}</span>
+						<button
+							class="order-btn"
+							onclick={() => moveOrder(entry, 'Down')}
+							disabled={entry[orderKey(activeTab)] === sorted.length}
+						>▼</button>
 					</div>
 					<label class="card-body toggle-row">
 						<input
@@ -349,5 +398,48 @@
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		color: rgba(255, 255, 255, 0.55);
+	}
+
+	.order-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.order-label {
+		font-size: 0.6rem;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		color: rgba(255, 255, 255, 0.35);
+	}
+
+	.order-val {
+		min-width: 1.5rem;
+		text-align: center;
+		color: #5dde8a;
+		font-family: 'DM Mono', monospace;
+		font-size: 0.7rem;
+	}
+
+	.order-btn {
+		padding: 0.1rem 0.35rem;
+		background: #1a1a1a;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 4px;
+		color: rgba(255, 255, 255, 0.4);
+		font-size: 0.6rem;
+		cursor: pointer;
+		line-height: 1;
+		transition: color 0.15s, border-color 0.15s;
+	}
+
+	.order-btn:hover:not(:disabled) {
+		color: #5dde8a;
+		border-color: rgba(60, 179, 113, 0.4);
+	}
+
+	.order-btn:disabled {
+		opacity: 0.25;
+		cursor: default;
 	}
 </style>

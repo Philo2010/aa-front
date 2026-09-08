@@ -839,7 +839,7 @@
     },
     "/api/prescout/insert": {
       "post": {
-        "description": "Store admin-entered prescout data. Unlike the other snowgrave insert routes this one is admin-gated — it writes straight to final storage with no check phase in front of it.",
+        "description": "Store admin-entered prescout data. Unlike the other snowgrave insert routes this one is admin-gated \u2014 it writes straight to final storage with no check phase in front of it.",
         "operationId": "prescout_insert",
         "requestBody": {
           "content": {
@@ -900,6 +900,33 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SetPick"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResult_for_String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pick_list/reorder": {
+      "post": {
+        "operationId": "reorder_pick_list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderPick"
               }
             }
           },
@@ -2091,7 +2118,7 @@
         ]
       },
       "DefenceTarget": {
-        "description": "What a main defender spent the match defending.\n\nOnly meaningful when the game is flagged as the main defender — it is `Some` exactly when that flag is set, and `None` otherwise. `Alliance` means the defence was spread across the whole opposing alliance; `Bot` means a single opposing robot was targeted.",
+        "description": "What a main defender spent the match defending.\n\nOnly meaningful when the game is flagged as the main defender \u2014 it is `Some` exactly when that flag is set, and `None` otherwise. `Alliance` means the defence was spread across the whole opposing alliance; `Bot` means a single opposing robot was targeted.",
         "oneOf": [
           {
             "type": "string",
@@ -3702,6 +3729,18 @@
           },
           "is_selected_general": {
             "type": "boolean"
+          },
+          "order_defence": {
+            "type": "integer",
+            "nullable": true
+          },
+          "order_offence": {
+            "type": "integer",
+            "nullable": true
+          },
+          "order_general": {
+            "type": "integer",
+            "nullable": true
           }
         }
       },
@@ -3740,6 +3779,50 @@
           "is_selected_general": {
             "type": "boolean",
             "nullable": true
+          },
+          "order_defence": {
+            "type": "integer",
+            "nullable": true
+          },
+          "order_offence": {
+            "type": "integer",
+            "nullable": true
+          },
+          "order_general": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "ReorderPick": {
+        "type": "object",
+        "required": [
+          "team",
+          "event_code",
+          "category",
+          "direction"
+        ],
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/Team"
+          },
+          "event_code": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Defence",
+              "Offence",
+              "General"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "Up",
+              "Down"
+            ]
           }
         }
       }

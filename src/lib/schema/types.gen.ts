@@ -693,6 +693,9 @@ export type PickEntry = {
     is_selected_defence: boolean;
     is_selected_offence: boolean;
     is_selected_general: boolean;
+    order_defence: number;
+    order_offence: number;
+    order_general: number;
 };
 
 export type GetPickListRequest = {
@@ -705,6 +708,16 @@ export type SetPick = {
     is_selected_defence?: boolean | null;
     is_selected_offence?: boolean | null;
     is_selected_general?: boolean | null;
+    order_defence?: number | null;
+    order_offence?: number | null;
+    order_general?: number | null;
+};
+
+export type ReorderPick = {
+    team: Team;
+    event_code: string;
+    category: 'Defence' | 'Offence' | 'General';
+    direction: 'Up' | 'Down';
 };
 
 export type EditPitData = {
@@ -1184,3 +1197,16 @@ export type SetPickListResponses = {
 };
 
 export type SetPickListResponse = SetPickListResponses[keyof SetPickListResponses];
+
+export type ReorderPickListData = {
+    body: ReorderPick;
+    path?: never;
+    query?: never;
+    url: '/api/pick_list/reorder';
+};
+
+export type ReorderPickListResponses = {
+    200: ApiResultForString;
+};
+
+export type ReorderPickListResponse = ReorderPickListResponses[keyof ReorderPickListResponses];
