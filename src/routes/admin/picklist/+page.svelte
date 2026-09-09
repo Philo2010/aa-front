@@ -47,8 +47,8 @@
 			: [...data.results].sort((a, b) => a[orderKey(activeTab)] - b[orderKey(activeTab)])
 	);
 
-	async function dispatch() {
-		data = 'Loading';
+	async function dispatch(silent = false) {
+		if (!silent) data = 'Loading';
 		toggleError = '';
 		try {
 			currentEvent = await get_event();
@@ -113,7 +113,7 @@
 			} else if (res.data.status === 'Error') {
 				toggleError = 'Error from server: ' + res.data.message;
 			} else {
-				await dispatch();
+				await dispatch(true);
 			}
 		} catch (e) {
 			toggleError = 'Failed to reach server';
