@@ -98,6 +98,8 @@
 	<p>Can Pass: {data.pit.RebuiltPit.can_pass}</p>
 	<p>Can Shoot: {data.pit.RebuiltPit.can_shoot}</p>
 	<p>Climb: {data.pit.RebuiltPit.climb}</p>
+	<p>Balls per Second: {data.pit.RebuiltPit.bps}</p>
+	<p>Ball Capacity: {data.pit.RebuiltPit.ball_capasity}</p>
 
 	<h3>Auto Paths</h3>
 	{#each data.pit.RebuiltPit.auto_paths as path, i}

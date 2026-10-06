@@ -121,6 +121,8 @@
 		<div class="info-row"><span class="info-key">CAN PASS</span><span class="info-val">{data.pit.RebuiltPit.can_pass}</span></div>
 		<div class="info-row"><span class="info-key">CAN SHOOT</span><span class="info-val">{data.pit.RebuiltPit.can_shoot}</span></div>
 		<div class="info-row"><span class="info-key">CLIMB</span><span class="info-val">{data.pit.RebuiltPit.climb}</span></div>
+		<div class="info-row"><span class="info-key">BALLS / SEC</span><span class="info-val">{data.pit.RebuiltPit.bps}</span></div>
+		<div class="info-row"><span class="info-key">BALL CAPACITY</span><span class="info-val">{data.pit.RebuiltPit.ball_capasity}</span></div>
 		<div class="info-row"><span class="info-key">DEFENCE</span><span class="info-val">{data.pit.RebuiltPit.willing_to_play_defence}</span></div>
 		{#if data.pit.RebuiltPit.strategy}
 		<div class="info-row stacked"><span class="info-key">STRATEGY</span><span class="info-val muted">{data.pit.RebuiltPit.strategy}</span></div>

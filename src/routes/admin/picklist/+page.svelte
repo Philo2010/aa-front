@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { flip } from 'svelte/animate';
 	import { checkadmin } from '$lib/checkadminship';
 	import { get_event } from '$lib/GetCurrEvent';
 	import { format_team } from '$lib/ParseTeam.svelte';
@@ -19,6 +20,14 @@
 	let activeTab = $state<Tab>('general');
 	let currentEvent = $state('');
 	let toggleError = $state('');
+
+	let listEl = $state<HTMLDivElement | null>(null);
+	let dragging = $state(false);
+	let syncing = $state(false);
+	let dragIndex = $state(0);
+	let dragOrigin = 0;
+	let dragEntry: PickEntry | null = null;
+	let slotCenters: number[] = [];
 
 	const selectedKey = (tab: Tab) =>
 		tab === 'defence'
@@ -105,7 +114,8 @@
 					team: entry.team,
 					event_code: currentEvent,
 					category: categoryName(activeTab),
-					direction
+					direction,
+					count: 1
 				}
 			});
 			if (res.error) {
@@ -117,6 +127,106 @@
 			}
 		} catch (e) {
 			toggleError = 'Failed to reach server';
+		}
+	}
+
+	// Reorder the local list only (no server calls) so the cards can animate
+	// smoothly while dragging. The server is synced once the motion is done.
+	function moveLocal(from: number, to: number) {
+		if (typeof data === 'string') return;
+		const key = orderKey(activeTab);
+		const list = [...data.results].sort((a, b) => a[key] - b[key]);
+		const [moved] = list.splice(from, 1);
+		list.splice(to, 0, moved);
+		const values = data.results
+			.map((e) => e[key])
+			.slice()
+			.sort((a, b) => a - b);
+		list.forEach((entry, idx) => {
+			entry[key] = values[idx];
+		});
+	}
+
+	function startDrag(e: PointerEvent, i: number) {
+		if (dragging || syncing || typeof sorted === 'string') return;
+		e.preventDefault();
+		dragging = true;
+		dragOrigin = i;
+		dragIndex = i;
+		dragEntry = sorted[i];
+		slotCenters = [];
+		if (listEl) {
+			Array.from(listEl.querySelectorAll<HTMLElement>('.card')).forEach((card, idx) => {
+				if (idx === i) return;
+				const rect = card.getBoundingClientRect();
+				slotCenters.push(rect.top + rect.height / 2);
+			});
+		}
+		window.addEventListener('pointermove', onDragMove);
+		window.addEventListener('pointerup', endDrag);
+		window.addEventListener('pointercancel', endDrag);
+	}
+
+	function onDragMove(e: PointerEvent) {
+		if (!dragging) return;
+		let target = 0;
+		for (const center of slotCenters) {
+			if (center < e.clientY) target++;
+		}
+		if (target !== dragIndex) {
+			moveLocal(dragIndex, target);
+			dragIndex = target;
+		}
+	}
+
+	function endDrag() {
+		window.removeEventListener('pointermove', onDragMove);
+		window.removeEventListener('pointerup', endDrag);
+		window.removeEventListener('pointercancel', endDrag);
+		if (!dragging) return;
+		dragging = false;
+		commitDrag();
+	}
+
+	async function commitDrag() {
+		if (!dragEntry || typeof data === 'string') return;
+		const delta = dragIndex - dragOrigin;
+		if (delta === 0) return;
+		const direction: 'Up' | 'Down' = delta > 0 ? 'Down' : 'Up';
+		const steps = Math.abs(delta);
+		toggleError = '';
+		syncing = true;
+		try {
+			const res = await reorderPickList({
+				body: {
+					team: dragEntry.team,
+					event_code: currentEvent,
+					category: categoryName(activeTab),
+					direction,
+					count: steps
+				}
+			});
+			if (res.error) {
+				toggleError = 'Error code: ' + res.response.status;
+			} else if (res.data.status === 'Error') {
+				toggleError = 'Error from server: ' + res.data.message;
+			}
+			await dispatch(true);
+		} catch (e) {
+			toggleError = 'Failed to reach server';
+		} finally {
+			syncing = false;
+		}
+	}
+
+	function onHandleKeydown(e: KeyboardEvent, i: number) {
+		if (typeof sorted === 'string') return;
+		if (e.key === 'ArrowUp' && i > 0) {
+			e.preventDefault();
+			moveOrder(sorted[i], 'Up');
+		} else if (e.key === 'ArrowDown' && i < sorted.length - 1) {
+			e.preventDefault();
+			moveOrder(sorted[i], 'Down');
 		}
 	}
 
@@ -167,9 +277,13 @@
 	{:else if sorted.length === 0}
 		<p class="state-message">no teams</p>
 	{:else}
-		<div class="card-list">
+		<div class="card-list" bind:this={listEl}>
 			{#each sorted as entry, i (entry.team.number + '-' + entry.team.is_ab_team)}
-				<div class="card" style="animation-delay: {i * 40}ms">
+				<div
+					class="card"
+					class:dragging={dragging && dragIndex === i}
+					animate:flip={{ duration: 200 }}
+				>
 					<div class="card-header">
 						<div class="card-left">
 							<span class="rank">#{i + 1}</span>
@@ -194,32 +308,52 @@
 								<span class="stat-value">{entry.team_avg.defence_score.toFixed(1)}</span>
 							</div>
 						{/if}
-						{#if entry.team_avg.dpdg != null}
+						{#if entry.team_avg.dpdg_team != null}
 							<div class="stat-item">
-								<span class="stat-label">DPDG %</span>
-								<span class="stat-value">{entry.team_avg.dpdg.toFixed(1)}%</span>
+								<span class="stat-label">TEAM DPDG %</span>
+								<span class="stat-value">{entry.team_avg.dpdg_team.toFixed(1)}%</span>
 							</div>
 						{/if}
-						{#if entry.team_avg.dpdg_raw != null}
+						{#if entry.team_avg.dpdg_team_raw != null}
 							<div class="stat-item">
-								<span class="stat-label">DPDG PTS</span>
-								<span class="stat-value">{entry.team_avg.dpdg_raw.toFixed(1)}</span>
+								<span class="stat-label">TEAM DPDG PTS</span>
+								<span class="stat-value">{entry.team_avg.dpdg_team_raw.toFixed(1)}</span>
+							</div>
+						{/if}
+						{#if entry.team_avg.dpdg_alliance != null}
+							<div class="stat-item">
+								<span class="stat-label">ALLY DPDG %</span>
+								<span class="stat-value">{entry.team_avg.dpdg_alliance.toFixed(1)}%</span>
+							</div>
+						{/if}
+						{#if entry.team_avg.dpdg_alliance_raw != null}
+							<div class="stat-item">
+								<span class="stat-label">ALLY DPDG PTS</span>
+								<span class="stat-value">{entry.team_avg.dpdg_alliance_raw.toFixed(1)}</span>
 							</div>
 						{/if}
 					</div>
 					<div class="card-body order-row">
 						<span class="order-label">ORDER</span>
-						<button
-							class="order-btn"
-							onclick={() => moveOrder(entry, 'Up')}
-							disabled={entry[orderKey(activeTab)] === 1}
-						>▲</button>
 						<span class="order-val">{entry[orderKey(activeTab)]}</span>
 						<button
-							class="order-btn"
-							onclick={() => moveOrder(entry, 'Down')}
-							disabled={entry[orderKey(activeTab)] === sorted.length}
-						>▼</button>
+							type="button"
+							class="drag-handle"
+							aria-label="Drag to reorder"
+							title="Drag to reorder"
+							onpointerdown={(e) => startDrag(e, i)}
+							onkeydown={(e) => onHandleKeydown(e, i)}
+						>
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+								<circle cx="9" cy="6" r="1.6" />
+								<circle cx="15" cy="6" r="1.6" />
+								<circle cx="9" cy="12" r="1.6" />
+								<circle cx="15" cy="12" r="1.6" />
+								<circle cx="9" cy="18" r="1.6" />
+								<circle cx="15" cy="18" r="1.6" />
+							</svg>
+							<span>DRAG</span>
+						</button>
 					</div>
 					<label class="card-body toggle-row">
 						<input
@@ -324,7 +458,7 @@
 		border: 1px solid rgba(255, 255, 255, 0.07);
 		border-radius: 10px;
 		overflow: hidden;
-		animation: slideIn 0.3s ease both;
+		animation: slideIn 0.3s ease backwards;
 	}
 
 	.card-header {
@@ -421,25 +555,45 @@
 		font-size: 0.7rem;
 	}
 
-	.order-btn {
-		padding: 0.1rem 0.35rem;
+	.drag-handle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin-left: auto;
+		padding: 0.25rem 0.5rem;
 		background: #1a1a1a;
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 4px;
 		color: rgba(255, 255, 255, 0.4);
+		font-family: inherit;
 		font-size: 0.6rem;
-		cursor: pointer;
+		font-weight: 700;
+		letter-spacing: 0.1em;
 		line-height: 1;
-		transition: color 0.15s, border-color 0.15s;
+		cursor: grab;
+		touch-action: none;
+		user-select: none;
+		transition: color 0.15s, border-color 0.15s, background 0.15s;
 	}
 
-	.order-btn:hover:not(:disabled) {
+	.drag-handle:hover,
+	.drag-handle:focus-visible {
 		color: #5dde8a;
 		border-color: rgba(60, 179, 113, 0.4);
+		outline: none;
 	}
 
-	.order-btn:disabled {
-		opacity: 0.25;
-		cursor: default;
+	.card.dragging {
+		z-index: 2;
+		position: relative;
+		border-color: rgba(60, 179, 113, 0.55);
+		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+		opacity: 0.92;
+	}
+
+	.card.dragging .drag-handle {
+		cursor: grabbing;
+		color: #5dde8a;
+		border-color: rgba(60, 179, 113, 0.5);
 	}
 </style>

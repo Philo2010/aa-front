@@ -22,6 +22,8 @@
 	let can_pass = $state<boolean | null>(null);
 	let can_shoot = $state<boolean | null>(null);
 	let climb = $state<ClimbState | null>(null);
+	let bps = $state<number | null>(null);
+	let ball_capasity = $state<number | null>(null);
 
 	let team = $state<string>('');
 	let insert_id: number;
@@ -80,6 +82,8 @@
 					can_pass = pit.can_pass ?? null;
 					can_shoot = pit.can_shoot ?? null;
 					climb = pit.climb ?? null;
+					bps = pit.bps ?? null;
+					ball_capasity = pit.ball_capasity ?? null;
 				}
 			}
 
@@ -132,6 +136,8 @@
 					can_pass,
 					can_shoot,
 					climb,
+					bps,
+					ball_capasity,
 				},
 			},
 			path: {
@@ -320,6 +326,17 @@
 						</button>
 					{/each}
 				</div>
+			</section>
+
+			<!-- Scoring numbers -->
+			<section class="field-section">
+				<div class="section-label">Balls per second</div>
+				<input type="number" class="text-input" bind:value={bps} min="0" step="any" />
+			</section>
+
+			<section class="field-section">
+				<div class="section-label">Ball capacity</div>
+				<input type="number" class="text-input" bind:value={ball_capasity} min="0" step="any" />
 			</section>
 
 		</div>

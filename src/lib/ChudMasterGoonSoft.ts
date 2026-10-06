@@ -8,8 +8,10 @@ export type GamesGraph = {
     auto_score: number;
     teleop_score: number;
     defence: number;
-    dpdg: number | null;
-    dpdg_raw: number | null;
+    dpdg_team: number | null;
+    dpdg_team_raw: number | null;
+    dpdg_alliance: number | null;
+    dpdg_alliance_raw: number | null;
 };
 
 export type GraphDataF = {
@@ -65,21 +67,52 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
         tension: 0.1
     }));
 
-    const datasetsDpdgRaw: ChartDataset<'line'>[] = teams.map((team, index) => ({
-        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} DPDG Points`,
-        data: team.data.map(item => item.dpdg_raw ?? null),
-        fill: false,
-        borderColor: generateColor(index),
-        tension: 0.1
-    }));
+    // DPDG is split by defence target: a game only ever populates the team side
+    // (targeted a single bot) or the alliance side (defended the whole alliance).
+    // Plot both so neither is hidden; missing points stay null.
+    const datasetsDpdgRaw: ChartDataset<'line'>[] = teams.flatMap((team, index) => {
+        const color = generateColor(index);
+        const label = `Team ${format_team(team.team.number, team.team.is_ab_team)}`;
+        return [
+            {
+                label: `${label} DPDG Team Pts`,
+                data: team.data.map(item => item.dpdg_team_raw ?? null),
+                fill: false,
+                borderColor: color,
+                tension: 0.1
+            },
+            {
+                label: `${label} DPDG Alliance Pts`,
+                data: team.data.map(item => item.dpdg_alliance_raw ?? null),
+                fill: false,
+                borderColor: color,
+                borderDash: [6, 4],
+                tension: 0.1
+            }
+        ];
+    });
 
-    const datasetsDpdgPct: ChartDataset<'line'>[] = teams.map((team, index) => ({
-        label: `Team ${format_team(team.team.number, team.team.is_ab_team)} DPDG %`,
-        data: team.data.map(item => item.dpdg ?? null),
-        fill: false,
-        borderColor: generateColor(index),
-        tension: 0.1
-    }));
+    const datasetsDpdgPct: ChartDataset<'line'>[] = teams.flatMap((team, index) => {
+        const color = generateColor(index);
+        const label = `Team ${format_team(team.team.number, team.team.is_ab_team)}`;
+        return [
+            {
+                label: `${label} DPDG Team %`,
+                data: team.data.map(item => item.dpdg_team ?? null),
+                fill: false,
+                borderColor: color,
+                tension: 0.1
+            },
+            {
+                label: `${label} DPDG Alliance %`,
+                data: team.data.map(item => item.dpdg_alliance ?? null),
+                fill: false,
+                borderColor: color,
+                borderDash: [6, 4],
+                tension: 0.1
+            }
+        ];
+    });
 
     return {
         total: { labels, datasets: datasetsTotal },

@@ -839,7 +839,7 @@
     },
     "/api/prescout/insert": {
       "post": {
-        "description": "Store admin-entered prescout data. Unlike the other snowgrave insert routes this one is admin-gated \u2014 it writes straight to final storage with no check phase in front of it.",
+        "description": "Store admin-entered prescout data. Unlike the other snowgrave insert routes this one is admin-gated — it writes straight to final storage with no check phase in front of it.",
         "operationId": "prescout_insert",
         "requestBody": {
           "content": {
@@ -1070,6 +1070,16 @@
               }
             ],
             "nullable": true
+          },
+          "bps": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "ball_capasity": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
           }
         }
       },
@@ -1236,6 +1246,8 @@
         "type": "object",
         "required": [
           "auto_paths",
+          "ball_capasity",
+          "bps",
           "can_pass",
           "can_shoot",
           "climb",
@@ -1289,6 +1301,14 @@
           },
           "climb": {
             "$ref": "#/components/schemas/ClimbState"
+          },
+          "bps": {
+            "type": "number",
+            "format": "float"
+          },
+          "ball_capasity": {
+            "type": "number",
+            "format": "float"
           }
         }
       },
@@ -1348,6 +1368,8 @@
         "type": "object",
         "required": [
           "auto_paths",
+          "ball_capasity",
+          "bps",
           "can_pass",
           "can_shoot",
           "climb",
@@ -1403,6 +1425,14 @@
           },
           "climb": {
             "$ref": "#/components/schemas/ClimbState"
+          },
+          "bps": {
+            "type": "number",
+            "format": "float"
+          },
+          "ball_capasity": {
+            "type": "number",
+            "format": "float"
           }
         }
       },
@@ -1668,12 +1698,22 @@
             "type": "number",
             "format": "double"
           },
-          "dpdg": {
+          "dpdg_team": {
             "type": "number",
             "format": "double",
             "nullable": true
           },
-          "dpdg_raw": {
+          "dpdg_team_raw": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dpdg_alliance": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dpdg_alliance_raw": {
             "type": "number",
             "format": "double",
             "nullable": true
@@ -1868,12 +1908,22 @@
             "type": "number",
             "format": "float"
           },
-          "dpdg": {
+          "dpdg_team": {
             "type": "number",
             "format": "float",
             "nullable": true
           },
-          "dpdg_raw": {
+          "dpdg_team_raw": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "dpdg_alliance": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "dpdg_alliance_raw": {
             "type": "number",
             "format": "float",
             "nullable": true
@@ -2083,14 +2133,26 @@
             "type": "string",
             "nullable": true
           },
-          "dpdg": {
-            "description": "DPDG as a percentage of the opposing teams' event averages.",
+          "dpdg_team": {
+            "description": "DPDG against a single targeted bot, as a percentage of its event average.",
             "type": "number",
             "format": "float",
             "nullable": true
           },
-          "dpdg_raw": {
-            "description": "DPDG as a raw point value.",
+          "dpdg_team_raw": {
+            "description": "DPDG against a single targeted bot, as a raw point difference.",
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "dpdg_alliance": {
+            "description": "DPDG averaged over the whole opposing alliance, as a percentage.",
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "dpdg_alliance_raw": {
+            "description": "DPDG averaged over the whole opposing alliance, as a raw point difference.",
             "type": "number",
             "format": "float",
             "nullable": true
@@ -2118,7 +2180,7 @@
         ]
       },
       "DefenceTarget": {
-        "description": "What a main defender spent the match defending.\n\nOnly meaningful when the game is flagged as the main defender \u2014 it is `Some` exactly when that flag is set, and `None` otherwise. `Alliance` means the defence was spread across the whole opposing alliance; `Bot` means a single opposing robot was targeted.",
+        "description": "What a main defender spent the match defending.\n\nOnly meaningful when the game is flagged as the main defender — it is `Some` exactly when that flag is set, and `None` otherwise. `Alliance` means the defence was spread across the whole opposing alliance; `Bot` means a single opposing robot was targeted.",
         "oneOf": [
           {
             "type": "string",
@@ -3711,6 +3773,9 @@
           "is_selected_defence",
           "is_selected_general",
           "is_selected_offence",
+          "order_defence",
+          "order_general",
+          "order_offence",
           "team",
           "team_avg"
         ],
@@ -3732,15 +3797,15 @@
           },
           "order_defence": {
             "type": "integer",
-            "nullable": true
+            "format": "int32"
           },
           "order_offence": {
             "type": "integer",
-            "nullable": true
+            "format": "int32"
           },
           "order_general": {
             "type": "integer",
-            "nullable": true
+            "format": "int32"
           }
         }
       },
@@ -3779,28 +3844,17 @@
           "is_selected_general": {
             "type": "boolean",
             "nullable": true
-          },
-          "order_defence": {
-            "type": "integer",
-            "nullable": true
-          },
-          "order_offence": {
-            "type": "integer",
-            "nullable": true
-          },
-          "order_general": {
-            "type": "integer",
-            "nullable": true
           }
         }
       },
       "ReorderPick": {
         "type": "object",
         "required": [
-          "team",
-          "event_code",
           "category",
-          "direction"
+          "count",
+          "direction",
+          "event_code",
+          "team"
         ],
         "properties": {
           "team": {
@@ -3810,21 +3864,32 @@
             "type": "string"
           },
           "category": {
-            "type": "string",
-            "enum": [
-              "Defence",
-              "Offence",
-              "General"
-            ]
+            "$ref": "#/components/schemas/Category"
           },
           "direction": {
-            "type": "string",
-            "enum": [
-              "Up",
-              "Down"
-            ]
+            "$ref": "#/components/schemas/Direction"
+          },
+          "count": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
           }
         }
+      },
+      "Category": {
+        "type": "string",
+        "enum": [
+          "Defence",
+          "Offence",
+          "General"
+        ]
+      },
+      "Direction": {
+        "type": "string",
+        "enum": [
+          "Up",
+          "Down"
+        ]
       }
     }
   }

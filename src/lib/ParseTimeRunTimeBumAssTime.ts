@@ -18,8 +18,10 @@ export type RebuiltGameFlatten = {
 	created_at: string;
     is_mvp: boolean;
     defence: number;
-    dpdg: number | null;
-    dpdg_raw: number | null;
+    dpdg_team: number | null;
+    dpdg_team_raw: number | null;
+    dpdg_alliance: number | null;
+    dpdg_alliance_raw: number | null;
     comment: string;
     defence_main: boolean;
     fuel_shoot_teleop: number;
@@ -41,8 +43,10 @@ export type RebuiltAvgFlatten = {
     auto_score: number;
     teleop_score: number;
     defence_score: number;
-    dpdg: number | null;
-    dpdg_raw: number | null;
+    dpdg_team: number | null;
+    dpdg_team_raw: number | null;
+    dpdg_alliance: number | null;
+    dpdg_alliance_raw: number | null;
     mvp_percent: number;
     defence_main_avg: number;
     fuel_shoot_teleop_avg: number;
@@ -86,8 +90,10 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
         created_at: formatted,
         is_mvp: data.header.is_mvp,
         defence: data.header.defence,
-        dpdg: data.header.dpdg ?? null,
-        dpdg_raw: data.header.dpdg_raw ?? null,
+        dpdg_team: data.header.dpdg_team ?? null,
+        dpdg_team_raw: data.header.dpdg_team_raw ?? null,
+        dpdg_alliance: data.header.dpdg_alliance ?? null,
+        dpdg_alliance_raw: data.header.dpdg_alliance_raw ?? null,
         comment: data.header.comment,
         defence_main: data.header.defence_main,
         fuel_shoot_teleop: data.game.RebuiltGame.fuel_shoot_teleop,
@@ -115,8 +121,10 @@ export function FlattenDataAvg(data: TeamAvg, event_code: string): RebuiltAvgFla
         auto_score: data.auto_score,
         teleop_score: data.teleop_score,
         defence_score: data.defence_score,
-        dpdg: data.dpdg ?? null,
-        dpdg_raw: data.dpdg_raw ?? null,
+        dpdg_team: data.dpdg_team ?? null,
+        dpdg_team_raw: data.dpdg_team_raw ?? null,
+        dpdg_alliance: data.dpdg_alliance ?? null,
+        dpdg_alliance_raw: data.dpdg_alliance_raw ?? null,
         mvp_percent: data.mvp_percent * 100,
         defence_main_avg: data.defence_main_avg,
         fuel_shoot_teleop_avg: data.game.RebuiltGame.fuel_shoot_teleop_avg,

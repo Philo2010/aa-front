@@ -28,6 +28,8 @@ export type Edit = {
     can_pass?: boolean | null;
     can_shoot?: boolean | null;
     climb?: ClimbState | null;
+    bps?: number | null;
+    ball_capasity?: number | null;
 };
 
 export type Drivebase = {
@@ -83,6 +85,8 @@ export type Model = {
     can_pass: boolean;
     can_shoot: boolean;
     climb: ClimbState;
+    bps: number;
+    ball_capasity: number;
 };
 
 export type PitHeaderGetFront = {
@@ -112,6 +116,8 @@ export type Insert = {
     can_pass: boolean;
     can_shoot: boolean;
     climb: ClimbState;
+    bps: number;
+    ball_capasity: number;
 };
 
 export type Forgive = {
@@ -172,8 +178,10 @@ export type TeamAvg = {
     teleop_score: number;
     defence_score: number;
     mvp_percent: number;
-    dpdg?: number | null;
-    dpdg_raw?: number | null;
+    dpdg_team?: number | null;
+    dpdg_team_raw?: number | null;
+    dpdg_alliance?: number | null;
+    dpdg_alliance_raw?: number | null;
     defence_main_avg: number;
     auto_time_avg: number;
     dead_avg: number;
@@ -218,8 +226,10 @@ export type GamesGraph = {
     auto_score: number;
     teleop_score: number;
     defence: number;
-    dpdg?: number | null;
-    dpdg_raw?: number | null;
+    dpdg_team?: number | null;
+    dpdg_team_raw?: number | null;
+    dpdg_alliance?: number | null;
+    dpdg_alliance_raw?: number | null;
 };
 
 export type Team = {
@@ -272,13 +282,21 @@ export type HeaderFull = {
     dnf: boolean;
     mvp_comment?: string | null;
     /**
-     * DPDG as a percentage of the opposing teams' event averages.
+     * DPDG against a single targeted bot, as a percentage of its event average.
      */
-    dpdg?: number | null;
+    dpdg_team?: number | null;
     /**
-     * DPDG as a raw point value.
+     * DPDG against a single targeted bot, as a raw point difference.
      */
-    dpdg_raw?: number | null;
+    dpdg_team_raw?: number | null;
+    /**
+     * DPDG averaged over the whole opposing alliance, as a percentage.
+     */
+    dpdg_alliance?: number | null;
+    /**
+     * DPDG averaged over the whole opposing alliance, as a raw point difference.
+     */
+    dpdg_alliance_raw?: number | null;
 };
 
 export type TournamentLevels = 'QualificationMatch' | 'Quarterfinal' | 'Semifinal' | 'Final';
@@ -708,17 +726,19 @@ export type SetPick = {
     is_selected_defence?: boolean | null;
     is_selected_offence?: boolean | null;
     is_selected_general?: boolean | null;
-    order_defence?: number | null;
-    order_offence?: number | null;
-    order_general?: number | null;
 };
 
 export type ReorderPick = {
     team: Team;
     event_code: string;
-    category: 'Defence' | 'Offence' | 'General';
-    direction: 'Up' | 'Down';
+    category: Category;
+    direction: Direction;
+    count: number;
 };
+
+export type Category = 'Defence' | 'Offence' | 'General';
+
+export type Direction = 'Up' | 'Down';
 
 export type EditPitData = {
     body: PitEditSpecific;
