@@ -1,6 +1,23 @@
 import { format_team } from "../lib/ParseTeam.svelte";
+import { dpdgColor } from "./dpdg";
 import type { GraphTeam } from "./schema/types.gen";
 import type { ChartConfiguration, ChartDataset, ChartData } from 'chart.js';
+
+// DPDG points are coloured by sign (green = positive/good, red = negative/bad)
+// so the direction is readable at a glance, while the connecting line keeps the
+// per-team colour so you can still tell which series a point belongs to.
+const dpdgPointColor = (ctx: any): string => {
+	const v = ctx?.parsed?.y ?? ctx?.raw;
+	return dpdgColor(typeof v === 'number' ? v : null);
+};
+
+const dpdgPointStyle = {
+	pointBackgroundColor: dpdgPointColor,
+	pointBorderColor: dpdgPointColor,
+	pointBorderWidth: 1.5,
+	pointRadius: 3.5,
+	pointHoverRadius: 5
+};
 
 export type GamesGraph = {
     time: string;
@@ -79,7 +96,8 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
                 data: team.data.map(item => item.dpdg_team_raw ?? null),
                 fill: false,
                 borderColor: color,
-                tension: 0.1
+                tension: 0.1,
+                ...dpdgPointStyle
             },
             {
                 label: `${label} DPDG Alliance Pts`,
@@ -87,7 +105,8 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
                 fill: false,
                 borderColor: color,
                 borderDash: [6, 4],
-                tension: 0.1
+                tension: 0.1,
+                ...dpdgPointStyle
             }
         ];
     });
@@ -101,7 +120,8 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
                 data: team.data.map(item => item.dpdg_team ?? null),
                 fill: false,
                 borderColor: color,
-                tension: 0.1
+                tension: 0.1,
+                ...dpdgPointStyle
             },
             {
                 label: `${label} DPDG Alliance %`,
@@ -109,7 +129,8 @@ export function generateGraphData(teams: GraphTeam[]): GraphDataF {
                 fill: false,
                 borderColor: color,
                 borderDash: [6, 4],
-                tension: 0.1
+                tension: 0.1,
+                ...dpdgPointStyle
             }
         ];
     });

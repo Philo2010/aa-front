@@ -29,9 +29,40 @@
 	// Separate from the charts above so flipping the toggle only rebuilds the DPDG chart.
 	$effect(() => {
 		const snap = $state.snapshot(data);
+		const unit = dpdgMode === 'raw' ? '' : '%';
 		const chart = new Chart(canvasDpdg, {
 			type: 'line',
-			data: dpdgMode === 'raw' ? snap.dpdg_raw : snap.dpdg_pct
+			data: dpdgMode === 'raw' ? snap.dpdg_raw : snap.dpdg_pct,
+			options: {
+				// DPDG is signed, so make the zero line obvious: above it is good
+				// defence, below it is bad.
+				scales: {
+					y: {
+						grid: {
+							color: (c: any) =>
+								c.tick.value === 0 ? 'rgba(255, 255, 255, 0.45)' : 'rgba(255, 255, 255, 0.07)',
+							lineWidth: (c: any) => (c.tick.value === 0 ? 2 : 1)
+						}
+					}
+				},
+				plugins: {
+					tooltip: {
+						callbacks: {
+							label: (ctx: any) => {
+								const v = ctx.parsed.y;
+								if (typeof v !== 'number') return `${ctx.dataset.label}: no data`;
+								const verb =
+									v > 0
+										? 'opponent BELOW their avg (good defence)'
+										: v < 0
+											? 'opponent ABOVE their avg (bad defence)'
+											: 'opponent exactly at their avg';
+								return `${ctx.dataset.label}: ${v > 0 ? '+' : ''}${v.toFixed(1)}${unit} — ${verb}`;
+							}
+						}
+					}
+				}
+			}
 		} as ChartConfiguration<'line'>);
 		return () => chart.destroy();
 	});
@@ -47,6 +78,11 @@
 	<h2>Defense Score:</h2>
 	<canvas bind:this={canvasDefense}></canvas>
 	<h2>DPDG ({dpdgMode === 'raw' ? 'points' : 'percent'}):</h2>
+	<div class="dpdg-key-row">
+		<span class="dpdg-key"><span class="dot dot-pos"></span>+ opponent held BELOW their average (good defence)</span>
+		<span class="dpdg-key"><span class="dot dot-neg"></span>− opponent scored ABOVE their average</span>
+	</div>
+	<p class="dpdg-sub">point colour = sign · solid line = targeted bot · dashed line = whole opposing alliance</p>
 	<div class="option-grid">
 		<button
 			type="button"
@@ -96,5 +132,39 @@
 		background: rgba(60, 179, 113, 0.18);
 		border-color: #3cb371;
 		color: #5dde8a;
+	}
+
+	.dpdg-key-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.3rem 1.1rem;
+		margin: -0.25rem 0 0.4rem;
+	}
+
+	.dpdg-key {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.6rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		color: rgba(255, 255, 255, 0.55);
+	}
+
+	.dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.dot-pos { background: #5dde8a; }
+	.dot-neg { background: #e05555; }
+
+	.dpdg-sub {
+		margin: 0 0 0.75rem;
+		font-size: 0.6rem;
+		letter-spacing: 0.08em;
+		color: rgba(255, 255, 255, 0.35);
 	}
 </style>

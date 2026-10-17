@@ -6,6 +6,7 @@
 	import { get_event } from '$lib/GetCurrEvent';
 	import { format_team } from '$lib/ParseTeam.svelte';
 	import { getPickList, reorderPickList, setPickList } from '$lib/schema/sdk.gen';
+	import { DPDG_LEGEND, DPDG_TOOLTIP, dpdgColor, dpdgPercent, dpdgSigned } from '$lib/dpdg';
 	import type { PickEntry, PickLists } from '$lib/schema/types.gen';
 
 	type Tab = 'defence' | 'offence' | 'general';
@@ -272,6 +273,8 @@
 		<p class="toggle-error">{toggleError}</p>
 	{/if}
 
+	<p class="dpdg-legend">{DPDG_LEGEND}</p>
+
 	{#if typeof sorted === 'string'}
 		<p class="state-message">{sorted}</p>
 	{:else if sorted.length === 0}
@@ -311,25 +314,41 @@
 						{#if entry.team_avg.dpdg_team != null}
 							<div class="stat-item">
 								<span class="stat-label">TEAM DPDG %</span>
-								<span class="stat-value">{entry.team_avg.dpdg_team.toFixed(1)}%</span>
+								<span
+									class="stat-value"
+									style="color: {dpdgColor(entry.team_avg.dpdg_team)}"
+									title={DPDG_TOOLTIP}
+								>{dpdgPercent(entry.team_avg.dpdg_team)}</span>
 							</div>
 						{/if}
 						{#if entry.team_avg.dpdg_team_raw != null}
 							<div class="stat-item">
 								<span class="stat-label">TEAM DPDG PTS</span>
-								<span class="stat-value">{entry.team_avg.dpdg_team_raw.toFixed(1)}</span>
+								<span
+									class="stat-value"
+									style="color: {dpdgColor(entry.team_avg.dpdg_team_raw)}"
+									title={DPDG_TOOLTIP}
+								>{dpdgSigned(entry.team_avg.dpdg_team_raw)}</span>
 							</div>
 						{/if}
 						{#if entry.team_avg.dpdg_alliance != null}
 							<div class="stat-item">
 								<span class="stat-label">ALLY DPDG %</span>
-								<span class="stat-value">{entry.team_avg.dpdg_alliance.toFixed(1)}%</span>
+								<span
+									class="stat-value"
+									style="color: {dpdgColor(entry.team_avg.dpdg_alliance)}"
+									title={DPDG_TOOLTIP}
+								>{dpdgPercent(entry.team_avg.dpdg_alliance)}</span>
 							</div>
 						{/if}
 						{#if entry.team_avg.dpdg_alliance_raw != null}
 							<div class="stat-item">
 								<span class="stat-label">ALLY DPDG PTS</span>
-								<span class="stat-value">{entry.team_avg.dpdg_alliance_raw.toFixed(1)}</span>
+								<span
+									class="stat-value"
+									style="color: {dpdgColor(entry.team_avg.dpdg_alliance_raw)}"
+									title={DPDG_TOOLTIP}
+								>{dpdgSigned(entry.team_avg.dpdg_alliance_raw)}</span>
 							</div>
 						{/if}
 					</div>
@@ -434,6 +453,14 @@
 		font-size: 0.75rem;
 		color: #e05555;
 		margin: 0 0 1rem;
+	}
+
+	.dpdg-legend {
+		margin: 0 0 1rem;
+		font-size: 0.6rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		color: rgba(255, 255, 255, 0.4);
 	}
 
 	.card-list {

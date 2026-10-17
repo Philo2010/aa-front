@@ -33,10 +33,6 @@
 	};
 
 	onMount(async () => {
-		if (!checkadmin()) {
-			goto('/notallowed');
-			return;
-		}
 		// Prefill with the active event, but leave it editable — prescout data
 		// usually comes from a different event than the one you're at.
 		event_code = await get_event();

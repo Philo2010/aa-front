@@ -358,3 +358,9 @@ button:focus-visible {
 	letter-spacing: 0.1em;
 	font-size: 0.85rem;
 }
+
+/* ── DPDG sign colouring ──────────────────────────── */
+/* Global so both Svelte components and PowerTable's html-parsed cells can use it. */
+.dpdg-pos { color: #5dde8a; }
+.dpdg-neg { color: #e05555; }
+.dpdg-zero { color: rgba(255, 255, 255, 0.45); }

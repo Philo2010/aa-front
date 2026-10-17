@@ -26,6 +26,10 @@
 			<span class="nav-label">LOGIN</span>
 			<span class="nav-sub">sign into your account</span>
 		</a>
+		<a href="/prescout" class="nav-card">
+			<span class="nav-label">PRESCOUT</span>
+			<span class="nav-sub">enter match data by hand</span>
+		</a>
 		<a href="/about" class="nav-card ghost">
 			<span class="nav-label">ABOUT</span>
 			<span class="nav-sub">about this app</span>
