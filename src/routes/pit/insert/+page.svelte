@@ -26,6 +26,7 @@
 
 	let team = $state<string>('');
 	let insert_id: number;
+	let done = $state<boolean>(false);
 
 	onMount(() => {
 		const params = $page.url.searchParams;
@@ -92,12 +93,23 @@
 			if (res.data.status === 'Error') {
 				return { message: String(res.data.message), worked: false };
 			} else {
+				done = true;
 				return { message: String(res.data.message), worked: true };
 			}
 		}
 	}
 </script>
 
+{#if done}
+	<div class="done-screen">
+		<div class="done-content">
+			<div class="done-icon">✓</div>
+			<div class="done-title">Pit submitted</div>
+			<div class="done-team">Team {team}</div>
+			<a href="/pit/select" class="done-back">← Back to assignments</a>
+		</div>
+	</div>
+{:else}
 <div class="pit-shell">
 	<header class="pit-header">
 		<div class="team-chip">
@@ -259,6 +271,7 @@
 		</div>
 	</FormWithLoading>
 </div>
+{/if}
 
 <style>
 	.pit-shell {
@@ -318,5 +331,77 @@
 		grid-template-columns: repeat(4, 1fr);
 		gap: 8px;
 	}
+
+	/* ── Done screen ─────────────────────── */
+	.done-screen {
+		position: fixed;
+		inset: 0;
+		background: #242424;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 100;
+		animation: fadeIn 0.25s ease both;
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; }
+		to   { opacity: 1; }
+	}
+
+	.done-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+	}
+
+	@keyframes popIn {
+		from { opacity: 0; transform: scale(0.85); }
+		to   { opacity: 1; transform: scale(1); }
+	}
+
+	.done-icon {
+		width: 80px;
+		height: 80px;
+		border-radius: 50%;
+		background: rgba(60, 179, 113, 0.15);
+		border: 2px solid rgba(60, 179, 113, 0.4);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 2.2rem;
+		color: #3cb371;
+	}
+
+	.done-title {
+		font-size: 1.5rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		color: #fff;
+	}
+
+	.done-team {
+		font-size: 0.8rem;
+		letter-spacing: 0.12em;
+		color: rgba(255, 255, 255, 0.4);
+	}
+
+	.done-back {
+		margin-top: 0.5rem;
+		padding: 0.7rem 1.5rem;
+		border-radius: 8px;
+		background: rgba(60, 179, 113, 0.12);
+		border: 1.5px solid rgba(60, 179, 113, 0.3);
+		color: #5dde8a;
+		text-decoration: none;
+		font-size: 0.82rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		transition: background 0.15s;
+	}
+
+	.done-back:hover { background: rgba(60, 179, 113, 0.22); }
 
 </style>
