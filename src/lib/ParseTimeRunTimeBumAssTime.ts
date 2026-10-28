@@ -77,7 +77,7 @@ export function FlattenData(data: GamesFull): RebuiltGameFlatten {
     });
     return {
         id: data.header.id,
-        users: data.header.user,
+        users: data.header.user.length > 0 ? data.header.user : ['GUEST'],
         team: format_team(data.header.team, data.header.is_ab_team),
         _team_number: data.header.team,
         _is_ab_team: data.header.is_ab_team,

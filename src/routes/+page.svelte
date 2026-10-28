@@ -1,3 +1,16 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { isLoggedIn } from '$lib/isLoggedIn';
+
+	// Guests only get PRESCOUT and LOGIN; everything else is hidden until they
+	// sign in. Checked in onMount so the cookie read stays client-only.
+	let loggedIn = $state(false);
+
+	onMount(() => {
+		loggedIn = isLoggedIn();
+	});
+</script>
+
 <nav class="page">
 	<header class="page-header">
 		<div class="header-accent"></div>
@@ -6,22 +19,24 @@
 	</header>
 
 	<div class="nav-grid">
-		<a href="/scout/select" class="nav-card primary">
-			<span class="nav-label">SCOUT</span>
-			<span class="nav-sub">view scouting assignments</span>
-		</a>
-		<a href="/pit" class="nav-card">
-			<span class="nav-label">PIT</span>
-			<span class="nav-sub">pit scouting</span>
-		</a>
-		<a href="/view" class="nav-card">
-			<span class="nav-label">STATS</span>
-			<span class="nav-sub">view & analyze data</span>
-		</a>
-		<a href="/admin" class="nav-card">
-			<span class="nav-label">ADMIN</span>
-			<span class="nav-sub">admin controls</span>
-		</a>
+		{#if loggedIn}
+			<a href="/scout/select" class="nav-card primary">
+				<span class="nav-label">SCOUT</span>
+				<span class="nav-sub">view scouting assignments</span>
+			</a>
+			<a href="/pit" class="nav-card">
+				<span class="nav-label">PIT</span>
+				<span class="nav-sub">pit scouting</span>
+			</a>
+			<a href="/view" class="nav-card">
+				<span class="nav-label">STATS</span>
+				<span class="nav-sub">view & analyze data</span>
+			</a>
+			<a href="/admin" class="nav-card">
+				<span class="nav-label">ADMIN</span>
+				<span class="nav-sub">admin controls</span>
+			</a>
+		{/if}
 		<a href="/login" class="nav-card ghost">
 			<span class="nav-label">LOGIN</span>
 			<span class="nav-sub">sign into your account</span>
@@ -30,10 +45,11 @@
 			<span class="nav-label">PRESCOUT</span>
 			<span class="nav-sub">enter match data by hand</span>
 		</a>
-		<a href="/about" class="nav-card ghost">
-			<span class="nav-label">ABOUT</span>
-			<span class="nav-sub">about this app</span>
-		</a>
+		{#if loggedIn}
+			<a href="/about" class="nav-card ghost">
+				<span class="nav-label">ABOUT</span>
+				<span class="nav-sub">about this app</span>
+			</a>
+		{/if}
 	</div>
 </nav>
-
